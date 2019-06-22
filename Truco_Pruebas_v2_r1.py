@@ -84,15 +84,190 @@ def prueba_QuienJugariaCarta():
     s.cartas_jugadas = Motor.Construir_Lista_Cartas("23457")  # Doble Empate
     print("23457" + " : " + str(s.QuienJugariaCarta()))
 
+def prueba_QuienActua():
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Quien Actua - ##")
+    print("===================================================")
+    print("prueba 1")
+
+    # PRUEBA 1
+    s = Estado()
+    print("inicial, le toca a: p" + str(s.QuienActua()))
+
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.JUGAR_C1))
+    s.cartas_jugadas.append(Carta("4-Copa", 10))
+    print("p1 jugó carta 1, le toca a: p" + str(s.QuienActua()))
+
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.GRITAR_TRUCO))
+    s.truco = Reglas.EstadoTruco.TRUCO_DICHO
+    print("p2 grito Truco, le toca a: p" + str(s.QuienActua()))
+
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.QUIERO_GRITO))
+    s.truco = Reglas.EstadoTruco.TRUCO_ACEPTADO
+    print("p1 acepto Truco, le toca a: p" + str(s.QuienActua()))
+
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.JUGAR_C3))
+    s.cartas_jugadas.append(Carta("6-Copa", 20))
+    print("p2 jugó carta 3, le toca a: p" + str(s.QuienActua()))
+
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.JUGAR_C1))
+    s.cartas_jugadas.append(Carta("6-Basto", 20))
+    print("p2 jugó carta 1, le toca a: p" + str(s.QuienActua()))
+
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.GRITAR_RETRUCO))
+    s.truco = Reglas.EstadoTruco.RETRUCO_DICHO
+    print("p1 grito ReTruco, le toca a: p" + str(s.QuienActua()))
+
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.FOLD))
+    s.truco = Reglas.EstadoTruco.FOLD
+    print("p2 no quiso, le toca a: p" + str(s.QuienActua()))
+
+    # PRUEBA 2
+    print("")
+    print("prueba 2")
+    s = Estado()
+    print("inicial, le toca a: p" + str(s.QuienActua()))
+
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.GRITAR_TRUCO))
+    s.truco = Reglas.EstadoTruco.TRUCO_DICHO
+    print("p2 grito Truco, le toca a: p" + str(s.QuienActua()))
+
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.GRITAR_RETRUCO))
+    s.truco = Reglas.EstadoTruco.RETRUCO_DICHO
+    print("p2 grito ReTruco, le toca a: p" + str(s.QuienActua()))
+
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.QUIERO_GRITO))
+    s.truco = Reglas.EstadoTruco.RETRUCO_ACEPTADO
+    print("p1 acepto ReTruco, le toca a: p" + str(s.QuienActua()))
+
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.JUGAR_C3))
+    s.cartas_jugadas.append(Carta("6-Copa", 20))
+    print("p1 jugó carta 3, le toca a: p" + str(s.QuienActua()))
+
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.FOLD))
+    s.truco = Reglas.EstadoTruco.FOLD
+    print("p2 no quiso, le toca a: p" + str(s.QuienActua()))
+
+def prueba_AccionesPosibles():
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Acciones Posibles - ##")
+    print("===================================================")
+    print("")
+
+    # SETUP
+    s = Estado()
+    p1 = Agente(Reglas.JUGADOR1)
+    p2 = Agente(Reglas.JUGADOR2)
+    cartas_p1, cartas_p2 = Reglas.RepartirCartas()
+    p1.TomarCartas(cartas_p1)
+    p2.TomarCartas(cartas_p2)
+
+    #Prueba 1
+    print("inicial, acciones posibles de p1")
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("p1 juega c1, acciones de p2 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.JUGAR_C1))
+    s.cartas_jugadas.append(Carta("6-Copa", 20))
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("p2 grito Truco, acciones de p1 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.GRITAR_TRUCO))
+    s.truco = Reglas.EstadoTruco.TRUCO_DICHO
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("p1 acepto, acciones de p2 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.QUIERO_GRITO))
+    s.truco = Reglas.EstadoTruco.TRUCO_ACEPTADO
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("p2 jugo c3, acciones de p1 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.JUGAR_C3))
+    s.cartas_jugadas.append(Carta("4-Copa", 10))
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("p1 hace fold, acciones de p2 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.FOLD))
+    s.truco = Reglas.EstadoTruco.FOLD
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+def prueba_EjecutarAccion():
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Ejecutar Accion - ##")
+    print("===================================================")
+    print("")
+
+    # SETUP
+    s = Estado()
+    p1 = Agente(Reglas.JUGADOR1)
+    p2 = Agente(Reglas.JUGADOR2)
+    cartas_p1, cartas_p2 = Reglas.RepartirCartas()
+    p1.TomarCartas(cartas_p1)
+    p2.TomarCartas(cartas_p2)
+
+    #Prueba 1
+    print("inicial, acciones posibles de p1")
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("p1 juega c1, acciones de p2 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.JUGAR_C1))
+    s.cartas_jugadas.append(Carta("6-Copa", 20))
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("p2 grito Truco, acciones de p1 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.GRITAR_TRUCO))
+    s.truco = Reglas.EstadoTruco.TRUCO_DICHO
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("p1 acepto, acciones de p2 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.QUIERO_GRITO))
+    s.truco = Reglas.EstadoTruco.TRUCO_ACEPTADO
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("p2 jugo c3, acciones de p1 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.JUGAR_C3))
+    s.cartas_jugadas.append(Carta("4-Copa", 10))
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("p1 jugo c1, acciones de p2 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.JUGAR_C2))
+    s.cartas_jugadas.append(Carta("6-Basto", 20))
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("p2 hace fold, acciones de p1 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.FOLD))
+    s.truco = Reglas.EstadoTruco.FOLD
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
 
 
 if __name__ == '__main__':
     print("COMIENZO!")
     print("")
 
+    # PRUEBAS ESTADO
     #prueba_QuienGanoManos()
     #prueba_QuienJugariaCarta()
+    #prueba_QuienActua()
 
+    # PRUEBAS AGENTE
+    #prueba_AccionesPosibles()
+    prueba_EjecutarAccion()
 
 
     print("")

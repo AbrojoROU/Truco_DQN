@@ -139,39 +139,34 @@ class Agente:
 
         if s.QuienJugariaCarta() == self.jugador: # me toca
             # Opciones de Truco : si me gritaron, agregar las acciones de aceptar (call) y subir apuesta (raise)
-            if s.truco == Reglas.EstadoTruco.TRUCO_DICHO :
-                result.append(Reglas.Accion.QUIERO_GRITO)
-                result.append(Reglas.Accion.GRITAR_RETRUCO)
+            if s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO :
+                for j, a in s.acciones_hechas:
+                    if (a is Reglas.Accion.GRITAR_TRUCO) and (j is not self.jugador): result.append(Reglas.Accion.GRITAR_RETRUCO)
 
-            elif s.truco == Reglas.EstadoTruco.TRUCO_ACEPTADO :
-                result.append(Reglas.Accion.GRITAR_RETRUCO)
+            elif s.truco is Reglas.EstadoTruco.RETRUCO_ACEPTADO :
+                for j, a in s.acciones_hechas:
+                    if (a is Reglas.Accion.GRITAR_RETRUCO) and (j is not self.jugador): result.append(Reglas.Accion.GRITAR_VALE4)
 
-            elif s.truco == Reglas.EstadoTruco.RETRUCO_DICHO :
-                result.append(Reglas.Accion.QUIERO_GRITO)
-                result.append(Reglas.Accion.GRITAR_VALE4)
-
-            elif s.truco == Reglas.EstadoTruco.RETRUCO_ACEPTADO :
-                result.append(Reglas.Accion.GRITAR_VALE4)
-
-            elif s.truco == Reglas.EstadoTruco.VALE4_DICHO :
-                result.append(Reglas.Accion.QUIERO_GRITO)
-
-            elif s.truco == Reglas.EstadoTruco.NADA_DICHO:
-                result.append(Reglas.Accion.GRITAR_TRUCO)
-                # solo resta agregar las acciones de jugar cartas aun en mano
-                for c in self.cartas_restantes:
-                    result.append(Reglas.Accion(self.cartas_totales.index(c) + 1))
-
-            elif s.truco == Reglas.EstadoTruco.VALE4_ACEPTADO :
-                # Ya esta aceptado el vale4, solo resta agregar las acciones de jugar cartas aun en mano
-                for c in self.cartas_restantes:
-                    result.append(Reglas.Accion(self.cartas_totales.index(c) + 1))
+            elif s.truco == Reglas.EstadoTruco.NADA_DICHO: result.append(Reglas.Accion.GRITAR_TRUCO)
 
             else:
                 assert False  # WARNING: Si me toca, el estado del truco deberia estar en alguno case de los elif
 
+            # solo resta agregar las acciones de jugar cartas aun en mano
+            for c in self.cartas_restantes:
+                result.append(Reglas.Accion(self.cartas_totales.index(c) + 1))
+
         else:
-            assert False  # WARNING: no me toca, levantar excepcion o assert
+            # No me toca jugar carta, seguramente me gritaron
+            if s.truco is Reglas.EstadoTruco.TRUCO_DICHO:
+                result.append(Reglas.Accion.QUIERO_GRITO)
+                result.append(Reglas.Accion.GRITAR_RETRUCO)
+            elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO :
+                result.append(Reglas.Accion.QUIERO_GRITO)
+                result.append(Reglas.Accion.GRITAR_VALE4)
+            elif s.truco == Reglas.EstadoTruco.VALE4_DICHO:
+                result.append(Reglas.Accion.QUIERO_GRITO)
+
 
         return result
 
