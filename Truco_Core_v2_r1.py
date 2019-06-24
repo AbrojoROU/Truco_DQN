@@ -3,6 +3,7 @@
 import numpy as np
 import inspect
 import random
+import copy
 from enum import Enum
 import pickle
 import itertools
@@ -26,7 +27,7 @@ def GenerarMazo():
     # Solucion final sera con 9 cartas (reduce statespace y permite codificar en base 10) tomadas al azar de las 40
     Carta.ResetContCarta()
     MAZO = []
-    MAZO.append(Carta("carta nula", 0))  # ID: 0
+    MAZO.append(Carta("carta nula", 0))  # ID: 0 para que Carta.ID = Mazo[index]
     MAZO.append(Carta("4-Copa", 10))  # ID: 1
     MAZO.append(Carta("6-Copa", 20))  # ID: 2
     MAZO.append(Carta("6-Basto", 20))  # ID: 3
@@ -72,7 +73,6 @@ class Reglas:
 
 
     class Accion(Enum):
-        FOLD = 0  # FOLD (irme / rechazar apuesta)
         JUGAR_C1 = 1  # Jugar Carta mas alta
         JUGAR_C2 = 2  # Jugar 2da Carta mas alta
         JUGAR_C3 = 3  # Jugar 3ra Carta mas alta
@@ -80,16 +80,18 @@ class Reglas:
         GRITAR_TRUCO = 5
         GRITAR_RETRUCO = 6
         GRITAR_VALE4 = 7
+        FOLD = 8  # FOLD (irme / rechazar apuesta)
 
     class EstadoTruco(Enum):
-        NADA_DICHO = 0
-        TRUCO_DICHO = 1
-        TRUCO_ACEPTADO = 2
-        RETRUCO_DICHO = 3
-        RETRUCO_ACEPTADO = 4
-        VALE4_DICHO = 5
-        VALE4_ACEPTADO = 6
-        FOLD = 7
+        NADA_DICHO = 1
+        TRUCO_DICHO = 2
+        TRUCO_ACEPTADO = 3
+        RETRUCO_DICHO = 4
+        RETRUCO_ACEPTADO = 5
+        VALE4_DICHO = 6
+        VALE4_ACEPTADO = 7
+        FOLD = 8
+
 
     @staticmethod
     def RepartirCartas():
@@ -98,12 +100,14 @@ class Reglas:
         cartas_j2 = []
         while len(cartas_j1) < 3:
             unaC = random.choice(mazo)
-            cartas_j1.append(unaC)
-            mazo.remove(unaC)
+            if not unaC.ID == 0: # que no sea la carta nula
+                cartas_j1.append(unaC)
+                mazo.remove(unaC)
         while len(cartas_j2) < 3:
             unaC = random.choice(mazo)
-            cartas_j2.append(unaC)
-            mazo.remove(unaC)
+            if not unaC.ID == 0: # que no sea la carta nula
+                cartas_j2.append(unaC)
+                mazo.remove(unaC)
         return cartas_j1, cartas_j2
 
 class Agente:
@@ -149,8 +153,10 @@ class Agente:
 
             elif s.truco == Reglas.EstadoTruco.NADA_DICHO: result.append(Reglas.Accion.GRITAR_TRUCO)
 
+            elif s.truco == Reglas.EstadoTruco.VALE4_ACEPTADO : pass
+
             else:
-                assert False  # WARNING: Si me toca, el estado del truco deberia estar en alguno case de los elif
+                assert False  # WARNING: Si me toca, el estado del truco deberia estar en alguno case de los elif, a menos que permita Re-Raise
 
             # solo resta agregar las acciones de jugar cartas aun en mano
             for c in self.cartas_restantes:
@@ -160,10 +166,10 @@ class Agente:
             # No me toca jugar carta, seguramente me gritaron
             if s.truco is Reglas.EstadoTruco.TRUCO_DICHO:
                 result.append(Reglas.Accion.QUIERO_GRITO)
-                result.append(Reglas.Accion.GRITAR_RETRUCO)
+                #result.append(Reglas.Accion.GRITAR_RETRUCO)  # Por ahora no permitimos Re-Raise
             elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO :
                 result.append(Reglas.Accion.QUIERO_GRITO)
-                result.append(Reglas.Accion.GRITAR_VALE4)
+                #result.append(Reglas.Accion.GRITAR_VALE4)  # Por ahora no permitimos Re-Raise
             elif s.truco == Reglas.EstadoTruco.VALE4_DICHO:
                 result.append(Reglas.Accion.QUIERO_GRITO)
 
@@ -172,16 +178,28 @@ class Agente:
 
     def Elegir_Accion_Random(self, s, debug=False):
         a_posibles = self.get_acciones_posibles(s)
-
+        if debug: printDebug("  acciones posibles: " + str(a_posibles))
         # choose a random action
-        if debug: printDebug("  Taking a random action")
         idx = np.random.choice(len(a_posibles))
         a = a_posibles[idx]
+
+        ## COMIENZA HACK para reducir probabilidad de Fold (quitar esta seccion si se quiere igual prob
+        if a is Reglas.Accion.FOLD: # si salio Fold que trate de nuevo (si sale de vuelta, bueno que salga)
+            # choose a random action
+            idx = np.random.choice(len(a_posibles))
+            a = a_posibles[idx]
+        if a is Reglas.Accion.FOLD:  # si salio Fold que trate de nuevo (si sale de vuelta, bueno que salga)
+            # choose a random action
+            idx = np.random.choice(len(a_posibles))
+            a = a_posibles[idx]
+        ## TERMINA HACK para reducir probabilidad de Fold
+
+        if debug: printDebug("  Taking a random action: " + str(a))
 
         return a
 
     # Ejecuta la accion que le llega, actualizando el estado y el agente de forma acorde
-    def EjecutarAccion(self, s, a):
+    def EjecutarAccion(self, s, a, DEBUG=False):
 
         if a is Reglas.Accion.FOLD: s.truco = Reglas.EstadoTruco.FOLD
 
@@ -192,7 +210,7 @@ class Agente:
         if a is Reglas.Accion.QUIERO_GRITO:
             if s.truco is Reglas.EstadoTruco.TRUCO_DICHO: s.truco = Reglas.EstadoTruco.TRUCO_ACEPTADO
             elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO: s.truco = Reglas.EstadoTruco.RETRUCO_ACEPTADO
-            elif s.truco is Reglas.EstadoTruco.VALE4_DICHO: s.truco = Reglas.EstadoTruco.VALE4_DICHO
+            elif s.truco is Reglas.EstadoTruco.VALE4_DICHO: s.truco = Reglas.EstadoTruco.VALE4_ACEPTADO
             else: assert False # No es posible pasar por aca, si quiso un grito es porque habia un truco, retruco o vale4 dicho
 
         if a is Reglas.Accion.JUGAR_C1:
@@ -214,8 +232,15 @@ class Agente:
             self.cartas_restantes.remove(c)  # la quito de las cartas restantes
 
         # finalmente agrego la accion al log de acciones hechas por el estado
+        if DEBUG : printDebug("  p" + str(self.jugador) + " - ejecutando accion: " + str(a))
         s.acciones_hechas.append((self.jugador, a))
 
+class Episodio:
+    def __init__(self):
+        self.estados = []
+        self.ganador = None # 4 estados posibles. None si nadie, 0 si empate, p1  o p2
+        self.p1 = None
+        self.p2 = None
 
 class Estado:
     def __init__(self):
@@ -223,9 +248,26 @@ class Estado:
         self.truco = Reglas.EstadoTruco.NADA_DICHO
         self.acciones_hechas = []
 
+    def __repr__(self):
+        # override print() oupput a consola
+        return " ## cartas jugadas:" + str(self.cartas_jugadas) + ", estado:" + self.truco.name + ", acciones:" + str(self.acciones_hechas) + " ##"
+
+    def __str__(self):  # python
+        # override del str()
+        return " Partida, cartas jugadas:" + str(self.cartas_jugadas) + ", estado:" + self.truco.name + ", acciones:" + str(self.acciones_hechas)
+
+    def get_last_action_from_player(self, jugador):
+        # Devuelve la ultima accion de un jugador
+        for i in reversed(self.acciones_hechas):
+            if i[0] == jugador:
+                return i[1]
+
+
     def reset(self):
         self.cartas_jugadas = []
         self.truco = Reglas.EstadoTruco.NADA_DICHO
+        self.ganador = None  # 4 estados posibles. None si nadie, 0 si empate, p1  o p2
+        self.acciones_hechas = []
 
     def QuienActua(self):
 
@@ -241,7 +283,6 @@ class Estado:
             assert ((a is Reglas.Accion.GRITAR_TRUCO) or (a is Reglas.Accion.GRITAR_RETRUCO) or (a is Reglas.Accion.GRITAR_VALE4)) # efectivamente la ultima accion fue un grito
             if j is Reglas.JUGADOR1 : return Reglas.JUGADOR2
             if j is Reglas.JUGADOR2 : return Reglas.JUGADOR1
-
 
     def QuienJugariaCarta(self):
         cartas_jugadas = self.cartas_jugadas
@@ -298,7 +339,6 @@ class Estado:
 
         # Si no hay Fold, quizas se jugaron todas las manos (este ya devuelve None si no se jugaron 6 cartas aun)
         return self.QuienGanoManos()
-
 
     def QuienGanoManos(self):
         # Calcula quien gano las manos, puede retornar:
@@ -407,84 +447,165 @@ class Motor:
     @staticmethod
     def Play_random_games(p1, p2, N, DEBUG):
         # SEEDING
-        from numpy.random import seed
-        seed(1)
+        # from numpy.random import seed
+        # seed(1)
+
+        lista_episodios = []
 
         # Declaro variables de monitoreo
         cont_win_p1 = 0
         cont_win_p2 = 0
         cont_empate = 0
 
-        s = Estado()
-
         for i in range(N):
             if DEBUG: printDebug("EPISODIO #" + str(i + 1) + "   ")
+
+            e = Episodio()
+            s = Estado()
 
             # SETUP INICIAL repartir cartas
             cartas_p1, cartas_p2 = Reglas.RepartirCartas()
             p1.TomarCartas(cartas_p1)
             p2.TomarCartas(cartas_p2)
-            s.reset()
+            e.p1 = p1
+            e.p2 = p2
 
             if DEBUG: printDebug("  Cartas Jugador 1: " + str(p1.cartas_totales))
             if DEBUG: printDebug("  Cartas Jugador 2: " + str(p2.cartas_totales))
 
             # Accion inicial
             current_player = p1
-            a = p1.Elegir_Accion_Random(s, DEBUG)
+            a = p1.Elegir_Accion_Random(s, False)
 
             # loops until the game is over
             while (s.QuienGanoManos() is None) and (s.truco is not Reglas.EstadoTruco.FOLD) :
 
-                sp, r = current_player.EjecutarAccion(s, a)
-                if DEBUG: printDebug("      Nuevo estado: " + sp + ", con recompensa: " + str(r))
+                current_player.EjecutarAccion(s, a, DEBUG)
+                if DEBUG: printDebug("      Nuevo estado: " + str(s.cartas_jugadas))
 
                 # Tomo otro jugador
-                if sp.QuienJugariaCarta() == Reglas.JUGADOR1:
+                if s.QuienActua() == Reglas.JUGADOR1:
                     next_player = p1
                 else:
                     next_player = p2
 
-                # Ahora calculo Q_Next, 4 opciones:  Terminal Gane, Terminal empate, Terminal Perdi o No terminal y propago
-                if len(sp) == 6:
-                    quien_gano = sp.QuienGanoManos()
-                    assert (quien_gano is not None)  # imposible resultado None, debe ser 1, 2 o 0
-                    if DEBUG: printDebug("- Partida terminada nro:" + str(i) + " s:" + sp)
+                # Me fijo si termino, 4 opciones:  Terminal Gane, Terminal empate, Terminal Perdi o No terminal y propago
+                if s.QuienGanoEpisodio() is not None:
+                    quien_gano = s.QuienGanoEpisodio()
+
+                    if DEBUG: printDebug("- Partida terminada nro:" + str(i+1) + " s:" + str(s.cartas_jugadas))
                     if quien_gano == Reglas.JUGADOR1:
                         # Caso 1: terminal gané
-                        if DEBUG: printDebug(" GANE! (jugador 1, s:" + sp)
+                        if DEBUG: printDebug(" GANE! (jugador 1)")
+                        e.ganador = Reglas.JUGADOR1
                         cont_win_p1 = cont_win_p1 + 1
                     elif quien_gano == 0:
                         # Caso 2: terminal empate
-                        if DEBUG: printDebug(" EMPATE!  s:" + sp)
+                        if DEBUG: printDebug(" EMPATE! ")
                         cont_empate = cont_empate + 1
+                        e.ganador = 0
                     elif quien_gano == Reglas.JUGADOR2:
                         # Caso 3: terminal perdí
-                        if DEBUG: printDebug(" GANE! (jugador 2, s:" + sp)
+                        if DEBUG: printDebug(" GANE! (jugador 2)")
+                        e.ganador = Reglas.JUGADOR2
                         cont_win_p2 = cont_win_p2 + 1
                 else:
-                    # Caso no terminal, propago Q
-                    ap = next_player.Elegir_Accion(sp, DEBUG)
-                    #Q_Next = ...
+                    # Caso no terminal
+                    a = next_player.Elegir_Accion_Random(s, False)
 
                 # Finalmente alterno jugador
-                if sp.QuienJugariaCarta() == Reglas.JUGADOR1:
-                    if DEBUG and type(current_player) is Agente: printDebug("JUGADOR:" + str(current_player.jugador) + " hace UPDATE de Q[" + str(current_player.s_cartas+s) + "][" + str(a) + "] = " + str(current_player.Q[int(current_player.s_cartas +s)][a])+ " y r:" + str(r))
+                if s.QuienActua() == Reglas.JUGADOR1:
                     current_player = p1
                 else:
                     current_player = p2
-                s = sp
-                a = ap
+                #Termino la mano
+                e.estados.append(copy.deepcopy(s))  # Agrego el estado intermedio al episodio
+
             # Terminó el while gameover
+            lista_episodios.append(e)  # Agrego el episodio a la lista de episodios
+            if DEBUG : print("")
         # Terminó el for N
 
         # Despliego resultados de la corrida
         winratio = cont_win_p1*100/(cont_win_p1+cont_win_p2+cont_empate)
-        print("## RESULTADO ##  N= " + str(N) + " - j1: " + str(cont_win_p1) + ", j2: " + str(cont_win_p2) + ", Empates: " + str(cont_empate) + ", WINRATIO:"+ str(winratio)[0:5]+", S final: " + str(s))
-        if DEBUG:
-            if type(p1) is Agente : print("j1 - Q[0]: " + str(p1.Q[0]))
-            for i in p1.cartas_totales:
-                if type(p2) is Agente : print("j2 - Q[" + str(i.ID) + "]: " + str(p2.Q[i.ID]))
+        print("## RESULTADO ##  N= " + str(N) + " - j1: " + str(cont_win_p1) + ", j2: " + str(cont_win_p2) + ", Empates: " + str(cont_empate) + ", WINRATIO p1:"+ str(winratio)[0:5] + " ##")
 
-        return winratio
+        return lista_episodios
 
+    @staticmethod
+    def Save_Games_to_Disk(lista_episodios, filename):
+        # Store data (serialize)
+        with open(filename, 'wb') as handle:
+            pickle.dump(lista_episodios, handle)
+
+    @staticmethod
+    def Load_Games_From_Disk(filename):
+        # Load data (deserialize)
+        with open(filename, 'rb') as handle:
+            result = pickle.load(handle)
+        return result
+
+    @staticmethod
+    def ConverToVector(jugador, estado, normalized=True): # Aca construimos el vector de largo fijo y normalizado para usar de input a la Red Neuronal
+        result = []
+
+        # 1ro ESTADO TRUCO (1 neurona)
+        if normalized : result.append(estado.truco.value / len(Reglas.EstadoTruco))  # normalizo usando total de estados posibles de truco
+        else: result.append(estado.truco.value)
+
+        # 2do CARTAS DEL JUGADOR (3)
+        for c in jugador.cartas_totales:
+            if normalized : result.append(c.ValorTruco / 101)    # 100 es maximo valortruco de cualquier carta, uso 101 para normalizar
+            else: result.append(c.ValorTruco)
+
+        # 3ro CARTAS JUGADAS (6 neuronas, fijo), en su forma de valor truco. (esto reduce total de combinaciones, de 40 ID posibles a 14 valores truco posibles)
+        for i in range(6):
+            if len(estado.cartas_jugadas) > i:
+                if normalized : result.append(estado.cartas_jugadas[i].ValorTruco/101)  # 100 es maximo valortruco de cualquier carta, uso 101 para normalizar
+                else: result.append(estado.cartas_jugadas[i].ValorTruco)
+            else:  # padding (largo fijo 6, el resto completo con 0's)
+                result.append(0)
+
+        # 4to ACCIONES (40 neuronas, fijo = 20 acciones x 2 (jugador + codigo accion) )
+        for i in range(20):
+            if len(estado.acciones_hechas) > i:
+                result.append(estado.acciones_hechas[i][0])
+                if normalized : result.append(estado.acciones_hechas[i][1].value/(len(Reglas.Accion)+1))
+                else: result.append(estado.acciones_hechas[i][1].value)
+
+            else: # padding (largo fijo 20, el resto completo con 0's)
+                result.append(0)
+                result.append(0)
+
+        return result
+
+    @staticmethod
+    def Generate_Training_Games(batch_size, epochs, DEBUG):
+        p1_data = []
+        p1_labels= []
+        p2_data = []
+        p2_labels = []
+
+        p1 = Agente(Reglas.JUGADOR1)
+        p2 = Agente(Reglas.JUGADOR2)
+
+        print("Generando Partidas.. ( epochs=" + str(epochs) + ",   batch_size=" + str(batch_size) + " )")
+        print("")
+
+        # Corremos los epochs
+        for i in range(epochs):
+            if DEBUG: print("Epoch: " + str(i + 1))
+            episodios = Motor.Play_random_games(p1, p2, batch_size, False)
+            for e in episodios:
+
+                for s in e.estados:
+                    if e.ganador is Reglas.JUGADOR1:
+                        if s.acciones_hechas[-1][0] == Reglas.JUGADOR1:
+                            p1_data.append(Motor.ConverToVector(e.p1,s, not DEBUG))
+                            p1_labels.append(s.get_last_action_from_player(Reglas.JUGADOR1).value)
+                    elif e.ganador is Reglas.JUGADOR2:
+                        if s.acciones_hechas[-1][0] == Reglas.JUGADOR2:
+                            p2_data.append(Motor.ConverToVector(e.p2,s, not DEBUG))
+                            p2_labels.append(s.get_last_action_from_player(Reglas.JUGADOR2).value)
+
+        return (p1_data, p1_labels), (p2_data, p2_labels)

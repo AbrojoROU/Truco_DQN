@@ -150,6 +150,8 @@ def prueba_QuienActua():
     print("p2 no quiso, le toca a: p" + str(s.QuienActua()))
 
 def prueba_AccionesPosibles():
+    # Pruebo Get Acciones Posibles, no uso ejecutar accion porque no quiero mezclar pruebas
+    # CUIDADO CON CIERTAS JUGADAS QUE PUEDEN DAR MAL POR NO EJECUTAR LA ACCION COMPLETAMENTE BIEN
     print("")
     print("===================================================")
     print("## PRUEBA - Acciones Posibles - ##")
@@ -210,64 +212,264 @@ def prueba_EjecutarAccion():
     s = Estado()
     p1 = Agente(Reglas.JUGADOR1)
     p2 = Agente(Reglas.JUGADOR2)
-    cartas_p1, cartas_p2 = Reglas.RepartirCartas()
-    p1.TomarCartas(cartas_p1)
-    p2.TomarCartas(cartas_p2)
+    cartas_j1 = []
+    cartas_j2 = []
+    cartas_j1.append(Reglas.MAZO[9])
+    cartas_j1.append(Reglas.MAZO[5])
+    cartas_j1.append(Reglas.MAZO[3])
+    cartas_j2.append(Reglas.MAZO[8])
+    cartas_j2.append(Reglas.MAZO[6])
+    cartas_j2.append(Reglas.MAZO[1])
+
+    p1.TomarCartas(cartas_j1)
+    p2.TomarCartas(cartas_j2)
 
     #Prueba 1
-    print("inicial, acciones posibles de p1")
-    print(str(p1.get_acciones_posibles(s)))
+    print("inicial")
     print("")
 
-    print("p1 juega c1, acciones de p2 disponibles")
-    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.JUGAR_C1))
-    s.cartas_jugadas.append(Carta("6-Copa", 20))
+    print("1) p1 juega c1, acciones de p2 disponibles")
+    p1.EjecutarAccion(s,Reglas.Accion.JUGAR_C1)
     print(str(p2.get_acciones_posibles(s)))
     print("")
 
-    print("p2 grito Truco, acciones de p1 disponibles")
-    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.GRITAR_TRUCO))
-    s.truco = Reglas.EstadoTruco.TRUCO_DICHO
+    print("2) p2 grito Truco, acciones de p1 disponibles")
+    p2.EjecutarAccion(s, Reglas.Accion.GRITAR_TRUCO)
     print(str(p1.get_acciones_posibles(s)))
     print("")
 
-    print("p1 acepto, acciones de p2 disponibles")
-    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.QUIERO_GRITO))
-    s.truco = Reglas.EstadoTruco.TRUCO_ACEPTADO
+    print("3) p1 acepto, acciones de p2 disponibles")
+    p1.EjecutarAccion(s, Reglas.Accion.QUIERO_GRITO)
     print(str(p2.get_acciones_posibles(s)))
     print("")
 
-    print("p2 jugo c3, acciones de p1 disponibles")
-    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.JUGAR_C3))
-    s.cartas_jugadas.append(Carta("4-Copa", 10))
+    print("4) p2 jugo c3, acciones de p1 disponibles")
+    p2.EjecutarAccion(s, Reglas.Accion.JUGAR_C3)
     print(str(p1.get_acciones_posibles(s)))
     print("")
 
-    print("p1 jugo c1, acciones de p2 disponibles")
-    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.JUGAR_C2))
-    s.cartas_jugadas.append(Carta("6-Basto", 20))
+    print("5) p1 jugo c2, acciones de p2 disponibles")
+    p1.EjecutarAccion(s, Reglas.Accion.JUGAR_C2)
     print(str(p2.get_acciones_posibles(s)))
     print("")
 
-    print("p2 hace fold, acciones de p1 disponibles")
+    print("6) p2 hace fold, acciones de p1 disponibles")
     s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.FOLD))
     s.truco = Reglas.EstadoTruco.FOLD
     print(str(p1.get_acciones_posibles(s)))
     print("")
 
+    print("Fin de prueba, estado S final")
+    print("")
+    print("Cartas Jugadas:")
+    print(str(s.cartas_jugadas))
+    print("")
+    print("Acciones Hechas Jugadas:")
+    print(str(s.acciones_hechas))
+    print("")
+    print("p1, cartas restantes:")
+    print(str(p1.cartas_restantes))
+    print("")
+    print("p2, cartas restantes:")
+    print(str(p2.cartas_restantes))
 
+def prueba_Elegir_Accion_Random():
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Elegir Accion Random- ##")
+    print("===================================================")
+    print("")
+
+    # SETUP
+    s = Estado()
+    p1 = Agente(Reglas.JUGADOR1)
+    p2 = Agente(Reglas.JUGADOR2)
+    cartas_j1 = []
+    cartas_j2 = []
+    cartas_j1.append(Reglas.MAZO[9])
+    cartas_j1.append(Reglas.MAZO[5])
+    cartas_j1.append(Reglas.MAZO[3])
+    cartas_j2.append(Reglas.MAZO[8])
+    cartas_j2.append(Reglas.MAZO[6])
+    cartas_j2.append(Reglas.MAZO[1])
+
+    p1.TomarCartas(cartas_j1)
+    p2.TomarCartas(cartas_j2)
+
+    #Prueba 1
+    print("inicial")
+    print("")
+
+    print("1) p1 juega c1, acciones de p2 disponibles")
+    p1.EjecutarAccion(s,Reglas.Accion.JUGAR_C1)
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("2) p2 grito Truco, acciones de p1 disponibles")
+    p2.EjecutarAccion(s, Reglas.Accion.GRITAR_TRUCO)
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("3) p1 acepto, acciones de p2 disponibles")
+    p1.EjecutarAccion(s, Reglas.Accion.QUIERO_GRITO)
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+    print("sampleo de estas acciones:")
+    print(str(p2.Elegir_Accion_Random(s)))
+    print(str(p2.Elegir_Accion_Random(s)))
+    print(str(p2.Elegir_Accion_Random(s)))
+    print(str(p2.Elegir_Accion_Random(s)))
+    print(str(p2.Elegir_Accion_Random(s)))
+    print(str(p2.Elegir_Accion_Random(s)))
+    print(str(p2.Elegir_Accion_Random(s)))
+    print(str(p2.Elegir_Accion_Random(s)))
+
+def prueba_PlayRandomGames():
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Play Random Games - ##")
+    print("===================================================")
+    print("")
+    p1 = Agente(Reglas.JUGADOR1)
+    p2 = Agente(Reglas.JUGADOR2)
+
+    Motor.Play_random_games(p1,p2,2,True)
+
+def prueba_Save_Load_Games():
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Saven and Load Games - ##")
+    print("===================================================")
+    print("")
+    p1 = Agente(Reglas.JUGADOR1)
+    p2 = Agente(Reglas.JUGADOR2)
+
+    print("")
+    print(" Playing games...")
+    print("")
+    lista_episodios = Motor.Play_random_games(p1,p2,2,True)
+    print("")
+    print("print de lista_episodios:")
+    print(str(lista_episodios))
+
+    print("")
+    print("Comenzando SAVE de lista_episodios")
+    Motor.Save_Games_to_Disk(lista_episodios, "prueba_le.pickle")
+
+    print("Comenzando LOAD")
+    pruebaLoad = Motor.Load_Games_From_Disk("prueba_le.pickle")
+    print("")
+    print("print de lista_episodios:")
+    print(str(pruebaLoad))
+    print("")
+
+def prueba_ConvertVector():
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Convert to Vector - ##")
+    print("===================================================")
+    print("")
+
+    # SETUP
+    s = Estado()
+    p1 = Agente(Reglas.JUGADOR1)
+    p2 = Agente(Reglas.JUGADOR2)
+    cartas_j1 = []
+    cartas_j2 = []
+    cartas_j1.append(Reglas.MAZO[9])
+    cartas_j1.append(Reglas.MAZO[5])
+    cartas_j1.append(Reglas.MAZO[3])
+    cartas_j2.append(Reglas.MAZO[8])
+    cartas_j2.append(Reglas.MAZO[6])
+    cartas_j2.append(Reglas.MAZO[1])
+
+    p1.TomarCartas(cartas_j1)
+    p2.TomarCartas(cartas_j2)
+
+    # Prueba 1
+    print("inicial")
+    print("")
+
+    print("1) p1 juega c1, acciones de p2 disponibles")
+    p1.EjecutarAccion(s, Reglas.Accion.JUGAR_C1)
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("2) p2 grito Truco, acciones de p1 disponibles")
+    p2.EjecutarAccion(s, Reglas.Accion.GRITAR_TRUCO)
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("3) p1 acepto, acciones de p2 disponibles")
+    p1.EjecutarAccion(s, Reglas.Accion.QUIERO_GRITO)
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("4) p2 jugo c3, acciones de p1 disponibles")
+    p2.EjecutarAccion(s, Reglas.Accion.JUGAR_C3)
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("5) p1 jugo c2, acciones de p2 disponibles")
+    p1.EjecutarAccion(s, Reglas.Accion.JUGAR_C2)
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("6) p2 hace fold, acciones de p1 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.FOLD))
+    s.truco = Reglas.EstadoTruco.FOLD
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print(str(Motor.ConverToVector(p1, s, False)))
+    print(len(Motor.ConverToVector(p1, s, False)))
+
+def prueba_Generate_Training_games():
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Play Random Games - ##")
+    print("===================================================")
+    print("")
+
+    (p1_data, p1_labels), (p2_data, p2_labels) = Motor.Generate_Training_Games(2, 2, True)
+
+    print("")
+    print("p1 data")
+    print(*p1_data, sep='\n')
+    print("")
+    print("p1 labels")
+    print(p1_labels)
+    print("")
+    print("p2 data")
+    print(*p2_data, sep='\n')
+    print("")
+    print("p2 labels")
+    print(p2_labels)
+    print("")
+
+
+#######################################################
+###                    MAIN                         ###
+#######################################################
 if __name__ == '__main__':
     print("COMIENZO!")
     print("")
 
-    # PRUEBAS ESTADO
-    #prueba_QuienGanoManos()
-    #prueba_QuienJugariaCarta()
-    #prueba_QuienActua()
+    ### PRUEBAS ESTADO
+    # prueba_QuienGanoManos()
+    # prueba_QuienJugariaCarta()
+    # prueba_QuienActua()
 
-    # PRUEBAS AGENTE
-    #prueba_AccionesPosibles()
-    prueba_EjecutarAccion()
+    ### PRUEBAS AGENTE
+    # prueba_AccionesPosibles()
+    # prueba_EjecutarAccion()
+    # prueba_Elegir_Accion_Random()
+
+    ### PRUEBAS MOTOR
+    # prueba_PlayRandomGames()
+    # prueba_Save_Load_Games()
+    # prueba_ConvertVector()
+    # prueba_Generate_Training_games()
 
 
     print("")
