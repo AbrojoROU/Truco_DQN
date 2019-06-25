@@ -110,7 +110,7 @@ class Reglas:
                 mazo.remove(unaC)
         return cartas_j1, cartas_j2
 
-class Agente:
+class AgenteRandom:
     def __init__(self, jugador):
 
         self.cartas_totales = []
@@ -176,7 +176,7 @@ class Agente:
 
         return result
 
-    def Elegir_Accion_Random(self, s, debug=False):
+    def Elegir_Accion(self, s, debug=False):
         a_posibles = self.get_acciones_posibles(s)
         if debug: printDebug("  acciones posibles: " + str(a_posibles))
         # choose a random action
@@ -197,6 +197,121 @@ class Agente:
         if debug: printDebug("  Taking a random action: " + str(a))
 
         return a
+
+    # Ejecuta la accion que le llega, actualizando el estado y el agente de forma acorde
+    def EjecutarAccion(self, s, a, DEBUG=False):
+
+        if a is Reglas.Accion.FOLD: s.truco = Reglas.EstadoTruco.FOLD
+
+        if a is Reglas.Accion.GRITAR_TRUCO: s.truco = Reglas.EstadoTruco.TRUCO_DICHO
+        if a is Reglas.Accion.GRITAR_RETRUCO: s.truco = Reglas.EstadoTruco.RETRUCO_DICHO
+        if a is Reglas.Accion.GRITAR_VALE4: s.truco = Reglas.EstadoTruco.VALE4_DICHO
+
+        if a is Reglas.Accion.QUIERO_GRITO:
+            if s.truco is Reglas.EstadoTruco.TRUCO_DICHO: s.truco = Reglas.EstadoTruco.TRUCO_ACEPTADO
+            elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO: s.truco = Reglas.EstadoTruco.RETRUCO_ACEPTADO
+            elif s.truco is Reglas.EstadoTruco.VALE4_DICHO: s.truco = Reglas.EstadoTruco.VALE4_ACEPTADO
+            else: assert False # No es posible pasar por aca, si quiso un grito es porque habia un truco, retruco o vale4 dicho
+
+        if a is Reglas.Accion.JUGAR_C1:
+            c = self.cartas_totales[0]
+            assert c in self.cartas_restantes # valido que la carta a jugar aun esta en mi mano
+            s.cartas_jugadas.append(c)  # actualizo el estado
+            self.cartas_restantes.remove(c)  # la quito de las cartas restantes
+
+        if a is Reglas.Accion.JUGAR_C2:
+            c = self.cartas_totales[1]
+            assert c in self.cartas_restantes # valido que la carta a jugar aun esta en mi mano
+            s.cartas_jugadas.append(c)  # actualizo el estado
+            self.cartas_restantes.remove(c)  # la quito de las cartas restantes
+
+        if a is Reglas.Accion.JUGAR_C3:
+            c = self.cartas_totales[2]
+            assert c in self.cartas_restantes # valido que la carta a jugar aun esta en mi mano
+            s.cartas_jugadas.append(c)  # actualizo el estado
+            self.cartas_restantes.remove(c)  # la quito de las cartas restantes
+
+        # finalmente agrego la accion al log de acciones hechas por el estado
+        if DEBUG : printDebug("  p" + str(self.jugador) + " - ejecutando accion: " + str(a))
+        s.acciones_hechas.append((self.jugador, a))
+
+class AgenteDQN:
+    def __init__(self, jugador, dqn):
+
+        self.cartas_totales = []
+        self.cartas_restantes = []
+        self.state_history = []
+        self.DQN = dqn
+
+        if jugador == Reglas.JUGADOR1:
+            self.jugador = Reglas.JUGADOR1
+        elif jugador == Reglas.JUGADOR2:
+            self.jugador = Reglas.JUGADOR2
+        elif jugador != self.jugador:
+            self.jugador = None
+            assert self.jugador is not None
+
+    def TomarCartas(self, listaCartas, debug=False):
+        self.cartas_totales = []
+        self.cartas_restantes = []
+
+        # Aqui asignamos las cartas al jugador en orden que coincide con el diseño de acciones
+        listaCartas.sort(key=lambda x: x.ValorTruco, reverse=True)
+        for i in listaCartas:
+            self.cartas_restantes.append(i)
+            self.cartas_totales.append(i)
+        if debug: printDebug(str(self.cartas_restantes))
+
+    def get_acciones_posibles(self,s):
+        # Este metodo construye y retorna el vector de acciones posibles (tomados del enum Reglas.Acciones) con base en el estado actual s
+        result = []
+        result.append(Reglas.Accion.FOLD)
+
+        if s.QuienJugariaCarta() == self.jugador: # me toca
+            # Opciones de Truco : si me gritaron, agregar las acciones de aceptar (call) y subir apuesta (raise)
+            if s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO :
+                for j, a in s.acciones_hechas:
+                    if (a is Reglas.Accion.GRITAR_TRUCO) and (j is not self.jugador): result.append(Reglas.Accion.GRITAR_RETRUCO)
+
+            elif s.truco is Reglas.EstadoTruco.RETRUCO_ACEPTADO :
+                for j, a in s.acciones_hechas:
+                    if (a is Reglas.Accion.GRITAR_RETRUCO) and (j is not self.jugador): result.append(Reglas.Accion.GRITAR_VALE4)
+
+            elif s.truco == Reglas.EstadoTruco.NADA_DICHO: result.append(Reglas.Accion.GRITAR_TRUCO)
+
+            elif s.truco == Reglas.EstadoTruco.VALE4_ACEPTADO : pass
+
+            else:
+                assert False  # WARNING: Si me toca, el estado del truco deberia estar en alguno case de los elif, a menos que permita Re-Raise
+
+            # solo resta agregar las acciones de jugar cartas aun en mano
+            for c in self.cartas_restantes:
+                result.append(Reglas.Accion(self.cartas_totales.index(c) + 1))
+
+        else:
+            # No me toca jugar carta, seguramente me gritaron
+            if s.truco is Reglas.EstadoTruco.TRUCO_DICHO:
+                result.append(Reglas.Accion.QUIERO_GRITO)
+                #result.append(Reglas.Accion.GRITAR_RETRUCO)  # Por ahora no permitimos Re-Raise
+            elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO :
+                result.append(Reglas.Accion.QUIERO_GRITO)
+                #result.append(Reglas.Accion.GRITAR_VALE4)  # Por ahora no permitimos Re-Raise
+            elif s.truco == Reglas.EstadoTruco.VALE4_DICHO:
+                result.append(Reglas.Accion.QUIERO_GRITO)
+
+
+        return result
+
+    def Elegir_Accion(self, s, debug=False):
+        v = Motor.ConverToVector(p1, s, True)
+
+        # Convierto a array de Red
+        v = np.squeeze(np.asarray(v))
+        v = v.reshape(1, 50)
+        v = v.astype('float32')
+        self.DQN.predict(v)
+
+        pass
 
     # Ejecuta la accion que le llega, actualizando el estado y el agente de forma acorde
     def EjecutarAccion(self, s, a, DEBUG=False):
@@ -432,7 +547,6 @@ class Estado:
 
         assert False # no deberia llegar aqui
 
-
 class Motor:
 
     @staticmethod
@@ -475,7 +589,7 @@ class Motor:
 
             # Accion inicial
             current_player = p1
-            a = p1.Elegir_Accion_Random(s, False)
+            a = p1.Elegir_Accion(s, False)
 
             # loops until the game is over
             while (s.QuienGanoManos() is None) and (s.truco is not Reglas.EstadoTruco.FOLD) :
@@ -511,7 +625,7 @@ class Motor:
                         cont_win_p2 = cont_win_p2 + 1
                 else:
                     # Caso no terminal
-                    a = next_player.Elegir_Accion_Random(s, False)
+                    a = next_player.Elegir_Accion(s, False)
 
                 # Finalmente alterno jugador
                 if s.QuienActua() == Reglas.JUGADOR1:
@@ -586,8 +700,8 @@ class Motor:
         p2_data = []
         p2_labels = []
 
-        p1 = Agente(Reglas.JUGADOR1)
-        p2 = Agente(Reglas.JUGADOR2)
+        p1 = AgenteRandom(Reglas.JUGADOR1)
+        p2 = AgenteRandom(Reglas.JUGADOR2)
 
         print("Generando Partidas.. ( epochs=" + str(epochs) + ",   batch_size=" + str(batch_size) + " )")
         print("")
@@ -601,11 +715,11 @@ class Motor:
                 for s in e.estados:
                     if e.ganador is Reglas.JUGADOR1:
                         if s.acciones_hechas[-1][0] == Reglas.JUGADOR1:
-                            p1_data.append(Motor.ConverToVector(e.p1,s, not DEBUG))
+                            p1_data.append(Motor.ConverToVector(e.p1,s, True))
                             p1_labels.append(s.get_last_action_from_player(Reglas.JUGADOR1).value)
                     elif e.ganador is Reglas.JUGADOR2:
                         if s.acciones_hechas[-1][0] == Reglas.JUGADOR2:
-                            p2_data.append(Motor.ConverToVector(e.p2,s, not DEBUG))
+                            p2_data.append(Motor.ConverToVector(e.p2,s, True))
                             p2_labels.append(s.get_last_action_from_player(Reglas.JUGADOR2).value)
 
         return (p1_data, p1_labels), (p2_data, p2_labels)

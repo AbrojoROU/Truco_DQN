@@ -160,8 +160,8 @@ def prueba_AccionesPosibles():
 
     # SETUP
     s = Estado()
-    p1 = Agente(Reglas.JUGADOR1)
-    p2 = Agente(Reglas.JUGADOR2)
+    p1 = AgenteRandom(Reglas.JUGADOR1)
+    p2 = AgenteRandom(Reglas.JUGADOR2)
     cartas_p1, cartas_p2 = Reglas.RepartirCartas()
     p1.TomarCartas(cartas_p1)
     p2.TomarCartas(cartas_p2)
@@ -210,8 +210,8 @@ def prueba_EjecutarAccion():
 
     # SETUP
     s = Estado()
-    p1 = Agente(Reglas.JUGADOR1)
-    p2 = Agente(Reglas.JUGADOR2)
+    p1 = AgenteRandom(Reglas.JUGADOR1)
+    p2 = AgenteRandom(Reglas.JUGADOR2)
     cartas_j1 = []
     cartas_j2 = []
     cartas_j1.append(Reglas.MAZO[9])
@@ -282,8 +282,8 @@ def prueba_Elegir_Accion_Random():
 
     # SETUP
     s = Estado()
-    p1 = Agente(Reglas.JUGADOR1)
-    p2 = Agente(Reglas.JUGADOR2)
+    p1 = AgenteRandom(Reglas.JUGADOR1)
+    p2 = AgenteRandom(Reglas.JUGADOR2)
     cartas_j1 = []
     cartas_j2 = []
     cartas_j1.append(Reglas.MAZO[9])
@@ -315,14 +315,14 @@ def prueba_Elegir_Accion_Random():
     print(str(p2.get_acciones_posibles(s)))
     print("")
     print("sampleo de estas acciones:")
-    print(str(p2.Elegir_Accion_Random(s)))
-    print(str(p2.Elegir_Accion_Random(s)))
-    print(str(p2.Elegir_Accion_Random(s)))
-    print(str(p2.Elegir_Accion_Random(s)))
-    print(str(p2.Elegir_Accion_Random(s)))
-    print(str(p2.Elegir_Accion_Random(s)))
-    print(str(p2.Elegir_Accion_Random(s)))
-    print(str(p2.Elegir_Accion_Random(s)))
+    print(str(p2.Elegir_Accion(s)))
+    print(str(p2.Elegir_Accion(s)))
+    print(str(p2.Elegir_Accion(s)))
+    print(str(p2.Elegir_Accion(s)))
+    print(str(p2.Elegir_Accion(s)))
+    print(str(p2.Elegir_Accion(s)))
+    print(str(p2.Elegir_Accion(s)))
+    print(str(p2.Elegir_Accion(s)))
 
 def prueba_PlayRandomGames():
     print("")
@@ -330,8 +330,8 @@ def prueba_PlayRandomGames():
     print("## PRUEBA - Play Random Games - ##")
     print("===================================================")
     print("")
-    p1 = Agente(Reglas.JUGADOR1)
-    p2 = Agente(Reglas.JUGADOR2)
+    p1 = AgenteRandom(Reglas.JUGADOR1)
+    p2 = AgenteRandom(Reglas.JUGADOR2)
 
     Motor.Play_random_games(p1,p2,2,True)
 
@@ -341,8 +341,8 @@ def prueba_Save_Load_Games():
     print("## PRUEBA - Saven and Load Games - ##")
     print("===================================================")
     print("")
-    p1 = Agente(Reglas.JUGADOR1)
-    p2 = Agente(Reglas.JUGADOR2)
+    p1 = AgenteRandom(Reglas.JUGADOR1)
+    p2 = AgenteRandom(Reglas.JUGADOR2)
 
     print("")
     print(" Playing games...")
@@ -372,8 +372,8 @@ def prueba_ConvertVector():
 
     # SETUP
     s = Estado()
-    p1 = Agente(Reglas.JUGADOR1)
-    p2 = Agente(Reglas.JUGADOR2)
+    p1 = AgenteRandom(Reglas.JUGADOR1)
+    p2 = AgenteRandom(Reglas.JUGADOR2)
     cartas_j1 = []
     cartas_j2 = []
     cartas_j1.append(Reglas.MAZO[9])

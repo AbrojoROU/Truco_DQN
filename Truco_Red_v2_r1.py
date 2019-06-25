@@ -2,6 +2,65 @@ from Truco_Core_v2_r1 import *
 import keras
 import tensorflow as tf
 
+def Get_VectorEstado_Prueba():
+    print("")
+    print(" Get_Estado_Prueba ")
+    print("")
+
+    # SETUP
+    s = Estado()
+    p1 = AgenteRandom(Reglas.JUGADOR1)
+    p2 = AgenteRandom(Reglas.JUGADOR2)
+    cartas_j1 = []
+    cartas_j2 = []
+    cartas_j1.append(Reglas.MAZO[9])
+    cartas_j1.append(Reglas.MAZO[5])
+    cartas_j1.append(Reglas.MAZO[3])
+    cartas_j2.append(Reglas.MAZO[8])
+    cartas_j2.append(Reglas.MAZO[6])
+    cartas_j2.append(Reglas.MAZO[1])
+
+    p1.TomarCartas(cartas_j1)
+    p2.TomarCartas(cartas_j2)
+
+    # Prueba 1
+    print("inicial")
+    print("")
+
+    print("1) p1 juega c1, acciones de p2 disponibles")
+    p1.EjecutarAccion(s, Reglas.Accion.JUGAR_C1)
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("2) p2 grito Truco, acciones de p1 disponibles")
+    p2.EjecutarAccion(s, Reglas.Accion.GRITAR_TRUCO)
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("3) p1 acepto, acciones de p2 disponibles")
+    p1.EjecutarAccion(s, Reglas.Accion.QUIERO_GRITO)
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("4) p2 jugo c3, acciones de p1 disponibles")
+    p2.EjecutarAccion(s, Reglas.Accion.JUGAR_C3)
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("5) p1 jugo c2, acciones de p2 disponibles")
+    p1.EjecutarAccion(s, Reglas.Accion.JUGAR_C2)
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+    print("estado: " + str(s.cartas_jugadas))
+
+    s = Motor.ConverToVector(p1,s,True)
+
+    # Convierto a array de Red
+    s = np.squeeze(np.asarray(s))
+    s = s.reshape(1, 50)
+    s = s.astype('float32')
+
+    return s
 
 def Generate_and_Save(nameprefix, batch_size, epochs, DEBUG):
     print("")
@@ -30,9 +89,6 @@ def Generate_and_Save(nameprefix, batch_size, epochs, DEBUG):
     Motor.Save_Games_to_Disk(p1_testlabels, nameprefix + "p1_testlabels.pickle")
     Motor.Save_Games_to_Disk(p2_testdata, nameprefix + "p2_testdata.pickle")
     Motor.Save_Games_to_Disk(p2_testlabels, nameprefix + "p2_testlabels.pickle")
-
-
-
 
 def Train_Save(nameprefix, batch_size, epochs, DEBUG):
     print("")
@@ -86,7 +142,6 @@ def Train_Save(nameprefix, batch_size, epochs, DEBUG):
     p1_DQN.save(nameprefix+"p1_DQN.h5")
     print("Saved model to disk")
 
-
 def Load_and_Test(nameprefix, DEBUG):
     print("")
     print("## Load_and_Test ##")
@@ -105,10 +160,25 @@ def Load_and_Test(nameprefix, DEBUG):
     p1_testlabels = keras.utils.to_categorical(p1_testlabels)  # los labels van a categorical
 
 
-    print("Loading model from disk")
+    print("1. Loading model from disk")
     p1_DQN = keras.models.load_model(nameprefix + "p1_DQN.h5")
     test_loss, test_acc = p1_DQN.evaluate(p1_testdata, p1_testlabels)
-    print('test_acc:', test_acc)
+    print('2. test_acc:', test_acc)
+
+    print("")
+    print("3. predict ##")
+    output = p1_DQN.predict(Get_VectorEstado_Prueba())
+
+    print("output red:")
+    print(str(output))
+    print("")
+
+    a = Reglas.Accion(np.argmax(output))
+    print("accion:" + str(a.name) + " id_accion:" + str(a.value))
+    prob = output[0,np.argmax(output)]
+    print(" prob:" + str(prob))
+
+
 
 
 
@@ -124,15 +194,15 @@ if __name__ == '__main__':
 
     # Variables de Entrenamiento
     nameprefix  = ""
-    batch_size = 20000
+    batch_size = 30000
     epochs = 5
     DEBUG = True
 
     # Genero las partidas y guardo los pickles en disco (omitir si ya tengo un buen pickle generado)
-    Generate_and_Save(nameprefix,batch_size,epochs,DEBUG)
+    # Generate_and_Save(nameprefix,batch_size,epochs,DEBUG)
 
     # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
-    Train_Save(nameprefix,batch_size,epochs,DEBUG)
+    # Train_Save(nameprefix,batch_size,epochs,DEBUG)
 
     # finalmente, cargo una Red de disco (formato h5) y juego/testeo
     Load_and_Test(nameprefix, DEBUG)
