@@ -140,7 +140,7 @@ class AgenteRandom:
         # Este metodo construye y retorna el vector de acciones posibles (tomados del enum Reglas.Acciones) con base en el estado actual s
         result = []
         result.append(Reglas.Accion.FOLD)
-
+        # TODO solo devolver FOLD si ya perdi en cartas jugadas
         if s.QuienJugariaCarta() == self.jugador: # me toca
             # Opciones de Truco : si me gritaron, agregar las acciones de aceptar (call) y subir apuesta (raise)
             if s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO :
@@ -266,7 +266,7 @@ class AgenteDQN:
         # Este metodo construye y retorna el vector de acciones posibles (tomados del enum Reglas.Acciones) con base en el estado actual s
         result = []
         result.append(Reglas.Accion.FOLD)
-
+        # TODO solo devolver FOLD si ya perdi en cartas jugadas
         if s.QuienJugariaCarta() == self.jugador: # me toca
             # Opciones de Truco : si me gritaron, agregar las acciones de aceptar (call) y subir apuesta (raise)
             if s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO :
@@ -583,6 +583,7 @@ class Motor:
             p2.TomarCartas(cartas_p2)
             e.p1 = p1
             e.p2 = p2
+            e.estados.append(copy.deepcopy(s))
 
             if DEBUG: printDebug("  Cartas Jugador 1: " + str(p1.cartas_totales))
             if DEBUG: printDebug("  Cartas Jugador 2: " + str(p2.cartas_totales))
@@ -667,7 +668,7 @@ class Motor:
         if normalized : result.append(estado.truco.value / len(Reglas.EstadoTruco))  # normalizo usando total de estados posibles de truco
         else: result.append(estado.truco.value)
 
-        # 2do CARTAS DEL JUGADOR (3)
+        # 2do CARTAS DEL JUGADOR (3 neuronas)
         for c in jugador.cartas_totales:
             if normalized : result.append(c.ValorTruco / 101)    # 100 es maximo valortruco de cualquier carta, uso 101 para normalizar
             else: result.append(c.ValorTruco)
@@ -711,16 +712,16 @@ class Motor:
             if DEBUG: print("Epoch: " + str(i + 1))
             episodios = Motor.Play_random_games(p1, p2, batch_size, False)
             for e in episodios:
-                for s in e.estados:
+                # TODO: Tengo que reforzar por cantida de puntos del Truco, sea con sesgo en datos de prueba (mas partidas con mayor valor)
+                # pero quizas esto sea con otra Red de Value (esta es policy)
+                for s in reversed(range(len(e.estados))):
                     if e.ganador is Reglas.JUGADOR1:
-                        if s.acciones_hechas[-1][0] == Reglas.JUGADOR1:
-                            # TODO: ESTA MAL, LA ETIQUETA ES LA ULTIMA ACCION NO LA SIGUIENTE
-                            # TODO: Tengo que reforzar x puntos de Truco, para mal o para bien, pero quizas esto sea con otra Red de Value (esta es policy)
-                            p1_data.append(Motor.ConverToVector(e.p1,s, True))
-                            p1_labels.append(s.get_last_action_from_player(Reglas.JUGADOR1).value)
+                        if s > 0 and e.estados[s-1].QuienActua() is Reglas.JUGADOR1:
+                            p1_data.append(Motor.ConverToVector(e.p1, e.estados[s-1], True))
+                            p1_labels.append(e.estados[s].get_last_action_from_player(Reglas.JUGADOR1).value)
                     elif e.ganador is Reglas.JUGADOR2:
-                        if s.acciones_hechas[-1][0] == Reglas.JUGADOR2:
-                            p2_data.append(Motor.ConverToVector(e.p2,s, True))
-                            p2_labels.append(s.get_last_action_from_player(Reglas.JUGADOR2).value)
+                        if s > 0 and e.estados[s - 1].QuienActua() is Reglas.JUGADOR2:
+                            p2_data.append(Motor.ConverToVector(e.p2, e.estados[s - 1], True))
+                            p2_labels.append(e.estados[s].get_last_action_from_player(Reglas.JUGADOR2).value) # si jugo dos veces seguidas el mismo jugador entonces devuelve mal
 
         return (p1_data, p1_labels), (p2_data, p2_labels)

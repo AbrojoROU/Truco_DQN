@@ -431,7 +431,7 @@ def prueba_Generate_Training_games():
     print("===================================================")
     print("")
 
-    (p1_data, p1_labels), (p2_data, p2_labels) = Motor.Generate_Training_Games(2, 2, True)
+    (p1_data, p1_labels), (p2_data, p2_labels) = Motor.Generate_Training_Games(1, 1, True)
 
     print("")
     print("p1 data")
@@ -469,7 +469,7 @@ if __name__ == '__main__':
     # prueba_PlayRandomGames()
     # prueba_Save_Load_Games()
     # prueba_ConvertVector()
-    # prueba_Generate_Training_games()
+    prueba_Generate_Training_games()
 
 
     print("")
