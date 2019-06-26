@@ -53,7 +53,7 @@ def Get_VectorEstado_Prueba():
     print("")
     print("estado: " + str(s.cartas_jugadas))
 
-    s = Motor.ConverToVector(p1,s,True)
+    s = Motor.ConverToVector(p2,s,True)
 
     # Convierto a array de Red
     s = np.squeeze(np.asarray(s))
@@ -111,6 +111,9 @@ def Train_Save(nameprefix, batch_size, epochs, DEBUG):
     from keras import models
     from keras import layers
 
+    #########################
+    ## ENTRENO RED PARA p1
+    print("Entrenado Red para p1")
     p1_DQN = models.Sequential()
     p1_DQN.add(layers.Dense(50, activation='relu', input_shape=(50,)))
     p1_DQN.add(layers.Dense(50, activation='relu'))
@@ -142,6 +145,40 @@ def Train_Save(nameprefix, batch_size, epochs, DEBUG):
     p1_DQN.save(nameprefix+"p1_DQN.h5")
     print("Saved model to disk")
 
+    #########################
+    ## ENTRENO RED PARA p2
+    print("Entrenado Red para p2")
+    p2_DQN = models.Sequential()
+    p2_DQN.add(layers.Dense(50, activation='relu', input_shape=(50,)))
+    p2_DQN.add(layers.Dense(50, activation='relu'))
+    p2_DQN.add(layers.Dense(8, activation='softmax'))
+
+    p2_DQN.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
+
+    # Convierto a nparray y reshape a lo especificado en las capas de la red neuronal (shape a 50)
+    # Train
+    p2_traindata = np.squeeze(np.asarray(p2_traindata))
+    p2_traindata = p2_traindata.reshape((len(p2_traindata), 50))
+    p2_traindata = p2_traindata.astype('float32')
+    p2_trainlabels = keras.utils.to_categorical(p2_trainlabels)  # los labels van a categorical
+    # Test
+    p2_testdata = np.squeeze(np.asarray(p2_testdata))
+    p2_testdata = p2_testdata.reshape((len(p2_testdata), 50))
+    p2_testdata = p2_testdata.astype('float32')
+    p2_testlabels = keras.utils.to_categorical(p2_testlabels)  # los labels van a categorical
+
+    # Fiteo la red
+    p2_DQN.fit(p2_traindata, p2_trainlabels, epochs=2, batch_size=64)
+
+    # Evaluo contra Test
+    test_loss, test_acc = p2_DQN.evaluate(p2_testdata, p2_testlabels)
+    print('test_acc:', test_acc)
+
+    print("")
+    print("2. Guardando Red DQN con prefijo:" + nameprefix)
+    p2_DQN.save(nameprefix + "p2_DQN.h5")
+    print("Saved model to disk")
+
 def Load_and_Test(nameprefix, DEBUG):
     print("")
     print("## Load_and_Test ##")
@@ -150,24 +187,34 @@ def Load_and_Test(nameprefix, DEBUG):
     # test
     p1_testdata = Motor.Load_Games_From_Disk(nameprefix + "p1_testdata.pickle")
     p1_testlabels = Motor.Load_Games_From_Disk(nameprefix + "p1_testlabels.pickle")
-    #p2_testdata = Motor.Load_Games_From_Disk(nameprefix + "p2_testdata.pickle")
-    #p2_testlabels = Motor.Load_Games_From_Disk(nameprefix + "p2_testlabels.pickle")
+    p2_testdata = Motor.Load_Games_From_Disk(nameprefix + "p2_testdata.pickle")
+    p2_testlabels = Motor.Load_Games_From_Disk(nameprefix + "p2_testlabels.pickle")
 
     # Convierto a nparray y reshape a lo especificado en las capas de la red neuronal (shape a 50)
+    # p1
     p1_testdata = np.squeeze(np.asarray(p1_testdata))
     p1_testdata = p1_testdata.reshape((len(p1_testdata), 50))
     p1_testdata = p1_testdata.astype('float32')
     p1_testlabels = keras.utils.to_categorical(p1_testlabels)  # los labels van a categorical
-
+    # p2
+    p2_testdata = np.squeeze(np.asarray(p2_testdata))
+    p2_testdata = p2_testdata.reshape((len(p2_testdata), 50))
+    p2_testdata = p2_testdata.astype('float32')
+    p2_testlabels = keras.utils.to_categorical(p2_testlabels)  # los labels van a categorical
 
     print("1. Loading model from disk")
+    # p1
     p1_DQN = keras.models.load_model(nameprefix + "p1_DQN.h5")
-    test_loss, test_acc = p1_DQN.evaluate(p1_testdata, p1_testlabels)
-    print('2. test_acc:', test_acc)
+    test_loss_p1, test_acc_p1 = p1_DQN.evaluate(p1_testdata, p1_testlabels)
+    print('2. test_acc:', test_acc_p1)
+    # p2
+    p2_DQN = keras.models.load_model(nameprefix + "p2_DQN.h5")
+    test_loss_p2, test_acc_p2 = p2_DQN.evaluate(p2_testdata, p2_testlabels)
+    print('2. test_acc:', test_acc_p2)
 
     print("")
     print("3. predict ##")
-    output = p1_DQN.predict(Get_VectorEstado_Prueba())
+    output = p2_DQN.predict(Get_VectorEstado_Prueba())
 
     print("output red:")
     print(str(output))
@@ -177,6 +224,7 @@ def Load_and_Test(nameprefix, DEBUG):
     print("accion:" + str(a.name) + " id_accion:" + str(a.value))
     prob = output[0,np.argmax(output)]
     print(" prob:" + str(prob))
+
 
 
 

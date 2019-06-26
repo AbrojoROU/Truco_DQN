@@ -711,10 +711,11 @@ class Motor:
             if DEBUG: print("Epoch: " + str(i + 1))
             episodios = Motor.Play_random_games(p1, p2, batch_size, False)
             for e in episodios:
-
                 for s in e.estados:
                     if e.ganador is Reglas.JUGADOR1:
                         if s.acciones_hechas[-1][0] == Reglas.JUGADOR1:
+                            # TODO: ESTA MAL, LA ETIQUETA ES LA ULTIMA ACCION NO LA SIGUIENTE
+                            # TODO: Tengo que reforzar x puntos de Truco, para mal o para bien, pero quizas esto sea con otra Red de Value (esta es policy)
                             p1_data.append(Motor.ConverToVector(e.p1,s, True))
                             p1_labels.append(s.get_last_action_from_player(Reglas.JUGADOR1).value)
                     elif e.ganador is Reglas.JUGADOR2:
