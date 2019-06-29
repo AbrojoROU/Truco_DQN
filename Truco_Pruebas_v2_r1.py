@@ -254,8 +254,7 @@ def prueba_EjecutarAccion():
     print("")
 
     print("6) p2 hace fold, acciones de p1 disponibles")
-    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.FOLD))
-    s.truco = Reglas.EstadoTruco.FOLD
+    p2.EjecutarAccion(s, Reglas.Accion.JUGAR_C2)
     print(str(p1.get_acciones_posibles(s)))
     print("")
 
@@ -424,14 +423,58 @@ def prueba_ConvertVector():
     print(str(Motor.ConverToVector(p1, s, False)))
     print(len(Motor.ConverToVector(p1, s, False)))
 
-def prueba_Generate_Training_games():
+
+def prueba_CalcularPuntos():
     print("")
     print("===================================================")
-    print("## PRUEBA - Play Random Games - ##")
+    print("## PRUEBA - CalcularPuntos - ##")
     print("===================================================")
     print("")
 
-    (p1_data, p1_labels), (p2_data, p2_labels) = Motor.Generate_Training_Games(1, 1, True)
+    p1 = AgenteRandom(Reglas.JUGADOR1)
+    p2 = AgenteRandom(Reglas.JUGADOR2)
+
+    episodios = Motor.Play_random_games(p1, p2, 1, False)
+    for e in episodios:
+        for s in e.estados:
+            print("estado: " + str(s))
+        print("")
+        print("puntos" + str(e.CalcularPuntosFinales()))
+
+    print("puntos: " + str(e.CalcularPuntosFinales()[0]))
+    print("puntos: " + str(e.CalcularPuntosFinales()[1]))
+
+def prueba_Generate_Policy_Training_Games():
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Generate_Policy_Training_Games - ##")
+    print("===================================================")
+    print("")
+
+    (p1_data, p1_labels), (p2_data, p2_labels) = Motor.Generate_Policy_Training_Games(1, 1, False)
+
+    print("")
+    print("p1 data")
+    print(*p1_data, sep='\n')
+    print("")
+    print("p1 labels")
+    print(p1_labels)
+    print("")
+    print("p2 data")
+    print(*p2_data, sep='\n')
+    print("")
+    print("p2 labels")
+    print(p2_labels)
+    print("")
+
+def prueba_Generate_Value_Training_Games():
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Generate_Value_Training_Games - ##")
+    print("===================================================")
+    print("")
+
+    (p1_data, p1_labels), (p2_data, p2_labels) = Motor.Generate_Value_Training_Games(1, 1, False)
 
     print("")
     print("p1 data")
@@ -448,6 +491,9 @@ def prueba_Generate_Training_games():
     print("")
 
 
+
+
+
 #######################################################
 ###                    MAIN                         ###
 #######################################################
@@ -459,6 +505,7 @@ if __name__ == '__main__':
     # prueba_QuienGanoManos()
     # prueba_QuienJugariaCarta()
     # prueba_QuienActua()
+    # prueba_CalcularPuntos()
 
     ### PRUEBAS AGENTE
     # prueba_AccionesPosibles()
@@ -469,7 +516,10 @@ if __name__ == '__main__':
     # prueba_PlayRandomGames()
     # prueba_Save_Load_Games()
     # prueba_ConvertVector()
-    prueba_Generate_Training_games()
+
+    #prueba_Generate_Value_Training_Games()
+    #prueba_Generate_Policy_Training_Games()
+
 
 
     print("")

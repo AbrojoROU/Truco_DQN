@@ -36,7 +36,7 @@ def GenerarMazo():
     MAZO.append(Carta("2-Basto", 40))  # ID: 6
     MAZO.append(Carta("2-Copa", 40))  # ID: 7
     MAZO.append(Carta("1-Basto", 80))  # ID: 8
-    MAZO.append(Carta("1-Espada", 100))  # ID: 9
+    MAZO.append(Carta("1-Espada", 90))  # ID: 9
     return MAZO
 
 
@@ -303,7 +303,7 @@ class AgenteDQN:
         return result
 
     def Elegir_Accion(self, s, debug=False):
-        v = Motor.ConverToVector(p1, s, True)
+        v = Motor.ConverToPolicyVector(p1, s, True)
 
         # Convierto a array de Red
         v = np.squeeze(np.asarray(v))
@@ -357,11 +357,32 @@ class Episodio:
         self.p1 = None
         self.p2 = None
 
+    def CalcularPuntosFinales(self):
+        p1 = 0
+        p2 = 0
+        bet = 1
+
+        for s in self.estados:
+            if s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO : bet = 2
+            elif s.truco is Reglas.EstadoTruco.RETRUCO_ACEPTADO : bet = 3
+            elif s.truco is Reglas.EstadoTruco.VALE4_ACEPTADO : bet = 4
+
+        if self.ganador is Reglas.JUGADOR1 :
+            p1 = bet
+        elif self.ganador is Reglas.JUGADOR2 :
+            p2 = bet
+        else:
+            p1 = 0
+            p2 = 0
+
+        return p1, p2
+
 class Estado:
     def __init__(self):
         self.cartas_jugadas = []
         self.truco = Reglas.EstadoTruco.NADA_DICHO
         self.acciones_hechas = []
+
 
     def __repr__(self):
         # override print() oupput a consola
@@ -459,7 +480,7 @@ class Estado:
         # Calcula quien gano las manos, puede retornar:
         # Reglas.JUGADOR1 or JUGADOR2
         # "None" si no se jugaron todas las manos aun (en esta nueva version esto rara vez se deberia usar, es parte de estado S)
-        # 0 si es un triple empate en las 3 manos
+        # p1 si es un triple empate en las 3 manos (por ser mano)
 
         puntos_j1 = 0
         puntos_j2 = 0
@@ -542,8 +563,8 @@ class Estado:
                 elif cartas_jugadas[2].ValorTruco < cartas_jugadas[3].ValorTruco:
                     return Reglas.JUGADOR2
                 else:
-                    # empataron las 3 manos
-                    return 0
+                    # empataron las 3 manos, gana el mano
+                    return Reglas.JUGADOR1
 
         assert False # no deberia llegar aqui
 
@@ -614,11 +635,6 @@ class Motor:
                         if DEBUG: printDebug(" GANE! (jugador 1)")
                         e.ganador = Reglas.JUGADOR1
                         cont_win_p1 = cont_win_p1 + 1
-                    elif quien_gano == 0:
-                        # Caso 2: terminal empate
-                        if DEBUG: printDebug(" EMPATE! ")
-                        cont_empate = cont_empate + 1
-                        e.ganador = 0
                     elif quien_gano == Reglas.JUGADOR2:
                         # Caso 3: terminal perdí
                         if DEBUG: printDebug(" GANE! (jugador 2)")
@@ -661,7 +677,7 @@ class Motor:
         return result
 
     @staticmethod
-    def ConverToVector(jugador, estado, normalized=True): # Aca construimos el vector de largo fijo y normalizado para usar de input a la Red Neuronal
+    def ConverToPolicyVector(jugador, estado, normalized=True): # Aca construimos el vector de largo fijo y normalizado para usar de input a la Red Neuronal
         result = []
 
         # 1ro ESTADO TRUCO (1 neurona)
@@ -695,7 +711,7 @@ class Motor:
         return result
 
     @staticmethod
-    def Generate_Training_Games(batch_size, epochs, DEBUG):
+    def Generate_Policy_Training_Games(batch_size, epochs, normalized=True):
         p1_data = []
         p1_labels= []
         p2_data = []
@@ -709,19 +725,52 @@ class Motor:
 
         # Corremos los epochs
         for i in range(epochs):
-            if DEBUG: print("Epoch: " + str(i + 1))
+            print("Epoch: " + str(i + 1))
             episodios = Motor.Play_random_games(p1, p2, batch_size, False)
             for e in episodios:
-                # TODO: Tengo que reforzar por cantida de puntos del Truco, sea con sesgo en datos de prueba (mas partidas con mayor valor)
                 # pero quizas esto sea con otra Red de Value (esta es policy)
                 for s in reversed(range(len(e.estados))):
                     if e.ganador is Reglas.JUGADOR1:
                         if s > 0 and e.estados[s-1].QuienActua() is Reglas.JUGADOR1:
-                            p1_data.append(Motor.ConverToVector(e.p1, e.estados[s-1], True))
+                            p1_data.append(Motor.ConverToPolicyVector(e.p1, e.estados[s - 1], normalized))
                             p1_labels.append(e.estados[s].get_last_action_from_player(Reglas.JUGADOR1).value)
                     elif e.ganador is Reglas.JUGADOR2:
                         if s > 0 and e.estados[s - 1].QuienActua() is Reglas.JUGADOR2:
-                            p2_data.append(Motor.ConverToVector(e.p2, e.estados[s - 1], True))
-                            p2_labels.append(e.estados[s].get_last_action_from_player(Reglas.JUGADOR2).value) # si jugo dos veces seguidas el mismo jugador entonces devuelve mal
+                            p2_data.append(Motor.ConverToPolicyVector(e.p2, e.estados[s - 1], normalized))
+                            p2_labels.append(e.estados[s].get_last_action_from_player(Reglas.JUGADOR2).value)
+
+        return (p1_data, p1_labels), (p2_data, p2_labels)
+
+    @staticmethod
+    def Generate_Value_Training_Games(batch_size, epochs, normalized=True):
+        p1_data = []
+        p1_labels= []
+        p2_data = []
+        p2_labels = []
+
+        p1 = AgenteRandom(Reglas.JUGADOR1)
+        p2 = AgenteRandom(Reglas.JUGADOR2)
+
+        print("Generando Partidas.. ( epochs=" + str(epochs) + ",   batch_size=" + str(batch_size) + " )")
+        print("")
+
+        # Corremos los epochs
+        for i in range(epochs):
+            print("Epoch: " + str(i + 1))
+            episodios = Motor.Play_random_games(p1, p2, batch_size, False)
+            for e in episodios:
+                # pero quizas esto sea con otra Red de Value (esta es policy)
+                for s in reversed(range(len(e.estados))):
+                    # logica: "si en [s-1] me toca a mi, en [s] ya jugue yo. Guardo ese estado con mi movimiento hecho y el puntaje total
+
+                    if s > 0 and e.estados[s-1].QuienActua() is Reglas.JUGADOR1:
+                        p1_data.append(Motor.ConverToPolicyVector(e.p1, e.estados[s], normalized))
+                        p1_labels.append(e.CalcularPuntosFinales()[0] - e.CalcularPuntosFinales()[1])
+
+                    if s > 0 and e.estados[s - 1].QuienActua() is Reglas.JUGADOR2:
+                        p2_data.append(Motor.ConverToPolicyVector(e.p2, e.estados[s], normalized))
+                        p2_labels.append(e.CalcularPuntosFinales()[1] - e.CalcularPuntosFinales()[0])
+
+
 
         return (p1_data, p1_labels), (p2_data, p2_labels)
