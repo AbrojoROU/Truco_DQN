@@ -89,7 +89,7 @@ def Generate_and_Save(nameprefix, batch_size, epochs):
     Motor.Save_Games_to_Disk(p2_testdata, nameprefix + "p2_testdata.pickle")
     Motor.Save_Games_to_Disk(p2_testlabels, nameprefix + "p2_testlabels.pickle")
 
-def Train_Save(nameprefix, DEBUG):
+def Train_Save(nameprefix, eps):
     print("####################")
     print("##   Train_Save   ##")
     print("####################")
@@ -138,7 +138,7 @@ def Train_Save(nameprefix, DEBUG):
     p1_testlabels = keras.utils.to_categorical(p1_testlabels)  # los labels van a categorical
 
     # Fiteo la red
-    p1_DQN.fit(p1_traindata, p1_trainlabels, epochs=5, batch_size=128, shuffle=True, verbose=2)
+    p1_DQN.fit(p1_traindata, p1_trainlabels, epochs=eps, batch_size=128, shuffle=True, verbose=2)
 
     # Evaluo contra Test
     test_loss, test_acc = p1_DQN.evaluate(p1_testdata, p1_testlabels, verbose=2)
@@ -176,7 +176,7 @@ def Train_Save(nameprefix, DEBUG):
     p2_testlabels = keras.utils.to_categorical(p2_testlabels)  # los labels van a categorical
 
     # Fiteo la red
-    p2_DQN.fit(p2_traindata, p2_trainlabels, epochs=5, batch_size=128, shuffle=True, verbose=2)
+    p2_DQN.fit(p2_traindata, p2_trainlabels, epochs=eps, batch_size=128, shuffle=True, verbose=2)
 
     # Evaluo contra Test
     test_loss, test_acc = p2_DQN.evaluate(p2_testdata, p2_testlabels, verbose=2)
@@ -242,7 +242,7 @@ def Load_and_Test(nameprefix, DEBUG):
 ###                    MAIN                         ###
 #######################################################
 if __name__ == '__main__':
-    print("COMIENZO!")
+    printDebug("COMIENZO!")
     print("")
 
     import logging
@@ -250,19 +250,17 @@ if __name__ == '__main__':
 
     # Variables de Entrenamiento
     nameprefix  = "policy_pickles\_p_"
-    batch_size = 1000
-    epochs = 2
     DEBUG = False
 
     # Genero las partidas y guardo los pickles en disco (omitir si ya tengo un buen pickle generado)
-    Generate_and_Save(nameprefix,batch_size,epochs)
+    #Generate_and_Save(nameprefix,50000,30)
 
     # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
-    Train_Save(nameprefix, DEBUG)
+    #Train_Save(nameprefix, 10)
 
     # finalmente, cargo una Red de disco (formato h5) y juego/testeo
     Load_and_Test(nameprefix, DEBUG)
 
 
     print("")
-    print("## TERMINE! ##")
+    printDebug("## TERMINE! ##")

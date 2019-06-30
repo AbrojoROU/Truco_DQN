@@ -235,13 +235,13 @@ class AgenteRandom:
         if DEBUG : printDebug("  p" + str(self.jugador) + " - ejecutando accion: " + str(a))
         s.acciones_hechas.append((self.jugador, a))
 
-class AgenteDQN:
-    def __init__(self, jugador, dqn):
+class AgenteDVN:
+    def __init__(self, jugador, dvn):
 
         self.cartas_totales = []
         self.cartas_restantes = []
         self.state_history = []
-        self.DQN = dqn
+        self.DVN = dvn
 
         if jugador == Reglas.JUGADOR1:
             self.jugador = Reglas.JUGADOR1
@@ -266,7 +266,7 @@ class AgenteDQN:
         # Este metodo construye y retorna el vector de acciones posibles (tomados del enum Reglas.Acciones) con base en el estado actual s
         result = []
         result.append(Reglas.Accion.FOLD)
-        # TODO solo devolver FOLD si ya perdi en cartas jugadas
+
         if s.QuienJugariaCarta() == self.jugador: # me toca
             # Opciones de Truco : si me gritaron, agregar las acciones de aceptar (call) y subir apuesta (raise)
             if s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO :
@@ -303,7 +303,7 @@ class AgenteDQN:
         return result
 
     def Elegir_Accion(self, s, debug=False):
-        v = Motor.ConverToPolicyVector(p1, s, True)
+        v = Motor.ConverToPolicyVector(self, s, True)
 
         # Convierto a array de Red
         v = np.squeeze(np.asarray(v))
