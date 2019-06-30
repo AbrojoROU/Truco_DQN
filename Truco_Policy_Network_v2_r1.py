@@ -12,6 +12,8 @@ def Get_VectorEstado_Prueba():
     s = Estado()
     p1 = AgenteRandom(Reglas.JUGADOR1)
     p2 = AgenteRandom(Reglas.JUGADOR2)
+
+
     cartas_j1 = []
     cartas_j2 = []
     cartas_j1.append(Reglas.MAZO[9])
@@ -49,7 +51,12 @@ def Get_VectorEstado_Prueba():
     p1.EjecutarAccion(s, Reglas.Accion.JUGAR_C2)
     print(str(p2.get_acciones_posibles(s)))
     print("")
+    print("")
     print(">> Cartas jugadas hasta ahora: " + str(s.cartas_jugadas))
+    print("> cartas totales: " + str(p2.cartas_totales))
+    print("> cartas restantes: " + str(p2.cartas_restantes))
+    print("")
+
 
     s = Motor.ConverToPolicyVector(p2, s, True)
 
@@ -65,12 +72,19 @@ def Generate_and_Save(nameprefix, batch_size, epochs):
     print("##   Generate_and_Save   ##")
     print("###########################")
     print("")
+
+    nameprefixLoad = "value_pickles\_v_"
+    p1_DQN = keras.models.load_model(nameprefixLoad + "p1_DQN.h5")
+    p2_DQN = keras.models.load_model(nameprefixLoad + "p2_DQN.h5")
+    p1 = AgenteDVN(Reglas.JUGADOR1, p1_DQN)
+    p2 = AgenteDVN(Reglas.JUGADOR2, p2_DQN)
+
     print("1. Generando Partidas de entrenamiento")
-    (p1_traindata, p1_trainlabels), (p2_traindata, p2_trainlabels) = Motor.Generate_Policy_Training_Games(batch_size, epochs)
+    (p1_traindata, p1_trainlabels), (p2_traindata, p2_trainlabels) = Motor.Generate_Policy_Training_Games(p1, p2, batch_size, epochs)
 
     print("")
     print("2. Generando Partidas de test")
-    (p1_testdata, p1_testlabels), (p2_testdata, p2_testlabels) = Motor.Generate_Policy_Training_Games(batch_size, 1)
+    (p1_testdata, p1_testlabels), (p2_testdata, p2_testlabels) = Motor.Generate_Policy_Training_Games(p1, p2, batch_size, 1)
     print("len p1_traindata: " + str(len(p1_traindata)) + ", len p1_testdata: " + str(len(p1_testdata)))
     print("len p1_trainlabels: " + str(len(p1_trainlabels)) + ", len p1_testlabels: " + str(len(p1_testlabels)))
     print("len p2_traindata: " + str(len(p2_traindata)) + ", len p2_testdata: " + str(len(p2_testdata)))
@@ -118,7 +132,8 @@ def Train_Save(nameprefix, eps):
     p1_DQN = models.Sequential()
     p1_DQN.add(layers.Dense(50, activation='relu', input_shape=(50,)))
     p1_DQN.add(layers.Dense(100, activation='relu'))
-    p1_DQN.add(layers.Dense(100, activation='relu'))
+    p1_DQN.add(layers.Dense(200, activation='relu'))
+    p1_DQN.add(layers.Dense(200, activation='relu'))
     p1_DQN.add(layers.Dense(100, activation='relu'))
     p1_DQN.add(layers.Dense(50, activation='relu'))
     p1_DQN.add(layers.Dense(8, activation='softmax'))
@@ -156,7 +171,8 @@ def Train_Save(nameprefix, eps):
     p2_DQN = models.Sequential()
     p2_DQN.add(layers.Dense(50, activation='relu', input_shape=(50,)))
     p2_DQN.add(layers.Dense(100, activation='relu'))
-    p2_DQN.add(layers.Dense(100, activation='relu'))
+    p2_DQN.add(layers.Dense(200, activation='relu'))
+    p2_DQN.add(layers.Dense(200, activation='relu'))
     p2_DQN.add(layers.Dense(100, activation='relu'))
     p2_DQN.add(layers.Dense(50, activation='relu'))
     p2_DQN.add(layers.Dense(8, activation='softmax'))
@@ -253,10 +269,10 @@ if __name__ == '__main__':
     DEBUG = False
 
     # Genero las partidas y guardo los pickles en disco (omitir si ya tengo un buen pickle generado)
-    #Generate_and_Save(nameprefix,50000,30)
+    Generate_and_Save(nameprefix,2000,5)
 
     # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
-    #Train_Save(nameprefix, 10)
+    Train_Save(nameprefix, 2)
 
     # finalmente, cargo una Red de disco (formato h5) y juego/testeo
     Load_and_Test(nameprefix, DEBUG)

@@ -53,19 +53,24 @@ def Get_VectorEstado_Prueba():
     print("")
     print(">> Cartas jugadas hasta ahora: " + str(s.cartas_jugadas))
 
-
-
 def Generate_and_Save(nameprefix, batch_size, epochs):
     print("###########################")
     print("##   Generate_and_Save   ##")
     print("###########################")
     print("")
+
+    nameprefixLoad = "value_pickles\_v_"
+    p1_DQN = keras.models.load_model(nameprefixLoad + "p1_DQN.h5")
+    p2_DQN = keras.models.load_model(nameprefixLoad + "p2_DQN.h5")
+    p1 = AgenteDVN(Reglas.JUGADOR1, p1_DQN)
+    p2 = AgenteDVN(Reglas.JUGADOR2, p2_DQN)
+
     print("1. Generando Partidas de entrenamiento")
-    (p1_traindata, p1_trainlabels), (p2_traindata, p2_trainlabels) = Motor.Generate_Value_Training_Games(batch_size, epochs)
+    (p1_traindata, p1_trainlabels), (p2_traindata, p2_trainlabels) = Motor.Generate_Value_Training_Games(p1, p2, batch_size, epochs)
 
     print("")
     print("2. Generando Partidas de test")
-    (p1_testdata, p1_testlabels), (p2_testdata, p2_testlabels) = Motor.Generate_Value_Training_Games(batch_size, 1)
+    (p1_testdata, p1_testlabels), (p2_testdata, p2_testlabels) = Motor.Generate_Value_Training_Games(p1, p2, batch_size, 1)
     print("len p1_traindata: " + str(len(p1_traindata)) + ", len p1_testdata: " + str(len(p1_testdata)))
     print("len p1_trainlabels: " + str(len(p1_trainlabels)) + ", len p1_testlabels: " + str(len(p1_testlabels)))
     print("len p2_traindata: " + str(len(p2_traindata)) + ", len p2_testdata: " + str(len(p2_testdata)))
@@ -198,7 +203,7 @@ def Load_and_Test(nameprefix, DEBUG):
     print("##   Load_and_Test   ##")
     print("#######################")
     print("")
-    print("## Carga de partidas de Test desde Disco (pickles) con prefijo:" + nameprefix)
+    print("## Carga de partidas de Test desde Disco (pickles) con prefijo: " + nameprefix)
     # test
     p1_testdata = Motor.Load_Games_From_Disk(nameprefix + "p1_testdata.pickle")
     p1_testlabels = Motor.Load_Games_From_Disk(nameprefix + "p1_testlabels.pickle")
@@ -276,14 +281,14 @@ if __name__ == '__main__':
     logging.getLogger('tensorflow').disabled = True
 
     # Variables de Entrenamiento
-    nameprefix  = "value_pickles\_v_"
+    nameprefix  = "value_pickles v3\_v_"
     DEBUG = False
 
     # Genero las partidas y guardo los pickles en disco (omitir si ya tengo un buen pickle generado)
-    #Generate_and_Save(nameprefix,100000,60)
+    Generate_and_Save(nameprefix,1000,10)
 
     # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
-    # Train_Save(nameprefix, 5)
+    Train_Save(nameprefix, 5)
 
     # finalmente, cargo una Red de disco (formato h5) y juego/testeo
     Load_and_Test(nameprefix, DEBUG)

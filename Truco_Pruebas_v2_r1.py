@@ -423,7 +423,6 @@ def prueba_ConvertVector():
     print(str(Motor.ConverToVector(p1, s, False)))
     print(len(Motor.ConverToVector(p1, s, False)))
 
-
 def prueba_CalcularPuntos():
     print("")
     print("===================================================")
@@ -450,8 +449,9 @@ def prueba_Generate_Policy_Training_Games():
     print("## PRUEBA - Generate_Policy_Training_Games - ##")
     print("===================================================")
     print("")
-
-    (p1_data, p1_labels), (p2_data, p2_labels) = Motor.Generate_Policy_Training_Games(1, 1, False)
+    p1 = AgenteRandom(Reglas.JUGADOR1)
+    p2 = AgenteRandom(Reglas.JUGADOR2)
+    (p1_data, p1_labels), (p2_data, p2_labels) = Motor.Generate_Policy_Training_Games(p1, p2, 1, 1, False)
 
     print("")
     print("p1 data")
@@ -473,8 +473,9 @@ def prueba_Generate_Value_Training_Games():
     print("## PRUEBA - Generate_Value_Training_Games - ##")
     print("===================================================")
     print("")
-
-    (p1_data, p1_labels), (p2_data, p2_labels) = Motor.Generate_Value_Training_Games(1, 1, False)
+    p1 = AgenteRandom(Reglas.JUGADOR1)
+    p2 = AgenteRandom(Reglas.JUGADOR2)
+    (p1_data, p1_labels), (p2_data, p2_labels) = Motor.Generate_Value_Training_Games(p1, p2, 1, 1, False)
 
     print("")
     print("p1 data")
@@ -490,7 +491,21 @@ def prueba_Generate_Value_Training_Games():
     print(p2_labels)
     print("")
 
+def prueba_Play_DVN_RandomGames():
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Play DVN Games - ##")
+    print("===================================================")
+    print("")
+    import keras
+    nameprefix = "value_pickles\_v_"
+    p1_DQN = keras.models.load_model(nameprefix + "p1_DQN.h5")
+    p2_DQN = keras.models.load_model(nameprefix + "p2_DQN.h5")
 
+    p1 = AgenteDVN(Reglas.JUGADOR1, p1_DQN)
+    p2 = AgenteDVN(Reglas.JUGADOR2, p2_DQN)
+
+    Motor.Play_random_games(p1,p2,10,False)
 
 
 
@@ -498,8 +513,10 @@ def prueba_Generate_Value_Training_Games():
 ###                    MAIN                         ###
 #######################################################
 if __name__ == '__main__':
-    print("COMIENZO!")
+    printDebug("COMIENZO!")
     print("")
+    import logging
+    logging.getLogger('tensorflow').disabled = True
 
     ### PRUEBAS ESTADO
     # prueba_QuienGanoManos()
@@ -520,7 +537,8 @@ if __name__ == '__main__':
     #prueba_Generate_Value_Training_Games()
     #prueba_Generate_Policy_Training_Games()
 
+    prueba_Play_DVN_RandomGames()
 
 
     print("")
-    print("## TERMINE! ##")
+    printDebug("## TERMINE! ##")

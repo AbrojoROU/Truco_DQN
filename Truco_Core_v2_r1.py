@@ -303,15 +303,35 @@ class AgenteDVN:
         return result
 
     def Elegir_Accion(self, s, debug=False):
-        v = Motor.ConverToPolicyVector(self, s, True)
+        a = None
+        best = -10000
 
-        # Convierto a array de Red
-        v = np.squeeze(np.asarray(v))
-        v = v.reshape(1, 50)
-        v = v.astype('float32')
-        self.DQN.predict(v)
+        _cp = AgenteDVN(self.jugador, self.DVN)
+        _cp.cartas_totales = self.cartas_totales
 
-        pass
+
+        for i in self.get_acciones_posibles(s):
+            # 1. copio
+            _cp.cartas_restantes = copy.deepcopy(self.cartas_restantes)
+            _s = copy.deepcopy(s)
+
+            # 2. muevo
+            _cp.EjecutarAccion(_s, i)
+
+            # 3. convierto
+            _s = Motor.ConverToPolicyVector(_cp, _s, True)
+            _s = np.squeeze(np.asarray(_s))  # Convierto a array de Red
+            _s = _s.reshape(1, 50)
+            _s = _s.astype('float32')
+
+            # 4. Estimo
+            value = _cp.DVN.predict(_s)
+            if value > best :
+                best = value
+                a = i
+            if debug : printDebug("p" + str(_cp.jugador) + "> accion posible: " + str(i.name) + ",  valor:" + str(output))
+
+        return a
 
     # Ejecuta la accion que le llega, actualizando el estado y el agente de forma acorde
     def EjecutarAccion(self, s, a, DEBUG=False):
@@ -402,7 +422,7 @@ class Estado:
     def reset(self):
         self.cartas_jugadas = []
         self.truco = Reglas.EstadoTruco.NADA_DICHO
-        self.ganador = None  # 4 estados posibles. None si nadie, 0 si empate, p1  o p2
+        #self.ganador = None  # 4 estados posibles. None si nadie, 0 si empate, p1  o p2
         self.acciones_hechas = []
 
     def QuienActua(self):
@@ -711,14 +731,12 @@ class Motor:
         return result
 
     @staticmethod
-    def Generate_Policy_Training_Games(batch_size, epochs, normalized=True):
+    def Generate_Policy_Training_Games(p1, p2, batch_size, epochs, normalized=True):
         p1_data = []
         p1_labels= []
         p2_data = []
         p2_labels = []
 
-        p1 = AgenteRandom(Reglas.JUGADOR1)
-        p2 = AgenteRandom(Reglas.JUGADOR2)
 
         print("Generando Partidas.. ( epochs=" + str(epochs) + ",   batch_size=" + str(batch_size) + " )")
         print("")
@@ -742,14 +760,12 @@ class Motor:
         return (p1_data, p1_labels), (p2_data, p2_labels)
 
     @staticmethod
-    def Generate_Value_Training_Games(batch_size, epochs, normalized=True):
+    def Generate_Value_Training_Games(p1, p2, batch_size, epochs, normalized=True):
         p1_data = []
         p1_labels= []
         p2_data = []
         p2_labels = []
 
-        p1 = AgenteRandom(Reglas.JUGADOR1)
-        p2 = AgenteRandom(Reglas.JUGADOR2)
 
         print("Generando Partidas.. ( epochs=" + str(epochs) + ",   batch_size=" + str(batch_size) + " )")
         print("")
