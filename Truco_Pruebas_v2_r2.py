@@ -1,4 +1,7 @@
 from Truco_Core_v2_r2 import *
+from Truco_Policy_Network_v2_r2 import *
+from Truco_Value_Network_v2_r2 import *
+
 import keras
 
 
@@ -563,6 +566,22 @@ def prueba_Generate_Value_Training_Games():
     print(p2_labels)
     print("")
 
+def prueba_Play_DPN_RandomGames():
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Play DPN Games - ##")
+    print("===================================================")
+    print("")
+
+    genX = "policy_pickles\gen1_"
+    p1_DQN = keras.models.load_model(genX + "p1_DQN.h5")
+    p2_DQN = keras.models.load_model(genX + "p2_DQN.h5")
+
+    p1 = AgenteDPN(Reglas.JUGADOR1, p1_DQN)
+    p2 = AgenteDPN(Reglas.JUGADOR2, p2_DQN)
+
+    Motor.Play_random_games(p1,p2,1,True)
+
 def prueba_Play_DVN_RandomGames():
     print("")
     print("===================================================")
@@ -572,12 +591,12 @@ def prueba_Play_DVN_RandomGames():
 
     genX = "value_pickles\gen2_"
     p1_DQN = keras.models.load_model(genX + "p1_DQN.h5")
-    p2_DQN = keras.models.load_model(genX+ "p2_DQN.h5")
+    p2_DQN = keras.models.load_model(genX + "p2_DQN.h5")
 
     p1 = AgenteDVN(Reglas.JUGADOR1, p1_DQN)
     p2 = AgenteDVN(Reglas.JUGADOR2, p2_DQN)
 
-    Motor.Play_random_games(p1,p2,1,True)
+    Motor.Play_random_games(p1, p2, 1, True)
 
 
 
@@ -607,10 +626,15 @@ if __name__ == '__main__':
     # prueba_Save_Load_Games()
     # prueba_ConvertVector()
 
-    prueba_Generate_Value_Training_Games()
+    # REDES
+    # prueba_Generate_Value_Training_Games()
     # prueba_Generate_Policy_Training_Games()
-
     # prueba_Play_DVN_RandomGames()
+    # prueba_Play_DPN_RandomGames()
+
+    PolicyNetworkEngine.PolicyNetworkTrainer()
+    #ValueNetworkEngine.ValueNetworkTrainer()
+
 
 
     print("")
