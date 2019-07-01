@@ -108,6 +108,7 @@ class Reglas:
                 mazo.remove(unaC)
         return cartas_j1, cartas_j2
 
+# Este agente toma decisiones al azar
 class AgenteRandom:
     def __init__(self, jugador):
 
@@ -239,6 +240,7 @@ class AgenteRandom:
         if DEBUG : printDebug("  p" + str(self.jugador) + " - ejecutando accion: " + str(a))
         s.acciones_hechas.append((self.jugador, a))
 
+# Este agente usa su Red de Valor para decidir acciones
 class AgenteDVN:
     def __init__(self, jugador, dvn):
 
@@ -338,6 +340,150 @@ class AgenteDVN:
                 best = value
                 a = i
             if debug : printDebug("p" + str(_cp.jugador) + "> accion posible: " + str(i.name) + ",  valor:" + str(value))
+
+        return a
+
+    # Ejecuta la accion que le llega, actualizando el estado y el agente de forma acorde
+    def EjecutarAccion(self, s, a, DEBUG=False):
+
+        if a is Reglas.Accion.FOLD: s.truco = Reglas.EstadoTruco.FOLD
+
+        if a is Reglas.Accion.GRITAR :
+            if s.truco is Reglas.EstadoTruco.RETRUCO_ACEPTADO: s.truco = Reglas.EstadoTruco.VALE4_DICHO
+            elif s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO: s.truco = Reglas.EstadoTruco.RETRUCO_DICHO
+            elif s.truco is Reglas.EstadoTruco.NADA_DICHO: s.truco = Reglas.EstadoTruco.TRUCO_DICHO
+            elif s.truco is Reglas.EstadoTruco.VALE4_ACEPTADO : assert False # no se puede gritar cuando ya esta dicho el vale4
+
+
+        if a is Reglas.Accion.QUIERO_GRITO:
+            if s.truco is Reglas.EstadoTruco.TRUCO_DICHO:
+                s.truco = Reglas.EstadoTruco.TRUCO_ACEPTADO
+            elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO:
+                s.truco = Reglas.EstadoTruco.RETRUCO_ACEPTADO
+            elif s.truco is Reglas.EstadoTruco.VALE4_DICHO:
+                s.truco = Reglas.EstadoTruco.VALE4_ACEPTADO
+            else:
+                assert False  # No es posible pasar por aca, si quiso un grito es porque habia un truco, retruco o vale4 dicho
+
+        if a is Reglas.Accion.JUGAR_C1:
+            c = self.cartas_totales[0]
+            assert c in self.cartas_restantes  # valido que la carta a jugar aun esta en mi mano
+            s.cartas_jugadas.append(c)  # actualizo el estado
+            self.cartas_restantes.remove(c)  # la quito de las cartas restantes
+
+        if a is Reglas.Accion.JUGAR_C2:
+            c = self.cartas_totales[1]
+            assert c in self.cartas_restantes  # valido que la carta a jugar aun esta en mi mano
+            s.cartas_jugadas.append(c)  # actualizo el estado
+            self.cartas_restantes.remove(c)  # la quito de las cartas restantes
+
+        if a is Reglas.Accion.JUGAR_C3:
+            c = self.cartas_totales[2]
+            assert c in self.cartas_restantes  # valido que la carta a jugar aun esta en mi mano
+            s.cartas_jugadas.append(c)  # actualizo el estado
+            self.cartas_restantes.remove(c)  # la quito de las cartas restantes
+
+        # finalmente agrego la accion al log de acciones hechas por el estado
+        if DEBUG: printDebug("  p" + str(self.jugador) + " - ejecutando accion: " + str(a))
+        s.acciones_hechas.append((self.jugador, a))
+
+# Este agente usa su Red de Policy para decidir acciones
+class AgenteDPN:
+    def __init__(self, jugador, dpn):
+
+        self.cartas_totales = []
+        self.cartas_restantes = []
+        self.state_history = []
+        self.DPN = dpn
+
+        if jugador == Reglas.JUGADOR1:
+            self.jugador = Reglas.JUGADOR1
+        elif jugador == Reglas.JUGADOR2:
+            self.jugador = Reglas.JUGADOR2
+        elif jugador != self.jugador:
+            self.jugador = None
+            assert self.jugador is not None
+
+    def TomarCartas(self, listaCartas, debug=False):
+        self.cartas_totales = []
+        self.cartas_restantes = []
+
+        # Aqui asignamos las cartas al jugador en orden que coincide con el diseño de acciones
+        listaCartas.sort(key=lambda x: x.ValorTruco, reverse=True)
+        for i in listaCartas:
+            self.cartas_restantes.append(i)
+            self.cartas_totales.append(i)
+        if debug: printDebug(str(self.cartas_restantes))
+
+    def get_acciones_posibles(self, s):
+        # Este metodo construye y retorna el vector de acciones posibles (tomados del enum Reglas.Acciones) con base en el estado actual s
+        result = []
+
+        if s.QuienJugariaCarta() == self.jugador:  # me toca
+            # Opciones de Truco : si me gritaron, agregar las acciones de aceptar (call) y subir apuesta (raise)
+            if s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO:
+                for j, a in reversed(s.acciones_hechas):
+                    if a is Reglas.Accion.GRITAR:
+                        if j is not self.jugador:
+                            result.append(Reglas.Accion.GRITAR)
+                        break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
+
+            elif s.truco is Reglas.EstadoTruco.RETRUCO_ACEPTADO:
+                for j, a in reversed(s.acciones_hechas):
+                    if a is Reglas.Accion.GRITAR:
+                        if j is not self.jugador:
+                            result.append(Reglas.Accion.GRITAR)
+                        break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
+            elif s.truco == Reglas.EstadoTruco.NADA_DICHO:
+                result.append(Reglas.Accion.GRITAR)
+            elif s.truco == Reglas.EstadoTruco.VALE4_ACEPTADO:
+                pass
+            else:
+                assert False  # WARNING: Si me toca, el estado del truco deberia estar en alguno case de los elif, a menos que permita Re-Raise
+
+            # solo resta agregar las acciones de jugar cartas aun en mano
+            for c in self.cartas_restantes:
+                result.append(Reglas.Accion(self.cartas_totales.index(c) + 1))
+
+        else:
+            result.append(Reglas.Accion.FOLD)
+            # No me toca jugar carta, seguramente me gritaron
+            if s.truco is Reglas.EstadoTruco.TRUCO_DICHO:
+                result.append(Reglas.Accion.QUIERO_GRITO)
+                # if len(self.cartas_restantes) == 0: result.append(Reglas.Accion.GRITAR_RETRUCO)  # Permitimos Re-Raise en la ultima mano
+            elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO:
+                result.append(Reglas.Accion.QUIERO_GRITO)
+                # if len(self.cartas_restantes) == 0: result.append(Reglas.Accion.GRITAR_VALE4)  # Permitimos Re-Raise en la ultima mano
+            elif s.truco == Reglas.EstadoTruco.VALE4_DICHO:
+                result.append(Reglas.Accion.QUIERO_GRITO)
+
+        return result
+
+    def Elegir_Accion(self, s, debug=False):
+        a = None
+
+        best = -10000
+
+        # 1. convierto
+        vector = Motor.ConverToPolicyVector(self, s, True)
+        vector = np.squeeze(np.asarray(vector))  # Convierto a array de Red
+        vector = vector.reshape(1, 50)
+        vector = vector.astype('float32')
+
+        # 2. Estimo
+        output = self.DPN.predict(vector)
+        # a = Reglas.Accion(np.argmax(output) + 1)
+        if debug: print("vector pronostico: " + str(output))
+
+        # 3. Comparo los puntajes con las acciones posibles de verdad
+
+        for i in self.get_acciones_posibles(s):
+            value = output[0][i.value-1]
+
+            if value > best:
+                a = i
+                best = value
+
 
         return a
 
