@@ -12,8 +12,6 @@ def Get_VectorEstado_Prueba():
     s = Estado()
     p1 = AgenteRandom(Reglas.JUGADOR1)
     p2 = AgenteRandom(Reglas.JUGADOR2)
-
-
     cartas_j1 = []
     cartas_j2 = []
     cartas_j1.append(Reglas.MAZO[9])
@@ -32,8 +30,10 @@ def Get_VectorEstado_Prueba():
     print(str(p2.get_acciones_posibles(s)))
     print("")
 
+    return p1, p2, s  # poner esta linea donde quiera testear predict de la red
+
     print("2) p2 grito Truco, acciones de p1 disponibles")
-    p2.EjecutarAccion(s, Reglas.Accion.GRITAR_TRUCO)
+    p2.EjecutarAccion(s, Reglas.Accion.GRITAR)
     print(str(p1.get_acciones_posibles(s)))
     print("")
 
@@ -51,33 +51,25 @@ def Get_VectorEstado_Prueba():
     p1.EjecutarAccion(s, Reglas.Accion.JUGAR_C2)
     print(str(p2.get_acciones_posibles(s)))
     print("")
-    print("")
     print(">> Cartas jugadas hasta ahora: " + str(s.cartas_jugadas))
-    print("> cartas totales: " + str(p2.cartas_totales))
-    print("> cartas restantes: " + str(p2.cartas_restantes))
-    print("")
 
+    return p1, p2, s # poner esta linea donde quiera testear predict de la red
 
-    s = Motor.ConverToPolicyVector(p2, s, True)
-
-    # Convierto a array de Red
-    s = np.squeeze(np.asarray(s))
-    s = s.reshape(1, 50)
-    s = s.astype('float32')
-
-    return s
-
-def Generate_and_Save(nameprefix, batch_size, epochs):
+def Generate_and_Save(input_prefix, output_prefix, batch_size, epochs):
     print("###########################")
     print("##   Generate_and_Save   ##")
     print("###########################")
     print("")
 
-    nameprefixLoad = "value_pickles\_v_"
-    p1_DQN = keras.models.load_model(nameprefixLoad + "p1_DQN.h5")
-    p2_DQN = keras.models.load_model(nameprefixLoad + "p2_DQN.h5")
-    p1 = AgenteDVN(Reglas.JUGADOR1, p1_DQN)
-    p2 = AgenteDVN(Reglas.JUGADOR2, p2_DQN)
+    if input_prefix is not None:
+        # Si input prefix es None, entonces es generacion inicial Random, de lo contrario cargamos generacion anterior
+        p1_DQN = keras.models.load_model(input_prefix + "p1_DQN.h5")
+        p2_DQN = keras.models.load_model(input_prefix + "p2_DQN.h5")
+        p1 = AgenteDVN(Reglas.JUGADOR1, p1_DQN)
+        p2 = AgenteDVN(Reglas.JUGADOR2, p2_DQN)
+    else:
+        p1 = AgenteRandom(Reglas.JUGADOR1)
+        p2 = AgenteRandom(Reglas.JUGADOR2)
 
     print("1. Generando Partidas de entrenamiento")
     (p1_traindata, p1_trainlabels), (p2_traindata, p2_trainlabels) = Motor.Generate_Policy_Training_Games(p1, p2, batch_size, epochs)
@@ -91,39 +83,34 @@ def Generate_and_Save(nameprefix, batch_size, epochs):
     print("len p2_trainlabels: " + str(len(p2_trainlabels)) + ", len p2_testlabels: " + str(len(p2_testlabels)))
 
     print("")
-    print("3. Guardando partidas en Disco (pickle) con prefijo:" + nameprefix)
+    print("3. Guardando partidas en Disco (pickle) con prefijo:" + output_prefix + "...")
     # train
-    Motor.Save_Games_to_Disk(p1_traindata, nameprefix + "p1_traindata.pickle")
-    Motor.Save_Games_to_Disk(p1_trainlabels, nameprefix + "p1_trainlabels.pickle")
-    Motor.Save_Games_to_Disk(p2_traindata, nameprefix + "p2_traindata.pickle")
-    Motor.Save_Games_to_Disk(p2_trainlabels, nameprefix + "p2_trainlabels.pickle")
+    Motor.Save_Games_to_Disk(p1_traindata, output_prefix + "p1_traindata.pickle")
+    Motor.Save_Games_to_Disk(p1_trainlabels, output_prefix + "p1_trainlabels.pickle")
+    Motor.Save_Games_to_Disk(p2_traindata, output_prefix + "p2_traindata.pickle")
+    Motor.Save_Games_to_Disk(p2_trainlabels, output_prefix + "p2_trainlabels.pickle")
     # test
-    Motor.Save_Games_to_Disk(p1_testdata, nameprefix + "p1_testdata.pickle")
-    Motor.Save_Games_to_Disk(p1_testlabels, nameprefix + "p1_testlabels.pickle")
-    Motor.Save_Games_to_Disk(p2_testdata, nameprefix + "p2_testdata.pickle")
-    Motor.Save_Games_to_Disk(p2_testlabels, nameprefix + "p2_testlabels.pickle")
-
-def Train_Save(nameprefix, eps):
-    print("####################")
-    print("##   Train_Save   ##")
-    print("####################")
+    Motor.Save_Games_to_Disk(p1_testdata, output_prefix + "p1_testdata.pickle")
+    Motor.Save_Games_to_Disk(p1_testlabels, output_prefix + "p1_testlabels.pickle")
+    Motor.Save_Games_to_Disk(p2_testdata, output_prefix + "p2_testdata.pickle")
+    Motor.Save_Games_to_Disk(p2_testlabels, output_prefix + "p2_testlabels.pickle")
+    print("  ...guardado!")
     print("")
-    print("## Carga de partidas de entrenamiento desde Disco (pickles) con prefijo '" + nameprefix + "'")
-    # train
-    p1_traindata = Motor.Load_Games_From_Disk(nameprefix + "p1_traindata.pickle")
-    p1_trainlabels = Motor.Load_Games_From_Disk(nameprefix + "p1_trainlabels.pickle")
-    p2_traindata = Motor.Load_Games_From_Disk(nameprefix + "p2_traindata.pickle")
-    p2_trainlabels = Motor.Load_Games_From_Disk(nameprefix + "p2_trainlabels.pickle")
-    # test
-    p1_testdata = Motor.Load_Games_From_Disk(nameprefix + "p1_testdata.pickle")
-    p1_testlabels = Motor.Load_Games_From_Disk(nameprefix + "p1_testlabels.pickle")
-    p2_testdata = Motor.Load_Games_From_Disk(nameprefix + "p2_testdata.pickle")
-    p2_testlabels = Motor.Load_Games_From_Disk(nameprefix + "p2_testlabels.pickle")
 
+def Train_Save(gen_prefix, eps):
+    print("  ##   Train_Save   ##")
+    print("")
+    print("  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo '" + gen_prefix + "'")
+    # p1
+    p1_traindata = Motor.Load_Games_From_Disk(gen_prefix + "p1_traindata.pickle")
+    p1_trainlabels = Motor.Load_Games_From_Disk(gen_prefix + "p1_trainlabels.pickle")
+    p1_testdata = Motor.Load_Games_From_Disk(gen_prefix + "p1_testdata.pickle")
+    p1_testlabels = Motor.Load_Games_From_Disk(gen_prefix + "p1_testlabels.pickle")
 
     # ENTRENANDO REDES
     from keras import models
     from keras import layers
+
 
     #########################
     print("")
@@ -136,9 +123,9 @@ def Train_Save(nameprefix, eps):
     p1_DQN.add(layers.Dense(200, activation='relu'))
     p1_DQN.add(layers.Dense(100, activation='relu'))
     p1_DQN.add(layers.Dense(50, activation='relu'))
-    p1_DQN.add(layers.Dense(8, activation='softmax'))
+    p1_DQN.add(layers.Dense(6, activation='softmax'))
 
-    p1_DQN.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    p1_DQN.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
 
     # Convierto a nparray y reshape a lo especificado en las capas de la red neuronal (shape a 50)
     # Train
@@ -160,12 +147,23 @@ def Train_Save(nameprefix, eps):
     print('test_acc:', test_acc)
 
     print("")
-    print("  ...guardando Red DQN de p1 con prefijo '" + nameprefix + "'")
-    p1_DQN.save(nameprefix+"p1_DQN.h5")
-    print("      " + nameprefix + "p1_DQN.h5 guardado!")
+    print("  ...guardando Red DQN de p1 con prefijo '" + gen_prefix + "'")
+    p1_DQN.save(gen_prefix + "p1_DQN.h5")
+    print("    ..." + gen_prefix + "p1_DQN.h5 guardado!")
+
+    del p1_traindata
 
     #########################
     ## ENTRENO RED PARA p2
+    #########################
+    ## ENTRENO RED PARA p2
+    print("## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo '" + gen_prefix + "'")
+    # p2
+    p2_traindata = Motor.Load_Games_From_Disk(gen_prefix + "p2_traindata.pickle")
+    p2_trainlabels = Motor.Load_Games_From_Disk(gen_prefix + "p2_trainlabels.pickle")
+    p2_testdata = Motor.Load_Games_From_Disk(gen_prefix + "p2_testdata.pickle")
+    p2_testlabels = Motor.Load_Games_From_Disk(gen_prefix + "p2_testlabels.pickle")
+
     print("")
     print("## Entrenando Red para P1ayer 2")
     p2_DQN = models.Sequential()
@@ -175,9 +173,9 @@ def Train_Save(nameprefix, eps):
     p2_DQN.add(layers.Dense(200, activation='relu'))
     p2_DQN.add(layers.Dense(100, activation='relu'))
     p2_DQN.add(layers.Dense(50, activation='relu'))
-    p2_DQN.add(layers.Dense(8, activation='softmax'))
+    p2_DQN.add(layers.Dense(6, activation='softmax'))
 
-    p2_DQN.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    p2_DQN.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
 
     # Convierto a nparray y reshape a lo especificado en las capas de la red neuronal (shape a 50)
     # Train
@@ -199,21 +197,21 @@ def Train_Save(nameprefix, eps):
     print('test_acc:', test_acc)
 
     print("")
-    print("  ...guardando red DQN de p2 con prefijo '" + nameprefix + "'")
-    p2_DQN.save(nameprefix + "p2_DQN.h5")
-    print("      " + nameprefix + "p2_DQN.h5 guardado!")
+    print("  ...guardando red DQN de p2 con prefijo '" + gen_prefix + "'")
+    p2_DQN.save(gen_prefix + "p2_DQN.h5")
+    print("    ..." + gen_prefix + "p2_DQN.h5 guardado!")
 
-def Load_and_Test(nameprefix, DEBUG):
-    print("#######################")
-    print("##   Load_and_Test   ##")
-    print("#######################")
+    del p2_traindata
+
+def Load_and_Test(gen_prefix, DEBUG):
+    print("  ##   Load_and_Test   ##")
     print("")
-    print("## Carga de partidas de Test desde Disco (pickles) con prefijo:" + nameprefix)
+    print("  ## Carga de partidas de Test desde Disco (pickles) con prefijo: " + gen_prefix)
     # test
-    p1_testdata = Motor.Load_Games_From_Disk(nameprefix + "p1_testdata.pickle")
-    p1_testlabels = Motor.Load_Games_From_Disk(nameprefix + "p1_testlabels.pickle")
-    p2_testdata = Motor.Load_Games_From_Disk(nameprefix + "p2_testdata.pickle")
-    p2_testlabels = Motor.Load_Games_From_Disk(nameprefix + "p2_testlabels.pickle")
+    p1_testdata = Motor.Load_Games_From_Disk(gen_prefix + "p1_testdata.pickle")
+    p1_testlabels = Motor.Load_Games_From_Disk(gen_prefix + "p1_testlabels.pickle")
+    p2_testdata = Motor.Load_Games_From_Disk(gen_prefix + "p2_testdata.pickle")
+    p2_testlabels = Motor.Load_Games_From_Disk(gen_prefix + "p2_testlabels.pickle")
 
     # Convierto a nparray y reshape a lo especificado en las capas de la red neuronal (shape a 50)
     # p1
@@ -230,24 +228,46 @@ def Load_and_Test(nameprefix, DEBUG):
     print("")
     print("## Loading model from disk")
     # p1
-    p1_DQN = keras.models.load_model(nameprefix + "p1_DQN.h5")
-    test_loss_p1, test_acc_p1 = p1_DQN.evaluate(p1_testdata, p1_testlabels)
+    p1_DQN = keras.models.load_model(gen_prefix + "p1_DQN.h5")
+    test_loss_p1, test_acc_p1 = p1_DQN.evaluate(p1_testdata, p1_testlabels, verbose=2)
     print('## p1 test_acc:', test_acc_p1)
     # p2
-    p2_DQN = keras.models.load_model(nameprefix + "p2_DQN.h5")
-    test_loss_p2, test_acc_p2 = p2_DQN.evaluate(p2_testdata, p2_testlabels)
+    p2_DQN = keras.models.load_model(gen_prefix + "p2_DQN.h5")
+    test_loss_p2, test_acc_p2 = p2_DQN.evaluate(p2_testdata, p2_testlabels, verbose=2)
     print('## p2 test_acc:', test_acc_p2)
 
-    print("")
-    print("## predicting.. ##")
-    output = p2_DQN.predict(Get_VectorEstado_Prueba())
 
+    # AHORA SI, EJECUTO PRUEBA
+    p1, p2, s = Get_VectorEstado_Prueba()
+
+    currentplayer = s.QuienActua()
+    if s.QuienActua() == Reglas.JUGADOR1: currentplayer = p1
+    if s.QuienActua() == Reglas.JUGADOR2: currentplayer = p2
+
+    print("Le toca a p" + str(currentplayer.jugador))
+    print(" cartas en mesa: " + str(s.cartas_jugadas))
+    print(" cartas totales: " + str(currentplayer.cartas_totales))
+    print(" cartas restates: " + str(currentplayer.cartas_restantes))
+    print("")
+
+    print("## predicting.. ##")
+    s = Motor.ConverToPolicyVector(currentplayer, s, True)
+    s = np.squeeze(np.asarray(s))  # Convierto a array de Red
+    s = s.reshape(1, 50)
+    s = s.astype('float32')
+    if currentplayer.jugador is Reglas.JUGADOR1: output = p1_DQN.predict(s)
+    if currentplayer.jugador is Reglas.JUGADOR2: output = p2_DQN.predict(s)
+
+    print("")
+    print("Lista acciones existentes:")
+    for i in Reglas.Accion: print(str(i.value) + ", " + i.name)
+    print("")
     print("output red:")
     print(str(output))
     print("")
 
-    a = Reglas.Accion(np.argmax(output))
-    print(">> Segun la red, p2 deberia jugar accion:" + str(a.name) + " id_accion:" + str(a.value))
+    a = Reglas.Accion(np.argmax(output)+1)
+    print(">> Segun la red, p" + str(currentplayer.jugador) + " deberia jugar accion:" + str(a.name) + " id_accion:" + str(a.value))
     prob = output[0,np.argmax(output)]
     print("    con prob:" + str(prob))
 
@@ -262,20 +282,56 @@ if __name__ == '__main__':
     print("")
 
     import logging
+
     logging.getLogger('tensorflow').disabled = True
 
     # Variables de Entrenamiento
-    nameprefix  = "policy_pickles\_p_"
+    gen0 = None
+    gen1 = "policy_pickles\gen1_"
+    gen2 = "policy_pickles\gen2_"
+    gen3 = "policy_pickles\gen3_"
     DEBUG = False
 
+    ################
+    # GENERACION 1
+    print("##########################")
+    print("##     GENERACION 1     ##")
+    print("##########################")
+    print("")
     # Genero las partidas y guardo los pickles en disco (omitir si ya tengo un buen pickle generado)
-    Generate_and_Save(nameprefix,2000,5)
-
+    #Generate_and_Save(gen0, gen1, 20000,5)
     # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
-    Train_Save(nameprefix, 2)
-
+    #Train_Save(gen1, 5)
     # finalmente, cargo una Red de disco (formato h5) y juego/testeo
-    Load_and_Test(nameprefix, DEBUG)
+    Load_and_Test(gen1, DEBUG)
+
+    ################
+    # GENERACION 2
+    print("")
+    print("##########################")
+    print("##     GENERACION 2     ##")
+    print("##########################")
+    print("")
+    # Genero las partidas y guardo los pickles en disco (omitir si ya tengo un buen pickle generado)
+    #Generate_and_Save(gen1, gen2, 30000, 5)
+    # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
+    #Train_Save(gen2, 5)
+    # finalmente, cargo una Red de disco (formato h5) y juego/testeo
+    #Load_and_Test(gen2, DEBUG)
+
+    ################
+    # GENERACION 3
+    print("")
+    print("##########################")
+    print("##     GENERACION 3     ##")
+    print("##########################")
+    print("")
+    # Genero las partidas y guardo los pickles en disco (omitir si ya tengo un buen pickle generado)
+    # Generate_and_Save(gen2, gen3, 30000, 5)
+    # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
+    # Train_Save(gen3, 5)
+    # finalmente, cargo una Red de disco (formato h5) y juego/testeo
+    # Load_and_Test(gen3, DEBUG)
 
 
     print("")

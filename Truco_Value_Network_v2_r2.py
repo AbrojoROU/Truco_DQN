@@ -30,7 +30,7 @@ def Get_VectorEstado_Prueba():
     print(str(p2.get_acciones_posibles(s)))
     print("")
 
-    return p1, p2, s
+    return p1, p2, s  # poner esta linea donde quiera testear predict de la red
 
     print("2) p2 grito Truco, acciones de p1 disponibles")
     p2.EjecutarAccion(s, Reglas.Accion.GRITAR)
@@ -53,6 +53,7 @@ def Get_VectorEstado_Prueba():
     print("")
     print(">> Cartas jugadas hasta ahora: " + str(s.cartas_jugadas))
 
+    return p1, p2, s # poner esta linea donde quiera testear predict de la red
 
 def Generate_and_Save(input_prefix, output_prefix, batch_size, epochs):
     print("  ##   Generate_and_Save   ##")
@@ -109,9 +110,9 @@ def Train_Save(gen_prefix, eps):
     from keras import layers
 
     #########################
+    ## ENTRENO RED PARA p1
     print("")
     print("  ## Entrenando Red para P1ayer 1")
-    ## ENTRENO RED PARA p1
     p1_DQN = models.Sequential()
     p1_DQN.add(layers.Dense(50, activation='relu', input_shape=(50,)))
     p1_DQN.add(layers.Dense(100, activation='relu'))
@@ -136,7 +137,7 @@ def Train_Save(gen_prefix, eps):
     p1_testdata = p1_testdata.astype('float32')
 
     # Fiteo la red
-    p1_DQN.fit(p1_traindata, p1_trainlabels, epochs=eps, batch_size=256, shuffle=True, verbose=2)
+    p1_DQN.fit(p1_traindata, p1_trainlabels, epochs=eps, batch_size=128, shuffle=True, verbose=2)
 
     # Evaluo contra Test
     test_loss, test_acc = p1_DQN.evaluate(p1_testdata, p1_testlabels, verbose=2)
@@ -185,7 +186,7 @@ def Train_Save(gen_prefix, eps):
     p2_testdata = p2_testdata.astype('float32')
 
     # Fiteo la red
-    p2_DQN.fit(p2_traindata, p2_trainlabels, epochs=eps, batch_size=256, shuffle=True, verbose=2)
+    p2_DQN.fit(p2_traindata, p2_trainlabels, epochs=eps, batch_size=128, shuffle=True, verbose=2)
 
     # Evaluo contra Test
     test_loss, test_acc = p2_DQN.evaluate(p2_testdata, p2_testlabels, verbose=2)
@@ -230,7 +231,7 @@ def Load_and_Test(gen_prefix, DEBUG):
     test_loss_p2, test_acc_p2 = p2_DQN.evaluate(p2_testdata, p2_testlabels, verbose=2)
     print('## p2 test_acc:', test_acc_p2)
 
-
+    # AHORA SI, EJECUTO PRUEBA
     p1,p2, s = Get_VectorEstado_Prueba()
 
     currentplayer = s.QuienActua()
@@ -292,11 +293,11 @@ if __name__ == '__main__':
     print("##########################")
     print("")
     # Genero las partidas y guardo los pickles en disco (omitir si ya tengo un buen pickle generado)
-    Generate_and_Save(gen0, gen1, 5000,5)
+    #Generate_and_Save(gen0, gen1, 30000,5)
     # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
-    Train_Save(gen1, 5)
+    #Train_Save(gen1, 5)
     # finalmente, cargo una Red de disco (formato h5) y juego/testeo
-    Load_and_Test(gen1, DEBUG)
+    #Load_and_Test(gen1, DEBUG)
 
     ################
     # GENERACION 2
@@ -306,9 +307,9 @@ if __name__ == '__main__':
     print("##########################")
     print("")
     # Genero las partidas y guardo los pickles en disco (omitir si ya tengo un buen pickle generado)
-    Generate_and_Save(gen1, gen2, 5000, 5)
+    #Generate_and_Save(gen1, gen2, 30000, 5)
     # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
-    Train_Save(gen2, 5)
+    #Train_Save(gen2, 5)
     # finalmente, cargo una Red de disco (formato h5) y juego/testeo
     Load_and_Test(gen2, DEBUG)
 
@@ -320,11 +321,11 @@ if __name__ == '__main__':
     print("##########################")
     print("")
     # Genero las partidas y guardo los pickles en disco (omitir si ya tengo un buen pickle generado)
-    Generate_and_Save(gen2, gen3, 5000, 5)
+    #Generate_and_Save(gen2, gen3, 30000, 5)
     # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
-    Train_Save(gen3, 5)
+    #Train_Save(gen3, 5)
     # finalmente, cargo una Red de disco (formato h5) y juego/testeo
-    Load_and_Test(gen3, DEBUG)
+    #Load_and_Test(gen3, DEBUG)
 
 
     print("")

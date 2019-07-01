@@ -137,7 +137,6 @@ class AgenteRandom:
     def get_acciones_posibles(self,s):
         # Este metodo construye y retorna el vector de acciones posibles (tomados del enum Reglas.Acciones) con base en el estado actual s
         result = []
-        result.append(Reglas.Accion.FOLD)
 
         if s.QuienJugariaCarta() == self.jugador: # me toca
             # Opciones de Truco : si me gritaron, agregar las acciones de aceptar (call) y subir apuesta (raise)
@@ -154,11 +153,8 @@ class AgenteRandom:
                         if j is not self.jugador:
                             result.append(Reglas.Accion.GRITAR)
                         break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
-
             elif s.truco == Reglas.EstadoTruco.NADA_DICHO: result.append(Reglas.Accion.GRITAR)
-
             elif s.truco == Reglas.EstadoTruco.VALE4_ACEPTADO : pass
-
             else:
                 assert False  # WARNING: Si me toca, el estado del truco deberia estar en alguno case de los elif, a menos que permita Re-Raise
 
@@ -167,13 +163,14 @@ class AgenteRandom:
                 result.append(Reglas.Accion(self.cartas_totales.index(c) + 1))
 
         else:
+            result.append(Reglas.Accion.FOLD)
             # No me toca jugar carta, seguramente me gritaron
             if s.truco is Reglas.EstadoTruco.TRUCO_DICHO:
                 result.append(Reglas.Accion.QUIERO_GRITO)
-                #result.append(Reglas.Accion.GRITAR_RETRUCO)  # Por ahora no permitimos Re-Raise
+                # if len(self.cartas_restantes) == 0: result.append(Reglas.Accion.GRITAR_RETRUCO)  # Permitimos Re-Raise en la ultima mano
             elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO :
                 result.append(Reglas.Accion.QUIERO_GRITO)
-                #result.append(Reglas.Accion.GRITAR_VALE4)  # Por ahora no permitimos Re-Raise
+                # if len(self.cartas_restantes) == 0: result.append(Reglas.Accion.GRITAR_VALE4)  # Permitimos Re-Raise en la ultima mano
             elif s.truco == Reglas.EstadoTruco.VALE4_DICHO:
                 result.append(Reglas.Accion.QUIERO_GRITO)
 
@@ -199,7 +196,7 @@ class AgenteRandom:
         ## TERMINA HACK para reducir probabilidad de Fold
 
         if debug: printDebug("  Taking a random action: " + str(a))
-
+        # TODO QUE ELIJA FOLD SOLO SI NO QUEDAN OTRAS OPCIONES, AUNQUE SEA AGENTE RANDOM QUE FOLD SEA ULTIMO RECURSO
         return a
 
     # Ejecuta la accion que le llega, actualizando el estado y el agente de forma acorde
@@ -269,31 +266,29 @@ class AgenteDVN:
             self.cartas_totales.append(i)
         if debug: printDebug(str(self.cartas_restantes))
 
-    def get_acciones_posibles(self,s):
+    def get_acciones_posibles(self, s):
         # Este metodo construye y retorna el vector de acciones posibles (tomados del enum Reglas.Acciones) con base en el estado actual s
         result = []
-        result.append(Reglas.Accion.FOLD)
 
-        if s.QuienJugariaCarta() == self.jugador: # me toca
+        if s.QuienJugariaCarta() == self.jugador:  # me toca
             # Opciones de Truco : si me gritaron, agregar las acciones de aceptar (call) y subir apuesta (raise)
-            if s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO :
+            if s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO:
                 for j, a in reversed(s.acciones_hechas):
                     if a is Reglas.Accion.GRITAR:
                         if j is not self.jugador:
                             result.append(Reglas.Accion.GRITAR)
                         break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
 
-            elif s.truco is Reglas.EstadoTruco.RETRUCO_ACEPTADO :
+            elif s.truco is Reglas.EstadoTruco.RETRUCO_ACEPTADO:
                 for j, a in reversed(s.acciones_hechas):
                     if a is Reglas.Accion.GRITAR:
                         if j is not self.jugador:
                             result.append(Reglas.Accion.GRITAR)
                         break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
-
-            elif s.truco == Reglas.EstadoTruco.NADA_DICHO: result.append(Reglas.Accion.GRITAR)
-
-            elif s.truco == Reglas.EstadoTruco.VALE4_ACEPTADO : pass
-
+            elif s.truco == Reglas.EstadoTruco.NADA_DICHO:
+                result.append(Reglas.Accion.GRITAR)
+            elif s.truco == Reglas.EstadoTruco.VALE4_ACEPTADO:
+                pass
             else:
                 assert False  # WARNING: Si me toca, el estado del truco deberia estar en alguno case de los elif, a menos que permita Re-Raise
 
@@ -302,13 +297,14 @@ class AgenteDVN:
                 result.append(Reglas.Accion(self.cartas_totales.index(c) + 1))
 
         else:
+            result.append(Reglas.Accion.FOLD)
             # No me toca jugar carta, seguramente me gritaron
             if s.truco is Reglas.EstadoTruco.TRUCO_DICHO:
                 result.append(Reglas.Accion.QUIERO_GRITO)
-                #result.append(Reglas.Accion.GRITAR_RETRUCO)  # Por ahora no permitimos Re-Raise
-            elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO :
+                # if len(self.cartas_restantes) == 0: result.append(Reglas.Accion.GRITAR_RETRUCO)  # Permitimos Re-Raise en la ultima mano
+            elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO:
                 result.append(Reglas.Accion.QUIERO_GRITO)
-                #result.append(Reglas.Accion.GRITAR_VALE4)  # Por ahora no permitimos Re-Raise
+                # if len(self.cartas_restantes) == 0: result.append(Reglas.Accion.GRITAR_VALE4)  # Permitimos Re-Raise en la ultima mano
             elif s.truco == Reglas.EstadoTruco.VALE4_DICHO:
                 result.append(Reglas.Accion.QUIERO_GRITO)
 
@@ -657,7 +653,7 @@ class Motor:
             while (s.QuienGanoManos() is None) and (s.truco is not Reglas.EstadoTruco.FOLD) :
 
                 current_player.EjecutarAccion(s, a, DEBUG)
-                if DEBUG: printDebug("      Nuevo estado: " + str(s.cartas_jugadas))
+                if DEBUG: printDebug("      Nuevo estado: " + s.truco.name.lower() + ",  cartas: " + str(s.cartas_jugadas))
 
                 # Tomo otro jugador
                 if s.QuienActua() == Reglas.JUGADOR1:
@@ -694,7 +690,7 @@ class Motor:
 
             # Terminó el while gameover
             lista_episodios.append(e)  # Agrego el episodio a la lista de episodios
-            if DEBUG : print("")
+            if DEBUG : print("Gano: " + str(e.ganador) + ",   puntaje:" + str(e.CalcularPuntosFinales()))
         # Terminó el for N
 
         # Despliego resultados de la corrida
