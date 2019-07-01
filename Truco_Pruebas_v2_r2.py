@@ -632,10 +632,8 @@ if __name__ == '__main__':
     # prueba_Play_DVN_RandomGames()
     # prueba_Play_DPN_RandomGames()
 
-    PolicyNetworkEngine.PolicyNetworkTrainer()
-    #ValueNetworkEngine.ValueNetworkTrainer()
-
-
+    # PolicyNetworkEngine.PolicyNetworkTrainer(10000, 3)
+    # ValueNetworkEngine.ValueNetworkTrainer(10000, 3)
 
     print("")
     printDebug("## TERMINE! ##")

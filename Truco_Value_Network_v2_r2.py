@@ -206,7 +206,7 @@ class ValueNetworkEngine:
         del p2_traindata
 
     @staticmethod
-    def Load_and_Test(gen_prefix, DEBUG):
+    def Load_and_Test(gen_prefix):
         print("  ##   Load_and_Test   ##")
         print("")
         print("  ## Carga de partidas de Test desde Disco (pickles) con prefijo: " + gen_prefix)
@@ -274,61 +274,29 @@ class ValueNetworkEngine:
             print("p" + str(_cp.jugador) + "> accion posible: " + str(i.name) + ",  valor:" + str(output))
 
     @staticmethod
-    def ValueNetworkTrainer():
+    def ValueNetworkTrainer(games_per_gen, generations):
         printDebug("COMIENZO!")
         print("")
 
         import logging
         logging.getLogger('tensorflow').disabled = True
 
-        # Variables de Entrenamiento
-        gen0 = None
-        gen1 = "value_pickles\gen1_"
-        gen2 = "value_pickles\gen2_"
-        gen3 = "value_pickles\gen3_"
-        DEBUG = False
+        for i in range(generations):
+            print("")
+            print("##########################")
+            print("##     GENERACION " + str(i+1) + "     ##")
+            print("##########################")
+            print("")
+            gen_n = "value_pickles\gen" + str(i) + "_"
+            gen_next = "value_pickles\gen" + str(i + 1) + "_"
+            if i == 0: gen_n = None
 
-        ################
-        # GENERACION 1
-        print("##########################")
-        print("##     GENERACION 1     ##")
-        print("##########################")
-        print("")
-        # Genero las partidas y guardo los pickles en disco (omitir si ya tengo un buen pickle generado)
-        ValueNetworkEngine.Generate_and_Save(gen0, gen1, 150000,10)
-        # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
-        ValueNetworkEngine.Train_Save(gen1, 5)
-        # finalmente, cargo una Red de disco (formato h5) y juego/testeo
-        ValueNetworkEngine.Load_and_Test(gen1, DEBUG)
-
-        ################
-        # GENERACION 2
-        print("")
-        print("##########################")
-        print("##     GENERACION 2     ##")
-        print("##########################")
-        print("")
-        # Genero las partidas y guardo los pickles en disco (omitir si ya tengo un buen pickle generado)
-        ValueNetworkEngine.Generate_and_Save(gen1, gen2, 150000, 10)
-        # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
-        ValueNetworkEngine.Train_Save(gen2, 5)
-        # finalmente, cargo una Red de disco (formato h5) y juego/testeo
-        ValueNetworkEngine.Load_and_Test(gen2, DEBUG)
-
-        ################
-        # GENERACION 3
-        print("")
-        print("##########################")
-        print("##     GENERACION 3     ##")
-        print("##########################")
-        print("")
-        # Genero las partidas y guardo los pickles en disco (omitir si ya tengo un buen pickle generado)
-        ValueNetworkEngine.Generate_and_Save(gen2, gen3, 150000, 10)
-        # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
-        ValueNetworkEngine.Train_Save(gen3, 5)
-        # finalmente, cargo una Red de disco (formato h5) y juego/testeo
-        ValueNetworkEngine.Load_and_Test(gen3, DEBUG)
-
+            # Genero las partidas y guardo los pickles en disco (omitir si ya tengo un buen pickle generado)
+            ValueNetworkEngine.Generate_and_Save(gen_n, gen_next, round(games_per_gen / 10), 10)
+            # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
+            ValueNetworkEngine.Train_Save(gen_next, 5)
+            # finalmente, cargo una Red de disco (formato h5) y juego/testeo
+            ValueNetworkEngine.Load_and_Test(gen_next)
 
         print("")
         printDebug("## TERMINE! ##")
