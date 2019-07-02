@@ -34,7 +34,7 @@ class ValueNetworkEngine:
         print(str(p2.get_acciones_posibles(s)))
         print("")
 
-        return p1, p2, s  # poner esta linea donde quiera testear predict de la red
+        #return p1, p2, s  # poner esta linea donde quiera testear predict de la red
 
         print("2) p2 grito Truco, acciones de p1 disponibles")
         p2.EjecutarAccion(s, Reglas.Accion.GRITAR)
@@ -122,11 +122,13 @@ class ValueNetworkEngine:
         p1_DQN = models.Sequential()
         p1_DQN.add(layers.Dense(50, activation='relu', input_shape=(50,)))
         p1_DQN.add(layers.Dense(100, activation='relu'))
-        p1_DQN.add(layers.Dense(200, activation='relu'))
-        p1_DQN.add(layers.Dense(200, activation='relu'))
-        p1_DQN.add(layers.Dense(200, activation='relu'))
-        p1_DQN.add(layers.Dense(200, activation='relu'))
+        p1_DQN.add(layers.Dropout(0.2))
         p1_DQN.add(layers.Dense(100, activation='relu'))
+        p1_DQN.add(layers.Dropout(0.2))
+        p1_DQN.add(layers.Dense(100, activation='relu'))
+        p1_DQN.add(layers.Dropout(0.2))
+        p1_DQN.add(layers.Dense(100, activation='relu'))
+        p1_DQN.add(layers.Dropout(0.2))
         p1_DQN.add(layers.Dense(50, activation='relu'))
         p1_DQN.add(layers.Dense(1))
 
@@ -143,7 +145,7 @@ class ValueNetworkEngine:
         p1_testdata = p1_testdata.astype('float32')
 
         # Fiteo la red
-        p1_DQN.fit(p1_traindata, p1_trainlabels, epochs=eps, batch_size=128, shuffle=True, verbose=2)
+        p1_DQN.fit(p1_traindata, p1_trainlabels, epochs=eps, batch_size=256, shuffle=True, verbose=2)
 
         # Evaluo contra Test
         test_loss, test_acc = p1_DQN.evaluate(p1_testdata, p1_testlabels, verbose=2)
@@ -170,11 +172,13 @@ class ValueNetworkEngine:
         p2_DQN = models.Sequential()
         p2_DQN.add(layers.Dense(50, activation='relu', input_shape=(50,)))
         p2_DQN.add(layers.Dense(100, activation='relu'))
-        p2_DQN.add(layers.Dense(200, activation='relu'))
-        p2_DQN.add(layers.Dense(200, activation='relu'))
-        p2_DQN.add(layers.Dense(200, activation='relu'))
-        p2_DQN.add(layers.Dense(200, activation='relu'))
+        p2_DQN.add(layers.Dropout(0.2))
         p2_DQN.add(layers.Dense(100, activation='relu'))
+        p2_DQN.add(layers.Dropout(0.2))
+        p2_DQN.add(layers.Dense(100, activation='relu'))
+        p2_DQN.add(layers.Dropout(0.2))
+        p2_DQN.add(layers.Dense(100, activation='relu'))
+        p2_DQN.add(layers.Dropout(0.2))
         p2_DQN.add(layers.Dense(50, activation='relu'))
         p2_DQN.add(layers.Dense(1))
 
@@ -192,7 +196,7 @@ class ValueNetworkEngine:
         p2_testdata = p2_testdata.astype('float32')
 
         # Fiteo la red
-        p2_DQN.fit(p2_traindata, p2_trainlabels, epochs=eps, batch_size=128, shuffle=True, verbose=2)
+        p2_DQN.fit(p2_traindata, p2_trainlabels, epochs=eps, batch_size=256, shuffle=True, verbose=2)
 
         # Evaluo contra Test
         test_loss, test_acc = p2_DQN.evaluate(p2_testdata, p2_testlabels, verbose=2)
@@ -294,7 +298,7 @@ class ValueNetworkEngine:
             # Genero las partidas y guardo los pickles en disco (omitir si ya tengo un buen pickle generado)
             ValueNetworkEngine.Generate_and_Save(gen_n, gen_next, round(games_per_gen / 10), 10)
             # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
-            ValueNetworkEngine.Train_Save(gen_next, 5)
+            ValueNetworkEngine.Train_Save(gen_next, 10)
             # finalmente, cargo una Red de disco (formato h5) y juego/testeo
             ValueNetworkEngine.Load_and_Test(gen_next)
 

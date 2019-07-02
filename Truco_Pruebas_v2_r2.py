@@ -533,7 +533,7 @@ def prueba_Generate_Policy_Training_Games():
     print(p2_labels)
     print("")
 
-def prueba_Generate_Value_Training_Games():
+def prueba_Generate_Value_Training_Games(gen):
     print("")
     print("===================================================")
     print("## PRUEBA - Generate_Value_Training_Games - ##")
@@ -582,22 +582,50 @@ def prueba_Play_DPN_RandomGames():
 
     Motor.Play_random_games(p1,p2,1,True)
 
-def prueba_Play_DVN_RandomGames():
+def prueba_Play_DVN_RandomGames(gen):
     print("")
     print("===================================================")
     print("## PRUEBA - Play DVN Games - ##")
     print("===================================================")
     print("")
 
-    genX = "value_pickles\gen2_"
-    p1_DQN = keras.models.load_model(genX + "p1_DQN.h5")
-    p2_DQN = keras.models.load_model(genX + "p2_DQN.h5")
+    genV = "value_pickles\gen" + str(gen) + "_"
+    p1_DVN = keras.models.load_model(genV + "p1_DQN.h5")
+    p2_DVN = keras.models.load_model(genV + "p2_DQN.h5")
+    p1 = AgenteDVN(Reglas.JUGADOR1, p1_DVN)
+    p2 = AgenteDVN(Reglas.JUGADOR2, p2_DVN)
 
-    p1 = AgenteDVN(Reglas.JUGADOR1, p1_DQN)
-    p2 = AgenteDVN(Reglas.JUGADOR2, p2_DQN)
+    Motor.Play_random_games(p1, p2, 10000, True)
 
-    Motor.Play_random_games(p1, p2, 1, True)
+def prueba_Play_VERSUS():
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Play VERSUS Games - ##")
+    print("===================================================")
+    print("")
 
+    # RANDOM AGENTS
+    random_p1 = AgenteRandom(Reglas.JUGADOR1)
+    random_p2 = AgenteRandom(Reglas.JUGADOR2)
+
+    # VALUE AGENTS
+    genV = "value_pickles\gen2_"
+    p1_DVN = keras.models.load_model(genV + "p1_DQN.h5")
+    p2_DVN = keras.models.load_model(genV + "p2_DQN.h5")
+    value_p1 = AgenteDVN(Reglas.JUGADOR1, p1_DVN)
+    value_p2 = AgenteDVN(Reglas.JUGADOR2, p2_DVN)
+
+    # POLICY AGENTS
+    genP = "policy_pickles\gen2_"
+    p1_DPN = keras.models.load_model(genP + "p1_DQN.h5")
+    p2_DPN = keras.models.load_model(genP + "p2_DQN.h5")
+    policy_p1 = AgenteDPN(Reglas.JUGADOR1, p1_DPN)
+    policy_p2 = AgenteDPN(Reglas.JUGADOR2, p2_DPN)
+
+    # PARTIDAS
+    Motor.Play_random_games(random_p1, random_p2, 1, True)
+    Motor.Play_random_games(value_p1, value_p2, 1, True)
+    Motor.Play_random_games(policy_p1, policy_p2, 1, True)
 
 
 #######################################################
@@ -622,7 +650,7 @@ if __name__ == '__main__':
     # prueba_HastaVALE4()
 
     ### PRUEBAS MOTOR
-    # prueba_PlayRandomGames()
+    #prueba_PlayRandomGames()
     # prueba_Save_Load_Games()
     # prueba_ConvertVector()
 
@@ -632,8 +660,14 @@ if __name__ == '__main__':
     # prueba_Play_DVN_RandomGames()
     # prueba_Play_DPN_RandomGames()
 
+    # PARTIDAS DE PRUEBA
+    # prueba_Play_VERSUS()
     # PolicyNetworkEngine.PolicyNetworkTrainer(10000, 3)
-    # ValueNetworkEngine.ValueNetworkTrainer(10000, 3)
+
+    ValueNetworkEngine.ValueNetworkTrainer(200000, 40)
+
+    #prueba_Play_DVN_RandomGames(7)
+    #ValueNetworkEngine.Load_and_Test("value_pickles\gen20_")
 
     print("")
     printDebug("## TERMINE! ##")

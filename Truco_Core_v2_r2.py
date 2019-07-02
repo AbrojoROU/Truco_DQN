@@ -197,7 +197,6 @@ class AgenteRandom:
         ## TERMINA HACK para reducir probabilidad de Fold
 
         if debug: printDebug("  Taking a random action: " + str(a))
-        # TODO QUE ELIJA FOLD SOLO SI NO QUEDAN OTRAS OPCIONES, AUNQUE SEA AGENTE RANDOM QUE FOLD SEA ULTIMO RECURSO
         return a
 
     # Ejecuta la accion que le llega, actualizando el estado y el agente de forma acorde
@@ -243,7 +242,7 @@ class AgenteRandom:
 # Este agente usa su Red de Valor para decidir acciones
 class AgenteDVN:
     def __init__(self, jugador, dvn):
-
+        self.eps = 0.1
         self.cartas_totales = []
         self.cartas_restantes = []
         self.state_history = []
@@ -313,33 +312,46 @@ class AgenteDVN:
         return result
 
     def Elegir_Accion(self, s, debug=False):
-        a = None
-        best = -10000
 
-        _cp = AgenteDVN(self.jugador, self.DVN)
-        _cp.cartas_totales = self.cartas_totales
+        # choose an action based on epsilon-greedy strategy
+        r = np.random.rand()
+
+        # TODO: PROBAR OTRO QUE NO SEA EPSILON GREEDY. bayesian sampling no esta bueno por las prob negativas
+        # podemos usar decaying epsilon (usando variable interna de clase) para el agente que vaya reduciendo eps. Esto me sirve porque cada training agent es nuevo.
+        if r < (1/(1+self.eps)):
+            # take a random action
+            if debug: printDebug("  Taking a random action")
+            idx = np.random.choice(len(self.get_acciones_posibles(s)))  # random 0,1 y 2
+            a = self.get_acciones_posibles(s)[idx]
+
+        else:
+            a = None
+            best = -10000
+
+            _cp = AgenteDVN(self.jugador, self.DVN)
+            _cp.cartas_totales = self.cartas_totales
 
 
-        for i in self.get_acciones_posibles(s):
-            # 1. copio
-            _cp.cartas_restantes = copy.deepcopy(self.cartas_restantes)
-            _s = copy.deepcopy(s)
+            for i in self.get_acciones_posibles(s):
+                # 1. copio
+                _cp.cartas_restantes = copy.deepcopy(self.cartas_restantes)
+                _s = copy.deepcopy(s)
 
-            # 2. muevo
-            _cp.EjecutarAccion(_s, i)
+                # 2. muevo
+                _cp.EjecutarAccion(_s, i)
 
-            # 3. convierto
-            _s = Motor.ConverToPolicyVector(_cp, _s, True)
-            _s = np.squeeze(np.asarray(_s))  # Convierto a array de Red
-            _s = _s.reshape(1, 50)
-            _s = _s.astype('float32')
+                # 3. convierto
+                _s = Motor.ConverToPolicyVector(_cp, _s, True)
+                _s = np.squeeze(np.asarray(_s))  # Convierto a array de Red
+                _s = _s.reshape(1, 50)
+                _s = _s.astype('float32')
 
-            # 4. Estimo
-            value = _cp.DVN.predict(_s)
-            if value > best :
-                best = value
-                a = i
-            if debug : printDebug("p" + str(_cp.jugador) + "> accion posible: " + str(i.name) + ",  valor:" + str(value))
+                # 4. Estimo
+                value = _cp.DVN.predict(_s)
+                if value > best :
+                    best = value
+                    a = i
+                if debug : printDebug("p" + str(_cp.jugador) + "> accion posible: " + str(i.name) + ",  valor:" + str(value))
 
         return a
 
