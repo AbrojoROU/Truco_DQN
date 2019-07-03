@@ -69,7 +69,9 @@ class ValueNetworkEngine:
             p1_DQN = keras.models.load_model(input_prefix + "p1_DQN.h5")
             p2_DQN = keras.models.load_model(input_prefix + "p2_DQN.h5")
             p1 = AgenteDVN(Reglas.JUGADOR1, p1_DQN)
+            p1.eps = 0.2
             p2 = AgenteDVN(Reglas.JUGADOR2, p2_DQN)
+            p2.eps = 0.2
         else:
             p1 = AgenteRandom(Reglas.JUGADOR1)
             p2 = AgenteRandom(Reglas.JUGADOR2)
@@ -101,7 +103,7 @@ class ValueNetworkEngine:
         print("")
 
     @staticmethod
-    def Train_Save(gen_prefix, eps):
+    def Train_Save(gen_prefix, eps, load_previous = False):
         print("  ##   Train_Save   ##")
         print("")
         print("  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo '" + gen_prefix + "'")
@@ -110,6 +112,14 @@ class ValueNetworkEngine:
         p1_trainlabels = Motor.Load_Games_From_Disk(gen_prefix + "p1_trainlabels.pickle")
         p1_testdata = Motor.Load_Games_From_Disk(gen_prefix + "p1_testdata.pickle")
         p1_testlabels = Motor.Load_Games_From_Disk(gen_prefix + "p1_testlabels.pickle")
+
+        if load_previous is True:
+            prev_gen = int(gen_prefix[-2]) - 1  # tomo el numero de generacion del string, lo parseo a int y le resto 1
+            prev_gen = gen_prefix[:-2] + str(prev_gen) + gen_prefix[-1:]  #vuelvo a recrear el string
+            # cargo y anexo
+            p1_traindata = p1_traindata + Motor.Load_Games_From_Disk(prev_gen + "p1_traindata.pickle")
+            p1_trainlabels = p1_trainlabels + Motor.Load_Games_From_Disk(prev_gen + "p1_trainlabels.pickle")
+
 
         # ENTRENANDO REDES
         from keras import models
@@ -121,18 +131,18 @@ class ValueNetworkEngine:
         print("  ## Entrenando Red para P1ayer 1")
         p1_DQN = models.Sequential()
         p1_DQN.add(layers.Dense(50, activation='relu', input_shape=(50,)))
-        p1_DQN.add(layers.Dense(100, activation='relu'))
-        p1_DQN.add(layers.Dropout(0.2))
-        p1_DQN.add(layers.Dense(100, activation='relu'))
-        p1_DQN.add(layers.Dropout(0.2))
-        p1_DQN.add(layers.Dense(100, activation='relu'))
-        p1_DQN.add(layers.Dropout(0.2))
-        p1_DQN.add(layers.Dense(100, activation='relu'))
-        p1_DQN.add(layers.Dropout(0.2))
-        p1_DQN.add(layers.Dense(50, activation='relu'))
+        p1_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        #p1_DQN.add(layers.Dropout(0.2))
+        p1_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        #p1_DQN.add(layers.Dropout(0.2))
+        p1_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        #p1_DQN.add(layers.Dropout(0.2))
+        p1_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        #p1_DQN.add(layers.Dropout(0.2))
+        p1_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
         p1_DQN.add(layers.Dense(1))
 
-        p1_DQN.compile(optimizer='rmsprop', loss='mse', metrics=['mae'])
+        p1_DQN.compile(optimizer='adam', loss='mse', metrics=['mae'])
 
         # Convierto a nparray y reshape a lo especificado en las capas de la red neuronal (shape a 50)
         # Train
@@ -167,22 +177,29 @@ class ValueNetworkEngine:
         p2_testdata = Motor.Load_Games_From_Disk(gen_prefix + "p2_testdata.pickle")
         p2_testlabels = Motor.Load_Games_From_Disk(gen_prefix + "p2_testlabels.pickle")
 
+        if load_previous is True:
+            prev_gen = int(gen_prefix[-2]) - 1  # tomo el numero de generacion del string, lo parseo a int y le resto 1
+            prev_gen = gen_prefix[:-2] + str(prev_gen) + gen_prefix[-1:]  #vuelvo a recrear el string
+            # cargo y anexo
+            p2_traindata = p2_traindata + Motor.Load_Games_From_Disk(prev_gen + "p1_traindata.pickle")
+            p2_trainlabels = p2_trainlabels + Motor.Load_Games_From_Disk(prev_gen + "p1_trainlabels.pickle")
+
         print("")
         print("## Entrenando Red para P1ayer 2")
         p2_DQN = models.Sequential()
         p2_DQN.add(layers.Dense(50, activation='relu', input_shape=(50,)))
-        p2_DQN.add(layers.Dense(100, activation='relu'))
-        p2_DQN.add(layers.Dropout(0.2))
-        p2_DQN.add(layers.Dense(100, activation='relu'))
-        p2_DQN.add(layers.Dropout(0.2))
-        p2_DQN.add(layers.Dense(100, activation='relu'))
-        p2_DQN.add(layers.Dropout(0.2))
-        p2_DQN.add(layers.Dense(100, activation='relu'))
-        p2_DQN.add(layers.Dropout(0.2))
-        p2_DQN.add(layers.Dense(50, activation='relu'))
+        p2_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        #p2_DQN.add(layers.Dropout(0.2))
+        p2_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        #p2_DQN.add(layers.Dropout(0.2))
+        p2_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        #p2_DQN.add(layers.Dropout(0.2))
+        p2_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        #p2_DQN.add(layers.Dropout(0.2))
+        p2_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
         p2_DQN.add(layers.Dense(1))
 
-        p2_DQN.compile(optimizer='rmsprop', loss='mse', metrics=['mae'])
+        p2_DQN.compile(optimizer='adam', loss='mse', metrics=['mae'])
 
         # Convierto a nparray y reshape a lo especificado en las capas de la red neuronal (shape a 50)
         # Train
@@ -208,6 +225,7 @@ class ValueNetworkEngine:
         print("    ..." + gen_prefix + "p2_DQN.h5 guardado!")
 
         del p2_traindata
+
 
     @staticmethod
     def Load_and_Test(gen_prefix):
@@ -278,14 +296,38 @@ class ValueNetworkEngine:
             print("p" + str(_cp.jugador) + "> accion posible: " + str(i.name) + ",  valor:" + str(output))
 
     @staticmethod
-    def ValueNetworkTrainer(games_per_gen, generations):
+    def ValueTrainingTest(gen_p1,gen_p2, N, debug):
+        print("")
+        print("ENTRENANDO gen" + str(gen_p1) + " versus gen" + str(gen_p2))
+
+
+        if gen_p1 > 0:
+            gen_p1 = "value_pickles\gen" + str(gen_p1) + "_"
+            p1_DVN = keras.models.load_model(gen_p1 + "p1_DQN.h5")
+            value_p1 = AgenteDVN(Reglas.JUGADOR1, p1_DVN)
+            value_p1.eps = 0
+        else:
+            value_p1 = AgenteRandom(Reglas.JUGADOR1)
+
+        if gen_p2 > 0:
+            gen_p2 = "value_pickles\gen" + str(gen_p2) + "_"
+            p2_DVN = keras.models.load_model(gen_p2 + "p2_DQN.h5")
+            value_p2 = AgenteDVN(Reglas.JUGADOR2, p2_DVN)
+            value_p2.eps = 0
+        else:
+            value_p2 = AgenteRandom(Reglas.JUGADOR2)
+
+        Motor.Play_random_games(value_p1, value_p2, N, debug)
+
+    @staticmethod
+    def ValueNetworkTrainer(games_per_gen, generations, start_gen =0, load_previous=False):
         printDebug("COMIENZO!")
         print("")
 
         import logging
         logging.getLogger('tensorflow').disabled = True
 
-        for i in range(generations):
+        for i in range(start_gen, start_gen+generations):
             print("")
             print("##########################")
             print("##     GENERACION " + str(i+1) + "     ##")
@@ -298,7 +340,10 @@ class ValueNetworkEngine:
             # Genero las partidas y guardo los pickles en disco (omitir si ya tengo un buen pickle generado)
             ValueNetworkEngine.Generate_and_Save(gen_n, gen_next, round(games_per_gen / 10), 10)
             # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
-            ValueNetworkEngine.Train_Save(gen_next, 10)
+            if i == 0:
+                ValueNetworkEngine.Train_Save(gen_next, 10, False)
+            else:
+                ValueNetworkEngine.Train_Save(gen_next, 10, load_previous)
             # finalmente, cargo una Red de disco (formato h5) y juego/testeo
             ValueNetworkEngine.Load_and_Test(gen_next)
 

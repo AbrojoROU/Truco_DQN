@@ -623,9 +623,29 @@ def prueba_Play_VERSUS():
     policy_p2 = AgenteDPN(Reglas.JUGADOR2, p2_DPN)
 
     # PARTIDAS
-    Motor.Play_random_games(random_p1, random_p2, 1, True)
-    Motor.Play_random_games(value_p1, value_p2, 1, True)
-    Motor.Play_random_games(policy_p1, policy_p2, 1, True)
+    #Motor.Play_random_games(random_p1, random_p2, 1, True)
+    #Motor.Play_random_games(value_p1, value_p2, 1, True)
+    #Motor.Play_random_games(policy_p1, policy_p2, 1, True)
+
+    # MIXTA
+    print("random vs gen2")
+    Motor.Play_random_games(AgenteRandom(Reglas.JUGADOR1),
+                            AgenteDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen2_p2_DQN.h5")),
+                            2000, False)
+    print("random vs gen12")
+    Motor.Play_random_games(AgenteRandom(Reglas.JUGADOR1),
+                            AgenteDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen12_p2_DQN.h5")),
+                            2000, False)
+
+    print("gen2 vs gen12")
+    Motor.Play_random_games(AgenteDVN(Reglas.JUGADOR1, keras.models.load_model("value_pickles\gen2_p1_DQN.h5")),
+                            AgenteDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen12_p2_DQN.h5")),
+                            2000, False)
+
+    print("gen12 vs gen2")
+    Motor.Play_random_games(AgenteDVN(Reglas.JUGADOR1, keras.models.load_model("value_pickles\gen12_p1_DQN.h5")),
+                            AgenteDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen2_p2_DQN.h5")),
+                            2000, False)
 
 
 #######################################################
@@ -657,17 +677,30 @@ if __name__ == '__main__':
     # REDES
     # prueba_Generate_Value_Training_Games()
     # prueba_Generate_Policy_Training_Games()
-    # prueba_Play_DVN_RandomGames()
+    # prueba_Play_DVN_RandomGames()we
     # prueba_Play_DPN_RandomGames()
 
     # PARTIDAS DE PRUEBA
     # prueba_Play_VERSUS()
     # PolicyNetworkEngine.PolicyNetworkTrainer(10000, 3)
 
-    ValueNetworkEngine.ValueNetworkTrainer(200000, 40)
 
-    #prueba_Play_DVN_RandomGames(7)
-    #ValueNetworkEngine.Load_and_Test("value_pickles\gen20_")
+    ##############
+    # AHORA
+    ##############
+
+    #traienr
+    ValueNetworkEngine.ValueNetworkTrainer(200000, 30, 0, True)
+
+    # versus
+    #ValueNetworkEngine.ValueTrainingTest(1, 5, 5000, False)
+    #ValueNetworkEngine.ValueTrainingTest(5, 1, 5000, False)
+
+    # pruebas acidas
+    #ValueNetworkEngine.Load_and_Test("value_pickles\gen5_")
+    #ValueNetworkEngine.Load_and_Test("value_pickles\gen11_")
+
+
 
     print("")
     printDebug("## TERMINE! ##")

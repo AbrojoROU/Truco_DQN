@@ -1,0 +1,2450 @@
+"D:\Onedrive\Material\AI\Curso Digital House\XX - Proyecto Truco\pycharm2\venv\Scripts\python.exe" "D:/Onedrive/Material/AI/Curso Digital House/XX - Proyecto Truco/pycharm2/Truco_Pruebas_v2_r2.py"
+Using TensorFlow backend.
+   #debug@ COMIENZO!   ## <module>()   ## T=3.12789s
+
+   #debug@ COMIENZO!   ## ValueNetworkTrainer()   ## T=3.12789s
+
+
+##########################
+##     GENERACION 1     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10042, j2: 9958, Empates: 0, WINRATIO p1:50.21 ##
+Epoch: 2
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10082, j2: 9918, Empates: 0, WINRATIO p1:50.41 ##
+Epoch: 3
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10088, j2: 9912, Empates: 0, WINRATIO p1:50.44 ##
+Epoch: 4
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10066, j2: 9934, Empates: 0, WINRATIO p1:50.33 ##
+Epoch: 5
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10049, j2: 9951, Empates: 0, WINRATIO p1:50.24 ##
+Epoch: 6
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10019, j2: 9981, Empates: 0, WINRATIO p1:50.09 ##
+Epoch: 7
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9996, j2: 10004, Empates: 0, WINRATIO p1:49.98 ##
+Epoch: 8
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10073, j2: 9927, Empates: 0, WINRATIO p1:50.36 ##
+Epoch: 9
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10165, j2: 9835, Empates: 0, WINRATIO p1:50.82 ##
+Epoch: 10
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10137, j2: 9863, Empates: 0, WINRATIO p1:50.68 ##
+
+2. Generando Partidas de test
+Generando Partidas.. ( epochs=1,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10101, j2: 9899, Empates: 0, WINRATIO p1:50.50 ##
+len p1_traindata: 854472, len p1_testdata: 85306
+len p1_trainlabels: 854472, len p1_testlabels: 85306
+len p2_traindata: 848201, len p2_testdata: 84659
+len p2_trainlabels: 848201, len p2_testlabels: 84659
+
+3. Guardando partidas en Disco (pickle) con prefijo:value_pickles\gen1_...
+  ...guardado!
+
+  ##   Train_Save   ##
+
+  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo 'value_pickles\gen1_'
+
+  ## Entrenando Red para P1ayer 1
+Epoch 1/10
+2019-07-02 00:48:15.528589: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2
+ - 9s - loss: 5.3231 - mean_absolute_error: 1.8649
+Epoch 2/10
+ - 10s - loss: 4.7996 - mean_absolute_error: 1.6990
+Epoch 3/10
+ - 9s - loss: 4.6133 - mean_absolute_error: 1.6368
+Epoch 4/10
+ - 9s - loss: 4.5130 - mean_absolute_error: 1.6040
+Epoch 5/10
+ - 10s - loss: 4.4415 - mean_absolute_error: 1.5821
+Epoch 6/10
+ - 10s - loss: 4.3843 - mean_absolute_error: 1.5646
+Epoch 7/10
+ - 10s - loss: 4.3461 - mean_absolute_error: 1.5524
+Epoch 8/10
+ - 9s - loss: 4.3204 - mean_absolute_error: 1.5436
+Epoch 9/10
+ - 9s - loss: 4.2897 - mean_absolute_error: 1.5347
+Epoch 10/10
+ - 9s - loss: 4.2782 - mean_absolute_error: 1.5299
+test_acc: 1.5360638101984154
+
+  ...guardando Red DQN de p1 con prefijo 'value_pickles\gen1_'
+    ...value_pickles\gen1_p1_DQN.h5 guardado!
+## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo 'value_pickles\gen1_'
+
+## Entrenando Red para P1ayer 2
+Epoch 1/10
+ - 10s - loss: 5.0760 - mean_absolute_error: 1.7808
+Epoch 2/10
+ - 9s - loss: 4.5167 - mean_absolute_error: 1.6046
+Epoch 3/10
+ - 9s - loss: 4.3341 - mean_absolute_error: 1.5474
+Epoch 4/10
+ - 9s - loss: 4.2210 - mean_absolute_error: 1.5137
+Epoch 5/10
+ - 9s - loss: 4.1559 - mean_absolute_error: 1.4920
+Epoch 6/10
+ - 9s - loss: 4.1057 - mean_absolute_error: 1.4760
+Epoch 7/10
+ - 9s - loss: 4.0676 - mean_absolute_error: 1.4643
+Epoch 8/10
+ - 10s - loss: 4.0408 - mean_absolute_error: 1.4552
+Epoch 9/10
+ - 9s - loss: 4.0168 - mean_absolute_error: 1.4471
+Epoch 10/10
+ - 9s - loss: 3.9983 - mean_absolute_error: 1.4415
+test_acc: 1.440762363686746
+
+  ...guardando red DQN de p2 con prefijo 'value_pickles\gen1_'
+    ...value_pickles\gen1_p2_DQN.h5 guardado!
+  ##   Load_and_Test   ##
+
+  ## Carga de partidas de Test desde Disco (pickles) con prefijo: value_pickles\gen1_
+
+## Loading model from disk
+## p1 test_acc: 1.5360638101984154
+## p2 test_acc: 1.440762363686746
+###########################
+##   Partida de Prueba   ##
+###########################
+
+1) p1 juega c1, acciones de p2 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+2) p2 grito Truco, acciones de p1 disponibles
+[<Accion.FOLD: 6>, <Accion.QUIERO_GRITO: 4>]
+
+3) p1 acepto, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+4) p2 jugo c3, acciones de p1 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+5) p1 jugo c2, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>]
+
+>> Cartas jugadas hasta ahora: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+Le toca a p2
+ cartas en mesa: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+ cartas totales: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40, ID:1, 4-Copa, vt:10]
+ cartas restates: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40]
+
+p2> accion posible: JUGAR_C1,  valor:[[0.20916924]]
+p2> accion posible: JUGAR_C2,  valor:[[0.5713307]]
+
+##########################
+##     GENERACION 2     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8609, j2: 11391, Empates: 0, WINRATIO p1:43.04 ##
+Epoch: 2
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8736, j2: 11264, Empates: 0, WINRATIO p1:43.68 ##
+Epoch: 3
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8730, j2: 11270, Empates: 0, WINRATIO p1:43.65 ##
+Epoch: 4
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8729, j2: 11271, Empates: 0, WINRATIO p1:43.64 ##
+Epoch: 5
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8540, j2: 11460, Empates: 0, WINRATIO p1:42.7 ##
+Epoch: 6
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8532, j2: 11468, Empates: 0, WINRATIO p1:42.66 ##
+Epoch: 7
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8719, j2: 11281, Empates: 0, WINRATIO p1:43.59 ##
+Epoch: 8
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8712, j2: 11288, Empates: 0, WINRATIO p1:43.56 ##
+Epoch: 9
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8644, j2: 11356, Empates: 0, WINRATIO p1:43.22 ##
+Epoch: 10
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8733, j2: 11267, Empates: 0, WINRATIO p1:43.66 ##
+
+2. Generando Partidas de test
+Generando Partidas.. ( epochs=1,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8655, j2: 11345, Empates: 0, WINRATIO p1:43.27 ##
+len p1_traindata: 765490, len p1_testdata: 76795
+len p1_trainlabels: 765490, len p1_testlabels: 76795
+len p2_traindata: 758937, len p2_testdata: 76141
+len p2_trainlabels: 758937, len p2_testlabels: 76141
+
+3. Guardando partidas en Disco (pickle) con prefijo:value_pickles\gen2_...
+  ...guardado!
+
+  ##   Train_Save   ##
+
+  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo 'value_pickles\gen2_'
+
+  ## Entrenando Red para P1ayer 1
+Epoch 1/10
+ - 9s - loss: 3.9257 - mean_absolute_error: 1.3749
+Epoch 2/10
+ - 8s - loss: 3.3661 - mean_absolute_error: 1.1906
+Epoch 3/10
+ - 9s - loss: 3.2359 - mean_absolute_error: 1.1464
+Epoch 4/10
+ - 9s - loss: 3.1724 - mean_absolute_error: 1.1201
+Epoch 5/10
+ - 8s - loss: 3.1403 - mean_absolute_error: 1.1065
+Epoch 6/10
+ - 9s - loss: 3.1002 - mean_absolute_error: 1.0934
+Epoch 7/10
+ - 9s - loss: 3.0811 - mean_absolute_error: 1.0861
+Epoch 8/10
+ - 8s - loss: 3.0716 - mean_absolute_error: 1.0817
+Epoch 9/10
+ - 8s - loss: 3.0583 - mean_absolute_error: 1.0781
+Epoch 10/10
+ - 9s - loss: 3.0436 - mean_absolute_error: 1.0732
+test_acc: 1.02781017447707
+
+  ...guardando Red DQN de p1 con prefijo 'value_pickles\gen2_'
+    ...value_pickles\gen2_p1_DQN.h5 guardado!
+## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo 'value_pickles\gen2_'
+
+## Entrenando Red para P1ayer 2
+Epoch 1/10
+ - 9s - loss: 3.6239 - mean_absolute_error: 1.2672
+Epoch 2/10
+ - 9s - loss: 2.9376 - mean_absolute_error: 1.0308
+Epoch 3/10
+ - 9s - loss: 2.7897 - mean_absolute_error: 0.9789
+Epoch 4/10
+ - 9s - loss: 2.7016 - mean_absolute_error: 0.9482
+Epoch 5/10
+ - 9s - loss: 2.6486 - mean_absolute_error: 0.9279
+Epoch 6/10
+ - 9s - loss: 2.6063 - mean_absolute_error: 0.9124
+Epoch 7/10
+ - 9s - loss: 2.5777 - mean_absolute_error: 0.9029
+Epoch 8/10
+ - 9s - loss: 2.5592 - mean_absolute_error: 0.8972
+Epoch 9/10
+ - 9s - loss: 2.5514 - mean_absolute_error: 0.8941
+Epoch 10/10
+ - 9s - loss: 2.5336 - mean_absolute_error: 0.8897
+test_acc: 0.8600209209538557
+
+  ...guardando red DQN de p2 con prefijo 'value_pickles\gen2_'
+    ...value_pickles\gen2_p2_DQN.h5 guardado!
+  ##   Load_and_Test   ##
+
+  ## Carga de partidas de Test desde Disco (pickles) con prefijo: value_pickles\gen2_
+
+## Loading model from disk
+## p1 test_acc: 1.02781017447707
+## p2 test_acc: 0.8600209209538557
+###########################
+##   Partida de Prueba   ##
+###########################
+
+1) p1 juega c1, acciones de p2 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+2) p2 grito Truco, acciones de p1 disponibles
+[<Accion.FOLD: 6>, <Accion.QUIERO_GRITO: 4>]
+
+3) p1 acepto, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+4) p2 jugo c3, acciones de p1 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+5) p1 jugo c2, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>]
+
+>> Cartas jugadas hasta ahora: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+Le toca a p2
+ cartas en mesa: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+ cartas totales: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40, ID:1, 4-Copa, vt:10]
+ cartas restates: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40]
+
+p2> accion posible: JUGAR_C1,  valor:[[-0.8670657]]
+p2> accion posible: JUGAR_C2,  valor:[[-0.09634875]]
+
+##########################
+##     GENERACION 3     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8334, j2: 11666, Empates: 0, WINRATIO p1:41.67 ##
+Epoch: 2
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8378, j2: 11622, Empates: 0, WINRATIO p1:41.89 ##
+Epoch: 3
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8352, j2: 11648, Empates: 0, WINRATIO p1:41.76 ##
+Epoch: 4
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8481, j2: 11519, Empates: 0, WINRATIO p1:42.40 ##
+Epoch: 5
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8543, j2: 11457, Empates: 0, WINRATIO p1:42.71 ##
+Epoch: 6
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8473, j2: 11527, Empates: 0, WINRATIO p1:42.36 ##
+Epoch: 7
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8347, j2: 11653, Empates: 0, WINRATIO p1:41.73 ##
+Epoch: 8
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8506, j2: 11494, Empates: 0, WINRATIO p1:42.53 ##
+Epoch: 9
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8432, j2: 11568, Empates: 0, WINRATIO p1:42.16 ##
+Epoch: 10
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8341, j2: 11659, Empates: 0, WINRATIO p1:41.70 ##
+
+2. Generando Partidas de test
+Generando Partidas.. ( epochs=1,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8422, j2: 11578, Empates: 0, WINRATIO p1:42.11 ##
+len p1_traindata: 680283, len p1_testdata: 68127
+len p1_trainlabels: 680283, len p1_testlabels: 68127
+len p2_traindata: 670437, len p2_testdata: 67139
+len p2_trainlabels: 670437, len p2_testlabels: 67139
+
+3. Guardando partidas en Disco (pickle) con prefijo:value_pickles\gen3_...
+  ...guardado!
+
+  ##   Train_Save   ##
+
+  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo 'value_pickles\gen3_'
+
+  ## Entrenando Red para P1ayer 1
+Epoch 1/10
+ - 9s - loss: 1.1887 - mean_absolute_error: 0.7122
+Epoch 2/10
+ - 8s - loss: 1.0159 - mean_absolute_error: 0.6197
+Epoch 3/10
+ - 8s - loss: 0.9681 - mean_absolute_error: 0.5883
+Epoch 4/10
+ - 8s - loss: 0.9396 - mean_absolute_error: 0.5728
+Epoch 5/10
+ - 8s - loss: 0.9235 - mean_absolute_error: 0.5640
+Epoch 6/10
+ - 8s - loss: 0.9131 - mean_absolute_error: 0.5573
+Epoch 7/10
+ - 8s - loss: 0.9057 - mean_absolute_error: 0.5528
+Epoch 8/10
+ - 8s - loss: 0.9016 - mean_absolute_error: 0.5497
+Epoch 9/10
+ - 8s - loss: 0.8954 - mean_absolute_error: 0.5464
+Epoch 10/10
+ - 8s - loss: 0.8913 - mean_absolute_error: 0.5447
+test_acc: 0.5743968722660244
+
+  ...guardando Red DQN de p1 con prefijo 'value_pickles\gen3_'
+    ...value_pickles\gen3_p1_DQN.h5 guardado!
+## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo 'value_pickles\gen3_'
+
+## Entrenando Red para P1ayer 2
+Epoch 1/10
+ - 9s - loss: 0.9820 - mean_absolute_error: 0.6221
+Epoch 2/10
+ - 8s - loss: 0.8006 - mean_absolute_error: 0.5220
+Epoch 3/10
+ - 8s - loss: 0.7534 - mean_absolute_error: 0.4907
+Epoch 4/10
+ - 8s - loss: 0.7309 - mean_absolute_error: 0.4755
+Epoch 5/10
+ - 8s - loss: 0.7147 - mean_absolute_error: 0.4652
+Epoch 6/10
+ - 8s - loss: 0.7045 - mean_absolute_error: 0.4583
+Epoch 7/10
+ - 8s - loss: 0.6964 - mean_absolute_error: 0.4533
+Epoch 8/10
+ - 8s - loss: 0.6902 - mean_absolute_error: 0.4497
+Epoch 9/10
+ - 8s - loss: 0.6876 - mean_absolute_error: 0.4479
+Epoch 10/10
+ - 8s - loss: 0.6824 - mean_absolute_error: 0.4455
+test_acc: 0.4350066610137526
+
+  ...guardando red DQN de p2 con prefijo 'value_pickles\gen3_'
+    ...value_pickles\gen3_p2_DQN.h5 guardado!
+  ##   Load_and_Test   ##
+
+  ## Carga de partidas de Test desde Disco (pickles) con prefijo: value_pickles\gen3_
+
+## Loading model from disk
+## p1 test_acc: 0.5743968722660244
+## p2 test_acc: 0.4350066610137526
+###########################
+##   Partida de Prueba   ##
+###########################
+
+1) p1 juega c1, acciones de p2 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+2) p2 grito Truco, acciones de p1 disponibles
+[<Accion.FOLD: 6>, <Accion.QUIERO_GRITO: 4>]
+
+3) p1 acepto, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+4) p2 jugo c3, acciones de p1 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+5) p1 jugo c2, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>]
+
+>> Cartas jugadas hasta ahora: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+Le toca a p2
+ cartas en mesa: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+ cartas totales: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40, ID:1, 4-Copa, vt:10]
+ cartas restates: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40]
+
+p2> accion posible: JUGAR_C1,  valor:[[0.7575961]]
+p2> accion posible: JUGAR_C2,  valor:[[-1.2765088]]
+
+##########################
+##     GENERACION 4     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10439, j2: 9561, Empates: 0, WINRATIO p1:52.19 ##
+Epoch: 2
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10324, j2: 9676, Empates: 0, WINRATIO p1:51.62 ##
+Epoch: 3
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10459, j2: 9541, Empates: 0, WINRATIO p1:52.29 ##
+Epoch: 4
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10348, j2: 9652, Empates: 0, WINRATIO p1:51.74 ##
+Epoch: 5
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10401, j2: 9599, Empates: 0, WINRATIO p1:52.00 ##
+Epoch: 6
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10346, j2: 9654, Empates: 0, WINRATIO p1:51.73 ##
+Epoch: 7
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10592, j2: 9408, Empates: 0, WINRATIO p1:52.96 ##
+Epoch: 8
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10524, j2: 9476, Empates: 0, WINRATIO p1:52.62 ##
+Epoch: 9
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10441, j2: 9559, Empates: 0, WINRATIO p1:52.20 ##
+Epoch: 10
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10473, j2: 9527, Empates: 0, WINRATIO p1:52.36 ##
+
+2. Generando Partidas de test
+Generando Partidas.. ( epochs=1,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10361, j2: 9639, Empates: 0, WINRATIO p1:51.80 ##
+len p1_traindata: 762920, len p1_testdata: 76498
+len p1_trainlabels: 762920, len p1_testlabels: 76498
+len p2_traindata: 768898, len p2_testdata: 77082
+len p2_trainlabels: 768898, len p2_testlabels: 77082
+
+3. Guardando partidas en Disco (pickle) con prefijo:value_pickles\gen4_...
+  ...guardado!
+
+  ##   Train_Save   ##
+
+  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo 'value_pickles\gen4_'
+
+  ## Entrenando Red para P1ayer 1
+Epoch 1/10
+ - 11s - loss: 2.7267 - mean_absolute_error: 1.1434
+Epoch 2/10
+ - 10s - loss: 2.3179 - mean_absolute_error: 0.9825
+Epoch 3/10
+ - 10s - loss: 2.2029 - mean_absolute_error: 0.9368
+Epoch 4/10
+ - 10s - loss: 2.1392 - mean_absolute_error: 0.9114
+Epoch 5/10
+ - 10s - loss: 2.0887 - mean_absolute_error: 0.8939
+Epoch 6/10
+ - 10s - loss: 2.0516 - mean_absolute_error: 0.8800
+Epoch 7/10
+ - 10s - loss: 2.0340 - mean_absolute_error: 0.8727
+Epoch 8/10
+ - 10s - loss: 2.0159 - mean_absolute_error: 0.8649
+Epoch 9/10
+ - 10s - loss: 2.0009 - mean_absolute_error: 0.8596
+Epoch 10/10
+ - 10s - loss: 1.9933 - mean_absolute_error: 0.8546
+test_acc: 0.8271671265520305
+
+  ...guardando Red DQN de p1 con prefijo 'value_pickles\gen4_'
+    ...value_pickles\gen4_p1_DQN.h5 guardado!
+## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo 'value_pickles\gen4_'
+
+## Entrenando Red para P1ayer 2
+Epoch 1/10
+ - 12s - loss: 2.5358 - mean_absolute_error: 1.0581
+Epoch 2/10
+ - 10s - loss: 2.0385 - mean_absolute_error: 0.8591
+Epoch 3/10
+ - 10s - loss: 1.9073 - mean_absolute_error: 0.8022
+Epoch 4/10
+ - 10s - loss: 1.8403 - mean_absolute_error: 0.7732
+Epoch 5/10
+ - 10s - loss: 1.8034 - mean_absolute_error: 0.7548
+Epoch 6/10
+ - 10s - loss: 1.7661 - mean_absolute_error: 0.7399
+Epoch 7/10
+ - 10s - loss: 1.7431 - mean_absolute_error: 0.7301
+Epoch 8/10
+ - 10s - loss: 1.7259 - mean_absolute_error: 0.7226
+Epoch 9/10
+ - 10s - loss: 1.7057 - mean_absolute_error: 0.7152
+Epoch 10/10
+ - 10s - loss: 1.6965 - mean_absolute_error: 0.7114
+test_acc: 0.7053240187796135
+
+  ...guardando red DQN de p2 con prefijo 'value_pickles\gen4_'
+    ...value_pickles\gen4_p2_DQN.h5 guardado!
+  ##   Load_and_Test   ##
+
+  ## Carga de partidas de Test desde Disco (pickles) con prefijo: value_pickles\gen4_
+
+## Loading model from disk
+## p1 test_acc: 0.8271671265520305
+## p2 test_acc: 0.7053240187796135
+###########################
+##   Partida de Prueba   ##
+###########################
+
+1) p1 juega c1, acciones de p2 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+2) p2 grito Truco, acciones de p1 disponibles
+[<Accion.FOLD: 6>, <Accion.QUIERO_GRITO: 4>]
+
+3) p1 acepto, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+4) p2 jugo c3, acciones de p1 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+5) p1 jugo c2, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>]
+
+>> Cartas jugadas hasta ahora: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+Le toca a p2
+ cartas en mesa: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+ cartas totales: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40, ID:1, 4-Copa, vt:10]
+ cartas restates: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40]
+
+p2> accion posible: JUGAR_C1,  valor:[[-1.5271676]]
+p2> accion posible: JUGAR_C2,  valor:[[-1.7608824]]
+
+##########################
+##     GENERACION 5     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8802, j2: 11198, Empates: 0, WINRATIO p1:44.01 ##
+Epoch: 2
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8717, j2: 11283, Empates: 0, WINRATIO p1:43.58 ##
+Epoch: 3
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8855, j2: 11145, Empates: 0, WINRATIO p1:44.27 ##
+Epoch: 4
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8698, j2: 11302, Empates: 0, WINRATIO p1:43.49 ##
+Epoch: 5
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9034, j2: 10966, Empates: 0, WINRATIO p1:45.17 ##
+Epoch: 6
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8756, j2: 11244, Empates: 0, WINRATIO p1:43.78 ##
+Epoch: 7
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8836, j2: 11164, Empates: 0, WINRATIO p1:44.18 ##
+Epoch: 8
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8805, j2: 11195, Empates: 0, WINRATIO p1:44.02 ##
+Epoch: 9
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8780, j2: 11220, Empates: 0, WINRATIO p1:43.9 ##
+Epoch: 10
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8858, j2: 11142, Empates: 0, WINRATIO p1:44.29 ##
+
+2. Generando Partidas de test
+Generando Partidas.. ( epochs=1,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8834, j2: 11166, Empates: 0, WINRATIO p1:44.17 ##
+len p1_traindata: 592693, len p1_testdata: 59276
+len p1_trainlabels: 592693, len p1_testlabels: 59276
+len p2_traindata: 579235, len p2_testdata: 57898
+len p2_trainlabels: 579235, len p2_testlabels: 57898
+
+3. Guardando partidas en Disco (pickle) con prefijo:value_pickles\gen5_...
+  ...guardado!
+
+  ##   Train_Save   ##
+
+  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo 'value_pickles\gen5_'
+
+  ## Entrenando Red para P1ayer 1
+Epoch 1/10
+ - 10s - loss: 1.4114 - mean_absolute_error: 0.7899
+Epoch 2/10
+ - 9s - loss: 1.1789 - mean_absolute_error: 0.6701
+Epoch 3/10
+ - 9s - loss: 1.1150 - mean_absolute_error: 0.6342
+Epoch 4/10
+ - 9s - loss: 1.0809 - mean_absolute_error: 0.6131
+Epoch 5/10
+ - 9s - loss: 1.0627 - mean_absolute_error: 0.6003
+Epoch 6/10
+ - 9s - loss: 1.0499 - mean_absolute_error: 0.5925
+Epoch 7/10
+ - 9s - loss: 1.0433 - mean_absolute_error: 0.5880
+Epoch 8/10
+ - 9s - loss: 1.0349 - mean_absolute_error: 0.5833
+Epoch 9/10
+ - 9s - loss: 1.0283 - mean_absolute_error: 0.5810
+Epoch 10/10
+ - 9s - loss: 1.0229 - mean_absolute_error: 0.5777
+test_acc: 0.5601359551831676
+
+  ...guardando Red DQN de p1 con prefijo 'value_pickles\gen5_'
+    ...value_pickles\gen5_p1_DQN.h5 guardado!
+## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo 'value_pickles\gen5_'
+
+## Entrenando Red para P1ayer 2
+Epoch 1/10
+ - 10s - loss: 1.2729 - mean_absolute_error: 0.6985
+Epoch 2/10
+ - 9s - loss: 1.0041 - mean_absolute_error: 0.5617
+Epoch 3/10
+ - 9s - loss: 0.9308 - mean_absolute_error: 0.5185
+Epoch 4/10
+ - 9s - loss: 0.8981 - mean_absolute_error: 0.4995
+Epoch 5/10
+ - 9s - loss: 0.8776 - mean_absolute_error: 0.4876
+Epoch 6/10
+ - 9s - loss: 0.8625 - mean_absolute_error: 0.4798
+Epoch 7/10
+ - 9s - loss: 0.8534 - mean_absolute_error: 0.4760
+Epoch 8/10
+ - 9s - loss: 0.8475 - mean_absolute_error: 0.4727
+Epoch 9/10
+ - 9s - loss: 0.8395 - mean_absolute_error: 0.4691
+Epoch 10/10
+ - 9s - loss: 0.8360 - mean_absolute_error: 0.4674
+test_acc: 0.47826875420060444
+
+  ...guardando red DQN de p2 con prefijo 'value_pickles\gen5_'
+    ...value_pickles\gen5_p2_DQN.h5 guardado!
+  ##   Load_and_Test   ##
+
+  ## Carga de partidas de Test desde Disco (pickles) con prefijo: value_pickles\gen5_
+
+## Loading model from disk
+## p1 test_acc: 0.5601359551831676
+## p2 test_acc: 0.47826875420060444
+###########################
+##   Partida de Prueba   ##
+###########################
+
+1) p1 juega c1, acciones de p2 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+2) p2 grito Truco, acciones de p1 disponibles
+[<Accion.FOLD: 6>, <Accion.QUIERO_GRITO: 4>]
+
+3) p1 acepto, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+4) p2 jugo c3, acciones de p1 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+5) p1 jugo c2, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>]
+
+>> Cartas jugadas hasta ahora: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+Le toca a p2
+ cartas en mesa: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+ cartas totales: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40, ID:1, 4-Copa, vt:10]
+ cartas restates: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40]
+
+p2> accion posible: JUGAR_C1,  valor:[[-1.2767761]]
+p2> accion posible: JUGAR_C2,  valor:[[-1.6619518]]
+
+##########################
+##     GENERACION 6     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8403, j2: 11597, Empates: 0, WINRATIO p1:42.01 ##
+Epoch: 2
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8405, j2: 11595, Empates: 0, WINRATIO p1:42.02 ##
+Epoch: 3
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8478, j2: 11522, Empates: 0, WINRATIO p1:42.39 ##
+Epoch: 4
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8325, j2: 11675, Empates: 0, WINRATIO p1:41.62 ##
+Epoch: 5
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8349, j2: 11651, Empates: 0, WINRATIO p1:41.74 ##
+Epoch: 6
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8478, j2: 11522, Empates: 0, WINRATIO p1:42.39 ##
+Epoch: 7
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8359, j2: 11641, Empates: 0, WINRATIO p1:41.79 ##
+Epoch: 8
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8349, j2: 11651, Empates: 0, WINRATIO p1:41.74 ##
+Epoch: 9
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8276, j2: 11724, Empates: 0, WINRATIO p1:41.38 ##
+Epoch: 10
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8250, j2: 11750, Empates: 0, WINRATIO p1:41.25 ##
+
+2. Generando Partidas de test
+Generando Partidas.. ( epochs=1,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8290, j2: 11710, Empates: 0, WINRATIO p1:41.45 ##
+len p1_traindata: 665445, len p1_testdata: 66418
+len p1_trainlabels: 665445, len p1_testlabels: 66418
+len p2_traindata: 671757, len p2_testdata: 67014
+len p2_trainlabels: 671757, len p2_testlabels: 67014
+
+3. Guardando partidas en Disco (pickle) con prefijo:value_pickles\gen6_...
+  ...guardado!
+
+  ##   Train_Save   ##
+
+  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo 'value_pickles\gen6_'
+
+  ## Entrenando Red para P1ayer 1
+Epoch 1/10
+ - 13s - loss: 2.0905 - mean_absolute_error: 0.9659
+Epoch 2/10
+ - 11s - loss: 1.7915 - mean_absolute_error: 0.8310
+Epoch 3/10
+ - 11s - loss: 1.7280 - mean_absolute_error: 0.8023
+Epoch 4/10
+ - 11s - loss: 1.6839 - mean_absolute_error: 0.7834
+Epoch 5/10
+ - 11s - loss: 1.6616 - mean_absolute_error: 0.7708
+Epoch 6/10
+ - 11s - loss: 1.6467 - mean_absolute_error: 0.7641
+Epoch 7/10
+ - 11s - loss: 1.6327 - mean_absolute_error: 0.7566
+Epoch 8/10
+ - 11s - loss: 1.6244 - mean_absolute_error: 0.7518
+Epoch 9/10
+ - 11s - loss: 1.6149 - mean_absolute_error: 0.7486
+Epoch 10/10
+ - 11s - loss: 1.6043 - mean_absolute_error: 0.7435
+test_acc: 0.7485778848632908
+
+  ...guardando Red DQN de p1 con prefijo 'value_pickles\gen6_'
+    ...value_pickles\gen6_p1_DQN.h5 guardado!
+## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo 'value_pickles\gen6_'
+
+## Entrenando Red para P1ayer 2
+Epoch 1/10
+ - 13s - loss: 1.7316 - mean_absolute_error: 0.8018
+Epoch 2/10
+ - 11s - loss: 1.3806 - mean_absolute_error: 0.6287
+Epoch 3/10
+ - 11s - loss: 1.2857 - mean_absolute_error: 0.5896
+Epoch 4/10
+ - 11s - loss: 1.2279 - mean_absolute_error: 0.5680
+Epoch 5/10
+ - 11s - loss: 1.1935 - mean_absolute_error: 0.5531
+Epoch 6/10
+ - 11s - loss: 1.1707 - mean_absolute_error: 0.5403
+Epoch 7/10
+ - 11s - loss: 1.1505 - mean_absolute_error: 0.5317
+Epoch 8/10
+ - 11s - loss: 1.1405 - mean_absolute_error: 0.5260
+Epoch 9/10
+ - 11s - loss: 1.1304 - mean_absolute_error: 0.5214
+Epoch 10/10
+ - 11s - loss: 1.1250 - mean_absolute_error: 0.5184
+test_acc: 0.5127555174218241
+
+  ...guardando red DQN de p2 con prefijo 'value_pickles\gen6_'
+    ...value_pickles\gen6_p2_DQN.h5 guardado!
+  ##   Load_and_Test   ##
+
+  ## Carga de partidas de Test desde Disco (pickles) con prefijo: value_pickles\gen6_
+
+## Loading model from disk
+## p1 test_acc: 0.7485778848632908
+## p2 test_acc: 0.5127555174218241
+###########################
+##   Partida de Prueba   ##
+###########################
+
+1) p1 juega c1, acciones de p2 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+2) p2 grito Truco, acciones de p1 disponibles
+[<Accion.FOLD: 6>, <Accion.QUIERO_GRITO: 4>]
+
+3) p1 acepto, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+4) p2 jugo c3, acciones de p1 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+5) p1 jugo c2, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>]
+
+>> Cartas jugadas hasta ahora: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+Le toca a p2
+ cartas en mesa: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+ cartas totales: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40, ID:1, 4-Copa, vt:10]
+ cartas restates: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40]
+
+p2> accion posible: JUGAR_C1,  valor:[[-0.33788294]]
+p2> accion posible: JUGAR_C2,  valor:[[0.90202194]]
+
+##########################
+##     GENERACION 7     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7835, j2: 12165, Empates: 0, WINRATIO p1:39.17 ##
+Epoch: 2
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7754, j2: 12246, Empates: 0, WINRATIO p1:38.77 ##
+Epoch: 3
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7719, j2: 12281, Empates: 0, WINRATIO p1:38.59 ##
+Epoch: 4
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7797, j2: 12203, Empates: 0, WINRATIO p1:38.98 ##
+Epoch: 5
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7771, j2: 12229, Empates: 0, WINRATIO p1:38.85 ##
+Epoch: 6
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7782, j2: 12218, Empates: 0, WINRATIO p1:38.91 ##
+Epoch: 7
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7758, j2: 12242, Empates: 0, WINRATIO p1:38.79 ##
+Epoch: 8
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7771, j2: 12229, Empates: 0, WINRATIO p1:38.85 ##
+Epoch: 9
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7811, j2: 12189, Empates: 0, WINRATIO p1:39.05 ##
+Epoch: 10
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7843, j2: 12157, Empates: 0, WINRATIO p1:39.21 ##
+
+2. Generando Partidas de test
+Generando Partidas.. ( epochs=1,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7783, j2: 12217, Empates: 0, WINRATIO p1:38.91 ##
+len p1_traindata: 674421, len p1_testdata: 67453
+len p1_trainlabels: 674421, len p1_testlabels: 67453
+len p2_traindata: 663119, len p2_testdata: 66289
+len p2_trainlabels: 663119, len p2_testlabels: 66289
+
+3. Guardando partidas en Disco (pickle) con prefijo:value_pickles\gen7_...
+  ...guardado!
+
+  ##   Train_Save   ##
+
+  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo 'value_pickles\gen7_'
+
+  ## Entrenando Red para P1ayer 1
+Epoch 1/10
+ - 15s - loss: 1.9957 - mean_absolute_error: 0.9854
+Epoch 2/10
+ - 13s - loss: 1.6676 - mean_absolute_error: 0.8390
+Epoch 3/10
+ - 13s - loss: 1.5872 - mean_absolute_error: 0.8007
+Epoch 4/10
+ - 13s - loss: 1.5439 - mean_absolute_error: 0.7794
+Epoch 5/10
+ - 13s - loss: 1.5211 - mean_absolute_error: 0.7674
+Epoch 6/10
+ - 13s - loss: 1.5006 - mean_absolute_error: 0.7559
+Epoch 7/10
+ - 13s - loss: 1.4921 - mean_absolute_error: 0.7509
+Epoch 8/10
+ - 13s - loss: 1.4814 - mean_absolute_error: 0.7456
+Epoch 9/10
+ - 13s - loss: 1.4758 - mean_absolute_error: 0.7424
+Epoch 10/10
+ - 13s - loss: 1.4705 - mean_absolute_error: 0.7395
+test_acc: 0.739864407388151
+
+  ...guardando Red DQN de p1 con prefijo 'value_pickles\gen7_'
+    ...value_pickles\gen7_p1_DQN.h5 guardado!
+## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo 'value_pickles\gen7_'
+
+## Entrenando Red para P1ayer 2
+Epoch 1/10
+ - 15s - loss: 1.7622 - mean_absolute_error: 0.8789
+Epoch 2/10
+ - 13s - loss: 1.3936 - mean_absolute_error: 0.7112
+Epoch 3/10
+ - 13s - loss: 1.3012 - mean_absolute_error: 0.6615
+Epoch 4/10
+ - 13s - loss: 1.2517 - mean_absolute_error: 0.6323
+Epoch 5/10
+ - 13s - loss: 1.2226 - mean_absolute_error: 0.6163
+Epoch 6/10
+ - 13s - loss: 1.2063 - mean_absolute_error: 0.6067
+Epoch 7/10
+ - 13s - loss: 1.1869 - mean_absolute_error: 0.5983
+Epoch 8/10
+ - 13s - loss: 1.1785 - mean_absolute_error: 0.5934
+Epoch 9/10
+ - 13s - loss: 1.1685 - mean_absolute_error: 0.5891
+Epoch 10/10
+ - 13s - loss: 1.1638 - mean_absolute_error: 0.5872
+test_acc: 0.5863612332321612
+
+  ...guardando red DQN de p2 con prefijo 'value_pickles\gen7_'
+    ...value_pickles\gen7_p2_DQN.h5 guardado!
+  ##   Load_and_Test   ##
+
+  ## Carga de partidas de Test desde Disco (pickles) con prefijo: value_pickles\gen7_
+
+## Loading model from disk
+## p1 test_acc: 0.739864407388151
+## p2 test_acc: 0.5863612332321612
+###########################
+##   Partida de Prueba   ##
+###########################
+
+1) p1 juega c1, acciones de p2 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+2) p2 grito Truco, acciones de p1 disponibles
+[<Accion.FOLD: 6>, <Accion.QUIERO_GRITO: 4>]
+
+3) p1 acepto, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+4) p2 jugo c3, acciones de p1 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+5) p1 jugo c2, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>]
+
+>> Cartas jugadas hasta ahora: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+Le toca a p2
+ cartas en mesa: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+ cartas totales: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40, ID:1, 4-Copa, vt:10]
+ cartas restates: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40]
+
+p2> accion posible: JUGAR_C1,  valor:[[2.0564268]]
+p2> accion posible: JUGAR_C2,  valor:[[1.1729319]]
+
+##########################
+##     GENERACION 8     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7690, j2: 12310, Empates: 0, WINRATIO p1:38.45 ##
+Epoch: 2
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7754, j2: 12246, Empates: 0, WINRATIO p1:38.77 ##
+Epoch: 3
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7776, j2: 12224, Empates: 0, WINRATIO p1:38.88 ##
+Epoch: 4
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7839, j2: 12161, Empates: 0, WINRATIO p1:39.19 ##
+Epoch: 5
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7731, j2: 12269, Empates: 0, WINRATIO p1:38.65 ##
+Epoch: 6
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7895, j2: 12105, Empates: 0, WINRATIO p1:39.47 ##
+Epoch: 7
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7756, j2: 12244, Empates: 0, WINRATIO p1:38.78 ##
+Epoch: 8
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7779, j2: 12221, Empates: 0, WINRATIO p1:38.89 ##
+Epoch: 9
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7756, j2: 12244, Empates: 0, WINRATIO p1:38.78 ##
+Epoch: 10
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7882, j2: 12118, Empates: 0, WINRATIO p1:39.41 ##
+
+2. Generando Partidas de test
+Generando Partidas.. ( epochs=1,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7720, j2: 12280, Empates: 0, WINRATIO p1:38.6 ##
+len p1_traindata: 694377, len p1_testdata: 69586
+len p1_trainlabels: 694377, len p1_testlabels: 69586
+len p2_traindata: 691505, len p2_testdata: 69203
+len p2_trainlabels: 691505, len p2_testlabels: 69203
+
+3. Guardando partidas en Disco (pickle) con prefijo:value_pickles\gen8_...
+  ...guardado!
+
+  ##   Train_Save   ##
+
+  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo 'value_pickles\gen8_'
+
+  ## Entrenando Red para P1ayer 1
+Epoch 1/10
+ - 17s - loss: 2.3983 - mean_absolute_error: 1.0318
+Epoch 2/10
+ - 15s - loss: 1.9737 - mean_absolute_error: 0.8463
+Epoch 3/10
+ - 14s - loss: 1.8996 - mean_absolute_error: 0.8111
+Epoch 4/10
+ - 14s - loss: 1.8631 - mean_absolute_error: 0.7925
+Epoch 5/10
+ - 14s - loss: 1.8415 - mean_absolute_error: 0.7810
+Epoch 6/10
+ - 14s - loss: 1.8222 - mean_absolute_error: 0.7728
+Epoch 7/10
+ - 14s - loss: 1.8064 - mean_absolute_error: 0.7654
+Epoch 8/10
+ - 14s - loss: 1.7971 - mean_absolute_error: 0.7611
+Epoch 9/10
+ - 14s - loss: 1.7868 - mean_absolute_error: 0.7582
+Epoch 10/10
+ - 14s - loss: 1.7872 - mean_absolute_error: 0.7575
+test_acc: 0.7598689563294667
+
+  ...guardando Red DQN de p1 con prefijo 'value_pickles\gen8_'
+    ...value_pickles\gen8_p1_DQN.h5 guardado!
+## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo 'value_pickles\gen8_'
+
+## Entrenando Red para P1ayer 2
+Epoch 1/10
+ - 17s - loss: 2.0719 - mean_absolute_error: 0.9195
+Epoch 2/10
+ - 14s - loss: 1.5788 - mean_absolute_error: 0.7072
+Epoch 3/10
+ - 15s - loss: 1.4849 - mean_absolute_error: 0.6534
+Epoch 4/10
+ - 14s - loss: 1.4359 - mean_absolute_error: 0.6271
+Epoch 5/10
+ - 14s - loss: 1.4088 - mean_absolute_error: 0.6124
+Epoch 6/10
+ - 14s - loss: 1.3797 - mean_absolute_error: 0.5992
+Epoch 7/10
+ - 14s - loss: 1.3630 - mean_absolute_error: 0.5911
+Epoch 8/10
+ - 14s - loss: 1.3469 - mean_absolute_error: 0.5833
+Epoch 9/10
+ - 14s - loss: 1.3370 - mean_absolute_error: 0.5795
+Epoch 10/10
+ - 14s - loss: 1.3265 - mean_absolute_error: 0.5758
+test_acc: 0.5753335170092001
+
+  ...guardando red DQN de p2 con prefijo 'value_pickles\gen8_'
+    ...value_pickles\gen8_p2_DQN.h5 guardado!
+  ##   Load_and_Test   ##
+
+  ## Carga de partidas de Test desde Disco (pickles) con prefijo: value_pickles\gen8_
+
+## Loading model from disk
+## p1 test_acc: 0.7598689563294667
+## p2 test_acc: 0.5753335170092001
+###########################
+##   Partida de Prueba   ##
+###########################
+
+1) p1 juega c1, acciones de p2 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+2) p2 grito Truco, acciones de p1 disponibles
+[<Accion.FOLD: 6>, <Accion.QUIERO_GRITO: 4>]
+
+3) p1 acepto, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+4) p2 jugo c3, acciones de p1 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+5) p1 jugo c2, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>]
+
+>> Cartas jugadas hasta ahora: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+Le toca a p2
+ cartas en mesa: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+ cartas totales: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40, ID:1, 4-Copa, vt:10]
+ cartas restates: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40]
+
+p2> accion posible: JUGAR_C1,  valor:[[0.7791315]]
+p2> accion posible: JUGAR_C2,  valor:[[-1.7477849]]
+
+##########################
+##     GENERACION 9     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8124, j2: 11876, Empates: 0, WINRATIO p1:40.62 ##
+Epoch: 2
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8092, j2: 11908, Empates: 0, WINRATIO p1:40.46 ##
+Epoch: 3
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8069, j2: 11931, Empates: 0, WINRATIO p1:40.34 ##
+Epoch: 4
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8051, j2: 11949, Empates: 0, WINRATIO p1:40.25 ##
+Epoch: 5
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8109, j2: 11891, Empates: 0, WINRATIO p1:40.54 ##
+Epoch: 6
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8215, j2: 11785, Empates: 0, WINRATIO p1:41.07 ##
+Epoch: 7
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8091, j2: 11909, Empates: 0, WINRATIO p1:40.45 ##
+Epoch: 8
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8102, j2: 11898, Empates: 0, WINRATIO p1:40.51 ##
+Epoch: 9
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8080, j2: 11920, Empates: 0, WINRATIO p1:40.4 ##
+Epoch: 10
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8016, j2: 11984, Empates: 0, WINRATIO p1:40.08 ##
+
+2. Generando Partidas de test
+Generando Partidas.. ( epochs=1,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8036, j2: 11964, Empates: 0, WINRATIO p1:40.18 ##
+len p1_traindata: 664338, len p1_testdata: 66436
+len p1_trainlabels: 664338, len p1_testlabels: 66436
+len p2_traindata: 670108, len p2_testdata: 67012
+len p2_trainlabels: 670108, len p2_testlabels: 67012
+
+3. Guardando partidas en Disco (pickle) con prefijo:value_pickles\gen9_...
+  ...guardado!
+
+  ##   Train_Save   ##
+
+  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo 'value_pickles\gen9_'
+
+  ## Entrenando Red para P1ayer 1
+Epoch 1/10
+ - 17s - loss: 1.8841 - mean_absolute_error: 0.9173
+Epoch 2/10
+ - 15s - loss: 1.5865 - mean_absolute_error: 0.7798
+Epoch 3/10
+ - 15s - loss: 1.5110 - mean_absolute_error: 0.7409
+Epoch 4/10
+ - 15s - loss: 1.4758 - mean_absolute_error: 0.7207
+Epoch 5/10
+ - 15s - loss: 1.4516 - mean_absolute_error: 0.7089
+Epoch 6/10
+ - 15s - loss: 1.4355 - mean_absolute_error: 0.7000
+Epoch 7/10
+ - 15s - loss: 1.4204 - mean_absolute_error: 0.6927
+Epoch 8/10
+ - 15s - loss: 1.4136 - mean_absolute_error: 0.6895
+Epoch 9/10
+ - 15s - loss: 1.4066 - mean_absolute_error: 0.6859
+Epoch 10/10
+ - 15s - loss: 1.4005 - mean_absolute_error: 0.6834
+test_acc: 0.665834428021088
+
+  ...guardando Red DQN de p1 con prefijo 'value_pickles\gen9_'
+    ...value_pickles\gen9_p1_DQN.h5 guardado!
+## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo 'value_pickles\gen9_'
+
+## Entrenando Red para P1ayer 2
+Epoch 1/10
+ - 19s - loss: 1.7137 - mean_absolute_error: 0.8557
+Epoch 2/10
+ - 16s - loss: 1.3546 - mean_absolute_error: 0.6873
+Epoch 3/10
+ - 15s - loss: 1.2713 - mean_absolute_error: 0.6440
+Epoch 4/10
+ - 16s - loss: 1.2234 - mean_absolute_error: 0.6188
+Epoch 5/10
+ - 15s - loss: 1.1926 - mean_absolute_error: 0.6023
+Epoch 6/10
+ - 17s - loss: 1.1707 - mean_absolute_error: 0.5921
+Epoch 7/10
+ - 16s - loss: 1.1544 - mean_absolute_error: 0.5837
+Epoch 8/10
+ - 16s - loss: 1.1409 - mean_absolute_error: 0.5783
+Epoch 9/10
+ - 16s - loss: 1.1312 - mean_absolute_error: 0.5732
+Epoch 10/10
+ - 15s - loss: 1.1225 - mean_absolute_error: 0.5690
+test_acc: 0.5833717414900587
+
+  ...guardando red DQN de p2 con prefijo 'value_pickles\gen9_'
+    ...value_pickles\gen9_p2_DQN.h5 guardado!
+  ##   Load_and_Test   ##
+
+  ## Carga de partidas de Test desde Disco (pickles) con prefijo: value_pickles\gen9_
+
+## Loading model from disk
+## p1 test_acc: 0.665834428021088
+## p2 test_acc: 0.5833717414900587
+###########################
+##   Partida de Prueba   ##
+###########################
+
+1) p1 juega c1, acciones de p2 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+2) p2 grito Truco, acciones de p1 disponibles
+[<Accion.FOLD: 6>, <Accion.QUIERO_GRITO: 4>]
+
+3) p1 acepto, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+4) p2 jugo c3, acciones de p1 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+5) p1 jugo c2, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>]
+
+>> Cartas jugadas hasta ahora: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+Le toca a p2
+ cartas en mesa: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+ cartas totales: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40, ID:1, 4-Copa, vt:10]
+ cartas restates: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40]
+
+p2> accion posible: JUGAR_C1,  valor:[[1.846537]]
+p2> accion posible: JUGAR_C2,  valor:[[1.764683]]
+
+##########################
+##     GENERACION 10     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9755, j2: 10245, Empates: 0, WINRATIO p1:48.77 ##
+Epoch: 2
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9781, j2: 10219, Empates: 0, WINRATIO p1:48.90 ##
+Epoch: 3
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9632, j2: 10368, Empates: 0, WINRATIO p1:48.16 ##
+Epoch: 4
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9592, j2: 10408, Empates: 0, WINRATIO p1:47.96 ##
+Epoch: 5
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9593, j2: 10407, Empates: 0, WINRATIO p1:47.96 ##
+Epoch: 6
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9554, j2: 10446, Empates: 0, WINRATIO p1:47.77 ##
+Epoch: 7
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9773, j2: 10227, Empates: 0, WINRATIO p1:48.86 ##
+Epoch: 8
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9794, j2: 10206, Empates: 0, WINRATIO p1:48.97 ##
+Epoch: 9
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9653, j2: 10347, Empates: 0, WINRATIO p1:48.26 ##
+Epoch: 10
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9554, j2: 10446, Empates: 0, WINRATIO p1:47.77 ##
+
+2. Generando Partidas de test
+Generando Partidas.. ( epochs=1,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9681, j2: 10319, Empates: 0, WINRATIO p1:48.40 ##
+len p1_traindata: 820406, len p1_testdata: 82013
+len p1_trainlabels: 820406, len p1_testlabels: 82013
+len p2_traindata: 817307, len p2_testdata: 81724
+len p2_trainlabels: 817307, len p2_testlabels: 81724
+
+3. Guardando partidas en Disco (pickle) con prefijo:value_pickles\gen10_...
+  ...guardado!
+
+  ##   Train_Save   ##
+
+  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo 'value_pickles\gen10_'
+
+  ## Entrenando Red para P1ayer 1
+Epoch 1/10
+ - 28s - loss: 4.3995 - mean_absolute_error: 1.5797
+Epoch 2/10
+ - 25s - loss: 3.7052 - mean_absolute_error: 1.3462
+Epoch 3/10
+ - 25s - loss: 3.5782 - mean_absolute_error: 1.2973
+Epoch 4/10
+ - 25s - loss: 3.5173 - mean_absolute_error: 1.2736
+Epoch 5/10
+ - 25s - loss: 3.4869 - mean_absolute_error: 1.2617
+Epoch 6/10
+ - 25s - loss: 3.4634 - mean_absolute_error: 1.2524
+Epoch 7/10
+ - 25s - loss: 3.4465 - mean_absolute_error: 1.2449
+Epoch 8/10
+ - 24s - loss: 3.4282 - mean_absolute_error: 1.2382
+Epoch 9/10
+ - 25s - loss: 3.4230 - mean_absolute_error: 1.2358
+Epoch 10/10
+ - 25s - loss: 3.4154 - mean_absolute_error: 1.2334
+test_acc: 1.233773269030972
+
+  ...guardando Red DQN de p1 con prefijo 'value_pickles\gen10_'
+    ...value_pickles\gen10_p1_DQN.h5 guardado!
+## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo 'value_pickles\gen10_'
+
+## Entrenando Red para P1ayer 2
+Epoch 1/10
+ - 24s - loss: 4.0676 - mean_absolute_error: 1.4715
+Epoch 2/10
+ - 21s - loss: 3.3359 - mean_absolute_error: 1.2209
+Epoch 3/10
+ - 22s - loss: 3.2099 - mean_absolute_error: 1.1741
+Epoch 4/10
+ - 22s - loss: 3.1504 - mean_absolute_error: 1.1485
+Epoch 5/10
+ - 21s - loss: 3.1090 - mean_absolute_error: 1.1302
+Epoch 6/10
+ - 22s - loss: 3.0906 - mean_absolute_error: 1.1200
+Epoch 7/10
+ - 21s - loss: 3.0659 - mean_absolute_error: 1.1093
+Epoch 8/10
+ - 23s - loss: 3.0513 - mean_absolute_error: 1.1008
+Epoch 9/10
+ - 22s - loss: 3.0424 - mean_absolute_error: 1.0974
+Epoch 10/10
+ - 22s - loss: 3.0289 - mean_absolute_error: 1.0914
+test_acc: 1.1004128525111359
+
+  ...guardando red DQN de p2 con prefijo 'value_pickles\gen10_'
+    ...value_pickles\gen10_p2_DQN.h5 guardado!
+  ##   Load_and_Test   ##
+
+  ## Carga de partidas de Test desde Disco (pickles) con prefijo: value_pickles\gen10_
+
+## Loading model from disk
+## p1 test_acc: 1.233773269030972
+## p2 test_acc: 1.1004128525111359
+###########################
+##   Partida de Prueba   ##
+###########################
+
+1) p1 juega c1, acciones de p2 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+2) p2 grito Truco, acciones de p1 disponibles
+[<Accion.FOLD: 6>, <Accion.QUIERO_GRITO: 4>]
+
+3) p1 acepto, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+4) p2 jugo c3, acciones de p1 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+5) p1 jugo c2, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>]
+
+>> Cartas jugadas hasta ahora: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+Le toca a p2
+ cartas en mesa: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+ cartas totales: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40, ID:1, 4-Copa, vt:10]
+ cartas restates: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40]
+
+p2> accion posible: JUGAR_C1,  valor:[[-1.4382644]]
+p2> accion posible: JUGAR_C2,  valor:[[-1.1695621]]
+
+##########################
+##     GENERACION 11     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9986, j2: 10014, Empates: 0, WINRATIO p1:49.93 ##
+Epoch: 2
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9980, j2: 10020, Empates: 0, WINRATIO p1:49.9 ##
+Epoch: 3
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10062, j2: 9938, Empates: 0, WINRATIO p1:50.31 ##
+Epoch: 4
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9977, j2: 10023, Empates: 0, WINRATIO p1:49.88 ##
+Epoch: 5
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10007, j2: 9993, Empates: 0, WINRATIO p1:50.03 ##
+Epoch: 6
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9925, j2: 10075, Empates: 0, WINRATIO p1:49.62 ##
+Epoch: 7
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9977, j2: 10023, Empates: 0, WINRATIO p1:49.88 ##
+Epoch: 8
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9952, j2: 10048, Empates: 0, WINRATIO p1:49.76 ##
+Epoch: 9
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10024, j2: 9976, Empates: 0, WINRATIO p1:50.12 ##
+Epoch: 10
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10065, j2: 9935, Empates: 0, WINRATIO p1:50.32 ##
+
+2. Generando Partidas de test
+Generando Partidas.. ( epochs=1,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10037, j2: 9963, Empates: 0, WINRATIO p1:50.18 ##
+len p1_traindata: 621161, len p1_testdata: 62029
+len p1_trainlabels: 621161, len p1_testlabels: 62029
+len p2_traindata: 609412, len p2_testdata: 60903
+len p2_trainlabels: 609412, len p2_testlabels: 60903
+
+3. Guardando partidas en Disco (pickle) con prefijo:value_pickles\gen11_...
+  ...guardado!
+
+  ##   Train_Save   ##
+
+  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo 'value_pickles\gen11_'
+
+  ## Entrenando Red para P1ayer 1
+Epoch 1/10
+ - 25s - loss: 1.7749 - mean_absolute_error: 0.8134
+Epoch 2/10
+ - 21s - loss: 1.5431 - mean_absolute_error: 0.6995
+Epoch 3/10
+ - 21s - loss: 1.4567 - mean_absolute_error: 0.6571
+Epoch 4/10
+ - 21s - loss: 1.4146 - mean_absolute_error: 0.6345
+Epoch 5/10
+ - 21s - loss: 1.3877 - mean_absolute_error: 0.6204
+Epoch 6/10
+ - 21s - loss: 1.3686 - mean_absolute_error: 0.6105
+Epoch 7/10
+ - 22s - loss: 1.3503 - mean_absolute_error: 0.6024
+Epoch 8/10
+ - 22s - loss: 1.3438 - mean_absolute_error: 0.5985
+Epoch 9/10
+ - 21s - loss: 1.3358 - mean_absolute_error: 0.5948
+Epoch 10/10
+ - 21s - loss: 1.3311 - mean_absolute_error: 0.5928
+test_acc: 0.622051283769045
+
+  ...guardando Red DQN de p1 con prefijo 'value_pickles\gen11_'
+    ...value_pickles\gen11_p1_DQN.h5 guardado!
+## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo 'value_pickles\gen11_'
+
+## Entrenando Red para P1ayer 2
+Epoch 1/10
+ - 22s - loss: 1.6644 - mean_absolute_error: 0.7590
+Epoch 2/10
+ - 19s - loss: 1.3688 - mean_absolute_error: 0.6151
+Epoch 3/10
+ - 18s - loss: 1.2769 - mean_absolute_error: 0.5703
+Epoch 4/10
+ - 19s - loss: 1.2320 - mean_absolute_error: 0.5473
+Epoch 5/10
+ - 18s - loss: 1.2023 - mean_absolute_error: 0.5324
+Epoch 6/10
+ - 19s - loss: 1.1752 - mean_absolute_error: 0.5212
+Epoch 7/10
+ - 19s - loss: 1.1635 - mean_absolute_error: 0.5135
+Epoch 8/10
+ - 18s - loss: 1.1475 - mean_absolute_error: 0.5064
+Epoch 9/10
+ - 19s - loss: 1.1371 - mean_absolute_error: 0.5007
+Epoch 10/10
+ - 19s - loss: 1.1303 - mean_absolute_error: 0.4989
+test_acc: 0.4986368958434532
+
+  ...guardando red DQN de p2 con prefijo 'value_pickles\gen11_'
+    ...value_pickles\gen11_p2_DQN.h5 guardado!
+  ##   Load_and_Test   ##
+
+  ## Carga de partidas de Test desde Disco (pickles) con prefijo: value_pickles\gen11_
+
+## Loading model from disk
+## p1 test_acc: 0.622051283769045
+## p2 test_acc: 0.4986368958434532
+###########################
+##   Partida de Prueba   ##
+###########################
+
+1) p1 juega c1, acciones de p2 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+2) p2 grito Truco, acciones de p1 disponibles
+[<Accion.FOLD: 6>, <Accion.QUIERO_GRITO: 4>]
+
+3) p1 acepto, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+4) p2 jugo c3, acciones de p1 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+5) p1 jugo c2, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>]
+
+>> Cartas jugadas hasta ahora: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+Le toca a p2
+ cartas en mesa: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+ cartas totales: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40, ID:1, 4-Copa, vt:10]
+ cartas restates: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40]
+
+p2> accion posible: JUGAR_C1,  valor:[[0.26939857]]
+p2> accion posible: JUGAR_C2,  valor:[[0.74065644]]
+
+##########################
+##     GENERACION 12     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10499, j2: 9501, Empates: 0, WINRATIO p1:52.49 ##
+Epoch: 2
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10419, j2: 9581, Empates: 0, WINRATIO p1:52.09 ##
+Epoch: 3
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10467, j2: 9533, Empates: 0, WINRATIO p1:52.33 ##
+Epoch: 4
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10449, j2: 9551, Empates: 0, WINRATIO p1:52.24 ##
+Epoch: 5
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10504, j2: 9496, Empates: 0, WINRATIO p1:52.52 ##
+Epoch: 6
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10434, j2: 9566, Empates: 0, WINRATIO p1:52.17 ##
+Epoch: 7
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10428, j2: 9572, Empates: 0, WINRATIO p1:52.14 ##
+Epoch: 8
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10476, j2: 9524, Empates: 0, WINRATIO p1:52.38 ##
+Epoch: 9
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10356, j2: 9644, Empates: 0, WINRATIO p1:51.78 ##
+Epoch: 10
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10551, j2: 9449, Empates: 0, WINRATIO p1:52.75 ##
+
+2. Generando Partidas de test
+Generando Partidas.. ( epochs=1,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10519, j2: 9481, Empates: 0, WINRATIO p1:52.59 ##
+len p1_traindata: 752709, len p1_testdata: 75111
+len p1_trainlabels: 752709, len p1_testlabels: 75111
+len p2_traindata: 742991, len p2_testdata: 74069
+len p2_trainlabels: 742991, len p2_testlabels: 74069
+
+3. Guardando partidas en Disco (pickle) con prefijo:value_pickles\gen12_...
+  ...guardado!
+
+  ##   Train_Save   ##
+
+  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo 'value_pickles\gen12_'
+
+  ## Entrenando Red para P1ayer 1
+Epoch 1/10
+ - 35s - loss: 2.6829 - mean_absolute_error: 1.1871
+Epoch 2/10
+ - 31s - loss: 2.2595 - mean_absolute_error: 1.0133
+Epoch 3/10
+ - 31s - loss: 2.1649 - mean_absolute_error: 0.9698
+Epoch 4/10
+ - 32s - loss: 2.1168 - mean_absolute_error: 0.9478
+Epoch 5/10
+ - 31s - loss: 2.0878 - mean_absolute_error: 0.9330
+Epoch 6/10
+ - 31s - loss: 2.0692 - mean_absolute_error: 0.9237
+Epoch 7/10
+ - 31s - loss: 2.0593 - mean_absolute_error: 0.9183
+Epoch 8/10
+ - 31s - loss: 2.0476 - mean_absolute_error: 0.9122
+Epoch 9/10
+ - 32s - loss: 2.0419 - mean_absolute_error: 0.9098
+Epoch 10/10
+ - 32s - loss: 2.0389 - mean_absolute_error: 0.9088
+test_acc: 0.8760998952841248
+
+  ...guardando Red DQN de p1 con prefijo 'value_pickles\gen12_'
+    ...value_pickles\gen12_p1_DQN.h5 guardado!
+## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo 'value_pickles\gen12_'
+
+## Entrenando Red para P1ayer 2
+Epoch 1/10
+ - 30s - loss: 2.6208 - mean_absolute_error: 1.1715
+Epoch 2/10
+ - 26s - loss: 2.1556 - mean_absolute_error: 0.9883
+Epoch 3/10
+ - 27s - loss: 2.0393 - mean_absolute_error: 0.9382
+Epoch 4/10
+ - 26s - loss: 1.9754 - mean_absolute_error: 0.9082
+Epoch 5/10
+ - 27s - loss: 1.9386 - mean_absolute_error: 0.8881
+Epoch 6/10
+ - 26s - loss: 1.9157 - mean_absolute_error: 0.8772
+Epoch 7/10
+ - 26s - loss: 1.8985 - mean_absolute_error: 0.8680
+Epoch 8/10
+ - 26s - loss: 1.8876 - mean_absolute_error: 0.8638
+Epoch 9/10
+ - 26s - loss: 1.8790 - mean_absolute_error: 0.8592
+Epoch 10/10
+ - 27s - loss: 1.8708 - mean_absolute_error: 0.8552
+test_acc: 0.8447712737378426
+
+  ...guardando red DQN de p2 con prefijo 'value_pickles\gen12_'
+    ...value_pickles\gen12_p2_DQN.h5 guardado!
+  ##   Load_and_Test   ##
+
+  ## Carga de partidas de Test desde Disco (pickles) con prefijo: value_pickles\gen12_
+
+## Loading model from disk
+## p1 test_acc: 0.8760998952841248
+## p2 test_acc: 0.8447712737378426
+###########################
+##   Partida de Prueba   ##
+###########################
+
+1) p1 juega c1, acciones de p2 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+2) p2 grito Truco, acciones de p1 disponibles
+[<Accion.FOLD: 6>, <Accion.QUIERO_GRITO: 4>]
+
+3) p1 acepto, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+4) p2 jugo c3, acciones de p1 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+5) p1 jugo c2, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>]
+
+>> Cartas jugadas hasta ahora: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+Le toca a p2
+ cartas en mesa: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+ cartas totales: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40, ID:1, 4-Copa, vt:10]
+ cartas restates: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40]
+
+p2> accion posible: JUGAR_C1,  valor:[[0.1281355]]
+p2> accion posible: JUGAR_C2,  valor:[[1.8177599]]
+
+##########################
+##     GENERACION 13     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10256, j2: 9744, Empates: 0, WINRATIO p1:51.28 ##
+Epoch: 2
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10243, j2: 9757, Empates: 0, WINRATIO p1:51.21 ##
+Epoch: 3
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10210, j2: 9790, Empates: 0, WINRATIO p1:51.05 ##
+Epoch: 4
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10213, j2: 9787, Empates: 0, WINRATIO p1:51.06 ##
+Epoch: 5
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10391, j2: 9609, Empates: 0, WINRATIO p1:51.95 ##
+Epoch: 6
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10242, j2: 9758, Empates: 0, WINRATIO p1:51.21 ##
+Epoch: 7
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10254, j2: 9746, Empates: 0, WINRATIO p1:51.27 ##
+Epoch: 8
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10256, j2: 9744, Empates: 0, WINRATIO p1:51.28 ##
+Epoch: 9
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10303, j2: 9697, Empates: 0, WINRATIO p1:51.51 ##
+Epoch: 10
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10198, j2: 9802, Empates: 0, WINRATIO p1:50.99 ##
+
+2. Generando Partidas de test
+Generando Partidas.. ( epochs=1,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 10234, j2: 9766, Empates: 0, WINRATIO p1:51.17 ##
+len p1_traindata: 609416, len p1_testdata: 60976
+len p1_trainlabels: 609416, len p1_testlabels: 60976
+len p2_traindata: 608734, len p2_testdata: 60907
+len p2_trainlabels: 608734, len p2_testlabels: 60907
+
+3. Guardando partidas en Disco (pickle) con prefijo:value_pickles\gen13_...
+  ...guardado!
+
+  ##   Train_Save   ##
+
+  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo 'value_pickles\gen13_'
+
+  ## Entrenando Red para P1ayer 1
+Epoch 1/10
+ - 32s - loss: 2.2109 - mean_absolute_error: 1.0047
+Epoch 2/10
+ - 28s - loss: 1.9096 - mean_absolute_error: 0.8706
+Epoch 3/10
+ - 28s - loss: 1.8249 - mean_absolute_error: 0.8295
+Epoch 4/10
+ - 28s - loss: 1.7807 - mean_absolute_error: 0.8073
+Epoch 5/10
+ - 28s - loss: 1.7519 - mean_absolute_error: 0.7943
+Epoch 6/10
+ - 28s - loss: 1.7302 - mean_absolute_error: 0.7846
+Epoch 7/10
+ - 28s - loss: 1.7183 - mean_absolute_error: 0.7789
+Epoch 8/10
+ - 28s - loss: 1.7058 - mean_absolute_error: 0.7752
+Epoch 9/10
+ - 28s - loss: 1.6977 - mean_absolute_error: 0.7733
+Epoch 10/10
+ - 28s - loss: 1.6975 - mean_absolute_error: 0.7750
+test_acc: 0.7341137883060093
+
+  ...guardando Red DQN de p1 con prefijo 'value_pickles\gen13_'
+    ...value_pickles\gen13_p1_DQN.h5 guardado!
+## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo 'value_pickles\gen13_'
+
+## Entrenando Red para P1ayer 2
+Epoch 1/10
+ - 30s - loss: 2.0772 - mean_absolute_error: 0.9320
+Epoch 2/10
+ - 26s - loss: 1.6781 - mean_absolute_error: 0.7540
+Epoch 3/10
+ - 26s - loss: 1.5749 - mean_absolute_error: 0.7022
+Epoch 4/10
+ - 26s - loss: 1.5177 - mean_absolute_error: 0.6740
+Epoch 5/10
+ - 26s - loss: 1.4753 - mean_absolute_error: 0.6538
+Epoch 6/10
+ - 26s - loss: 1.4498 - mean_absolute_error: 0.6419
+Epoch 7/10
+ - 27s - loss: 1.4282 - mean_absolute_error: 0.6326
+Epoch 8/10
+ - 27s - loss: 1.4139 - mean_absolute_error: 0.6276
+Epoch 9/10
+ - 26s - loss: 1.4053 - mean_absolute_error: 0.6232
+Epoch 10/10
+ - 26s - loss: 1.4008 - mean_absolute_error: 0.6198
+test_acc: 0.585767497642643
+
+  ...guardando red DQN de p2 con prefijo 'value_pickles\gen13_'
+    ...value_pickles\gen13_p2_DQN.h5 guardado!
+  ##   Load_and_Test   ##
+
+  ## Carga de partidas de Test desde Disco (pickles) con prefijo: value_pickles\gen13_
+
+## Loading model from disk
+## p1 test_acc: 0.7341137883060093
+## p2 test_acc: 0.585767497642643
+###########################
+##   Partida de Prueba   ##
+###########################
+
+1) p1 juega c1, acciones de p2 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+2) p2 grito Truco, acciones de p1 disponibles
+[<Accion.FOLD: 6>, <Accion.QUIERO_GRITO: 4>]
+
+3) p1 acepto, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+4) p2 jugo c3, acciones de p1 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+5) p1 jugo c2, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>]
+
+>> Cartas jugadas hasta ahora: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+Le toca a p2
+ cartas en mesa: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+ cartas totales: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40, ID:1, 4-Copa, vt:10]
+ cartas restates: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40]
+
+p2> accion posible: JUGAR_C1,  valor:[[0.14958121]]
+p2> accion posible: JUGAR_C2,  valor:[[-1.902598]]
+
+##########################
+##     GENERACION 14     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9246, j2: 10754, Empates: 0, WINRATIO p1:46.23 ##
+Epoch: 2
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9161, j2: 10839, Empates: 0, WINRATIO p1:45.80 ##
+Epoch: 3
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8984, j2: 11016, Empates: 0, WINRATIO p1:44.92 ##
+Epoch: 4
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9066, j2: 10934, Empates: 0, WINRATIO p1:45.33 ##
+Epoch: 5
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9009, j2: 10991, Empates: 0, WINRATIO p1:45.04 ##
+Epoch: 6
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 8974, j2: 11026, Empates: 0, WINRATIO p1:44.87 ##
+Epoch: 7
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9140, j2: 10860, Empates: 0, WINRATIO p1:45.7 ##
+Epoch: 8
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9124, j2: 10876, Empates: 0, WINRATIO p1:45.62 ##
+Epoch: 9
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9122, j2: 10878, Empates: 0, WINRATIO p1:45.61 ##
+Epoch: 10
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9099, j2: 10901, Empates: 0, WINRATIO p1:45.49 ##
+
+2. Generando Partidas de test
+Generando Partidas.. ( epochs=1,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 9170, j2: 10830, Empates: 0, WINRATIO p1:45.85 ##
+len p1_traindata: 696945, len p1_testdata: 69401
+len p1_trainlabels: 696945, len p1_testlabels: 69401
+len p2_traindata: 675491, len p2_testdata: 67287
+len p2_trainlabels: 675491, len p2_testlabels: 67287
+
+3. Guardando partidas en Disco (pickle) con prefijo:value_pickles\gen14_...
+  ...guardado!
+
+  ##   Train_Save   ##
+
+  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo 'value_pickles\gen14_'
+
+  ## Entrenando Red para P1ayer 1
+Epoch 1/10
+ - 40s - loss: 2.7924 - mean_absolute_error: 1.2487
+Epoch 2/10
+ - 36s - loss: 2.4463 - mean_absolute_error: 1.1019
+Epoch 3/10
+ - 36s - loss: 2.3634 - mean_absolute_error: 1.0626
+Epoch 4/10
+ - 36s - loss: 2.3184 - mean_absolute_error: 1.0411
+Epoch 5/10
+ - 36s - loss: 2.2873 - mean_absolute_error: 1.0276
+Epoch 6/10
+ - 36s - loss: 2.2681 - mean_absolute_error: 1.0193
+Epoch 7/10
+ - 36s - loss: 2.2555 - mean_absolute_error: 1.0133
+Epoch 8/10
+ - 36s - loss: 2.2418 - mean_absolute_error: 1.0087
+Epoch 9/10
+ - 36s - loss: 2.2318 - mean_absolute_error: 1.0061
+Epoch 10/10
+ - 36s - loss: 2.2275 - mean_absolute_error: 1.0048
+test_acc: 0.984503798575084
+
+  ...guardando Red DQN de p1 con prefijo 'value_pickles\gen14_'
+    ...value_pickles\gen14_p1_DQN.h5 guardado!
+## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo 'value_pickles\gen14_'
+
+## Entrenando Red para P1ayer 2
+Epoch 1/10
+ - 39s - loss: 2.6639 - mean_absolute_error: 1.1927
+Epoch 2/10
+ - 34s - loss: 2.2629 - mean_absolute_error: 1.0207
+Epoch 3/10
+ - 34s - loss: 2.1479 - mean_absolute_error: 0.9686
+Epoch 4/10
+ - 34s - loss: 2.0859 - mean_absolute_error: 0.9397
+Epoch 5/10
+ - 34s - loss: 2.0500 - mean_absolute_error: 0.9231
+Epoch 6/10
+ - 34s - loss: 2.0196 - mean_absolute_error: 0.9088
+Epoch 7/10
+ - 34s - loss: 1.9957 - mean_absolute_error: 0.8980
+Epoch 8/10
+ - 34s - loss: 1.9816 - mean_absolute_error: 0.8917
+Epoch 9/10
+ - 34s - loss: 1.9704 - mean_absolute_error: 0.8875
+Epoch 10/10
+ - 34s - loss: 1.9609 - mean_absolute_error: 0.8831
+test_acc: 0.8688379824303262
+
+  ...guardando red DQN de p2 con prefijo 'value_pickles\gen14_'
+    ...value_pickles\gen14_p2_DQN.h5 guardado!
+  ##   Load_and_Test   ##
+
+  ## Carga de partidas de Test desde Disco (pickles) con prefijo: value_pickles\gen14_
+
+## Loading model from disk
+## p1 test_acc: 0.984503798575084
+## p2 test_acc: 0.8688379824303262
+###########################
+##   Partida de Prueba   ##
+###########################
+
+1) p1 juega c1, acciones de p2 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+2) p2 grito Truco, acciones de p1 disponibles
+[<Accion.FOLD: 6>, <Accion.QUIERO_GRITO: 4>]
+
+3) p1 acepto, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+4) p2 jugo c3, acciones de p1 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+5) p1 jugo c2, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>]
+
+>> Cartas jugadas hasta ahora: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+Le toca a p2
+ cartas en mesa: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+ cartas totales: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40, ID:1, 4-Copa, vt:10]
+ cartas restates: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40]
+
+p2> accion posible: JUGAR_C1,  valor:[[-0.65775543]]
+p2> accion posible: JUGAR_C2,  valor:[[1.2307161]]
+
+##########################
+##     GENERACION 15     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7829, j2: 12171, Empates: 0, WINRATIO p1:39.14 ##
+Epoch: 2
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7719, j2: 12281, Empates: 0, WINRATIO p1:38.59 ##
+Epoch: 3
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7814, j2: 12186, Empates: 0, WINRATIO p1:39.07 ##
+Epoch: 4
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7802, j2: 12198, Empates: 0, WINRATIO p1:39.01 ##
+Epoch: 5
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7897, j2: 12103, Empates: 0, WINRATIO p1:39.48 ##
+Epoch: 6
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7762, j2: 12238, Empates: 0, WINRATIO p1:38.81 ##
+Epoch: 7
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7760, j2: 12240, Empates: 0, WINRATIO p1:38.8 ##
+Epoch: 8
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7883, j2: 12117, Empates: 0, WINRATIO p1:39.41 ##
+Epoch: 9
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7822, j2: 12178, Empates: 0, WINRATIO p1:39.11 ##
+Epoch: 10
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7871, j2: 12129, Empates: 0, WINRATIO p1:39.35 ##
+
+2. Generando Partidas de test
+Generando Partidas.. ( epochs=1,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7779, j2: 12221, Empates: 0, WINRATIO p1:38.89 ##
+len p1_traindata: 724825, len p1_testdata: 72484
+len p1_trainlabels: 724825, len p1_testlabels: 72484
+len p2_traindata: 695567, len p2_testdata: 69518
+len p2_trainlabels: 695567, len p2_testlabels: 69518
+
+3. Guardando partidas en Disco (pickle) con prefijo:value_pickles\gen15_...
+  ...guardado!
+
+  ##   Train_Save   ##
+
+  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo 'value_pickles\gen15_'
+
+  ## Entrenando Red para P1ayer 1
+Epoch 1/10
+ - 47s - loss: 2.0980 - mean_absolute_error: 0.9617
+Epoch 2/10
+ - 42s - loss: 1.7775 - mean_absolute_error: 0.8266
+Epoch 3/10
+ - 42s - loss: 1.6976 - mean_absolute_error: 0.7959
+Epoch 4/10
+ - 42s - loss: 1.6605 - mean_absolute_error: 0.7806
+Epoch 5/10
+ - 42s - loss: 1.6349 - mean_absolute_error: 0.7710
+Epoch 6/10
+ - 42s - loss: 1.6186 - mean_absolute_error: 0.7646
+Epoch 7/10
+ - 42s - loss: 1.6020 - mean_absolute_error: 0.7589
+Epoch 8/10
+ - 42s - loss: 1.6004 - mean_absolute_error: 0.7575
+Epoch 9/10
+ - 42s - loss: 1.5894 - mean_absolute_error: 0.7556
+Epoch 10/10
+ - 42s - loss: 1.5885 - mean_absolute_error: 0.7576
+test_acc: 0.7696656549610409
+
+  ...guardando Red DQN de p1 con prefijo 'value_pickles\gen15_'
+    ...value_pickles\gen15_p1_DQN.h5 guardado!
+## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo 'value_pickles\gen15_'
+
+## Entrenando Red para P1ayer 2
+Epoch 1/10
+ - 46s - loss: 1.9837 - mean_absolute_error: 0.9060
+Epoch 2/10
+ - 41s - loss: 1.5418 - mean_absolute_error: 0.7122
+Epoch 3/10
+ - 41s - loss: 1.4320 - mean_absolute_error: 0.6628
+Epoch 4/10
+ - 41s - loss: 1.3832 - mean_absolute_error: 0.6399
+Epoch 5/10
+ - 41s - loss: 1.3508 - mean_absolute_error: 0.6256
+Epoch 6/10
+ - 41s - loss: 1.3257 - mean_absolute_error: 0.6141
+Epoch 7/10
+ - 41s - loss: 1.3071 - mean_absolute_error: 0.6051
+Epoch 8/10
+ - 41s - loss: 1.2983 - mean_absolute_error: 0.6018
+Epoch 9/10
+ - 41s - loss: 1.2934 - mean_absolute_error: 0.6033
+Epoch 10/10
+ - 41s - loss: 1.2970 - mean_absolute_error: 0.6112
+test_acc: 0.5669628424890578
+
+  ...guardando red DQN de p2 con prefijo 'value_pickles\gen15_'
+    ...value_pickles\gen15_p2_DQN.h5 guardado!
+  ##   Load_and_Test   ##
+
+  ## Carga de partidas de Test desde Disco (pickles) con prefijo: value_pickles\gen15_
+
+## Loading model from disk
+## p1 test_acc: 0.7696656549610409
+## p2 test_acc: 0.5669628424890578
+###########################
+##   Partida de Prueba   ##
+###########################
+
+1) p1 juega c1, acciones de p2 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+2) p2 grito Truco, acciones de p1 disponibles
+[<Accion.FOLD: 6>, <Accion.QUIERO_GRITO: 4>]
+
+3) p1 acepto, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+4) p2 jugo c3, acciones de p1 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+5) p1 jugo c2, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>]
+
+>> Cartas jugadas hasta ahora: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+Le toca a p2
+ cartas en mesa: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+ cartas totales: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40, ID:1, 4-Copa, vt:10]
+ cartas restates: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40]
+
+p2> accion posible: JUGAR_C1,  valor:[[1.9854934]]
+p2> accion posible: JUGAR_C2,  valor:[[1.8292226]]
+
+##########################
+##     GENERACION 16     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7048, j2: 12952, Empates: 0, WINRATIO p1:35.24 ##
+Epoch: 2
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7013, j2: 12987, Empates: 0, WINRATIO p1:35.06 ##
+Epoch: 3
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7148, j2: 12852, Empates: 0, WINRATIO p1:35.74 ##
+Epoch: 4
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7066, j2: 12934, Empates: 0, WINRATIO p1:35.33 ##
+Epoch: 5
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7098, j2: 12902, Empates: 0, WINRATIO p1:35.49 ##
+Epoch: 6
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7023, j2: 12977, Empates: 0, WINRATIO p1:35.11 ##
+Epoch: 7
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7083, j2: 12917, Empates: 0, WINRATIO p1:35.41 ##
+Epoch: 8
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7085, j2: 12915, Empates: 0, WINRATIO p1:35.42 ##
+Epoch: 9
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7056, j2: 12944, Empates: 0, WINRATIO p1:35.28 ##
+Epoch: 10
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7119, j2: 12881, Empates: 0, WINRATIO p1:35.59 ##
+
+2. Generando Partidas de test
+Generando Partidas.. ( epochs=1,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 7227, j2: 12773, Empates: 0, WINRATIO p1:36.13 ##
+len p1_traindata: 647864, len p1_testdata: 64952
+len p1_trainlabels: 647864, len p1_testlabels: 64952
+len p2_traindata: 630397, len p2_testdata: 63201
+len p2_trainlabels: 630397, len p2_testlabels: 63201
+
+3. Guardando partidas en Disco (pickle) con prefijo:value_pickles\gen16_...
+  ...guardado!
+
+  ##   Train_Save   ##
+
+  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo 'value_pickles\gen16_'
+
+  ## Entrenando Red para P1ayer 1
+Epoch 1/10
+ - 47s - loss: 2.2239 - mean_absolute_error: 1.0233
+Epoch 2/10
+ - 42s - loss: 1.8929 - mean_absolute_error: 0.8843
+Epoch 3/10
+ - 42s - loss: 1.8127 - mean_absolute_error: 0.8511
+Epoch 4/10
+ - 42s - loss: 1.7756 - mean_absolute_error: 0.8344
+Epoch 5/10
+ - 42s - loss: 1.7522 - mean_absolute_error: 0.8234
+Epoch 6/10
+ - 42s - loss: 1.7390 - mean_absolute_error: 0.8183
+Epoch 7/10
+ - 42s - loss: 1.7310 - mean_absolute_error: 0.8161
+Epoch 8/10
+ - 42s - loss: 1.7279 - mean_absolute_error: 0.8168
+Epoch 9/10
+ - 42s - loss: 7062.9397 - mean_absolute_error: 13.0463
+Epoch 10/10
+ - 42s - loss: 526679810696.5005 - mean_absolute_error: 345389.2000
+test_acc: 2540996.6597179454
+
+  ...guardando Red DQN de p1 con prefijo 'value_pickles\gen16_'
+    ...value_pickles\gen16_p1_DQN.h5 guardado!
+## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo 'value_pickles\gen16_'
+
+## Entrenando Red para P1ayer 2
+Epoch 1/10
+ - 44s - loss: 2.1544 - mean_absolute_error: 0.9996
+Epoch 2/10
+ - 39s - loss: 1.7576 - mean_absolute_error: 0.8342
+Epoch 3/10
+ - 39s - loss: 1.6730 - mean_absolute_error: 0.7940
+Epoch 4/10
+ - 39s - loss: 1.6291 - mean_absolute_error: 0.7749
+Epoch 5/10
+ - 39s - loss: 1.5981 - mean_absolute_error: 0.7609
+Epoch 6/10
+ - 39s - loss: 1.5798 - mean_absolute_error: 0.7524
+Epoch 7/10
+ - 39s - loss: 1.5679 - mean_absolute_error: 0.7473
+Epoch 8/10
+ - 39s - loss: 1.5593 - mean_absolute_error: 0.7430
+Epoch 9/10
+ - 39s - loss: 1.5524 - mean_absolute_error: 0.7416
+Epoch 10/10
+ - 39s - loss: 1.5466 - mean_absolute_error: 0.7386
+test_acc: 0.6891784545177579
+
+  ...guardando red DQN de p2 con prefijo 'value_pickles\gen16_'
+    ...value_pickles\gen16_p2_DQN.h5 guardado!
+  ##   Load_and_Test   ##
+
+  ## Carga de partidas de Test desde Disco (pickles) con prefijo: value_pickles\gen16_
+
+## Loading model from disk
+## p1 test_acc: 2540996.6597179454
+## p2 test_acc: 0.6891784545177579
+###########################
+##   Partida de Prueba   ##
+###########################
+
+1) p1 juega c1, acciones de p2 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+2) p2 grito Truco, acciones de p1 disponibles
+[<Accion.FOLD: 6>, <Accion.QUIERO_GRITO: 4>]
+
+3) p1 acepto, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+4) p2 jugo c3, acciones de p1 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+5) p1 jugo c2, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>]
+
+>> Cartas jugadas hasta ahora: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+Le toca a p2
+ cartas en mesa: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+ cartas totales: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40, ID:1, 4-Copa, vt:10]
+ cartas restates: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40]
+
+p2> accion posible: JUGAR_C1,  valor:[[0.9301362]]
+p2> accion posible: JUGAR_C2,  valor:[[-1.8720839]]
+
+##########################
+##     GENERACION 17     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 5430, j2: 14570, Empates: 0, WINRATIO p1:27.15 ##
+Epoch: 2
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 5399, j2: 14601, Empates: 0, WINRATIO p1:26.99 ##
+Epoch: 3
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 5364, j2: 14636, Empates: 0, WINRATIO p1:26.82 ##
+Epoch: 4
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 5375, j2: 14625, Empates: 0, WINRATIO p1:26.87 ##
+Epoch: 5
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 5414, j2: 14586, Empates: 0, WINRATIO p1:27.07 ##
+Epoch: 6
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 5565, j2: 14435, Empates: 0, WINRATIO p1:27.82 ##
+Epoch: 7
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 5386, j2: 14614, Empates: 0, WINRATIO p1:26.93 ##
+Epoch: 8
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 5434, j2: 14566, Empates: 0, WINRATIO p1:27.17 ##
+Epoch: 9
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 5396, j2: 14604, Empates: 0, WINRATIO p1:26.98 ##
+Epoch: 10
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 5461, j2: 14539, Empates: 0, WINRATIO p1:27.30 ##
+
+2. Generando Partidas de test
+Generando Partidas.. ( epochs=1,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 5352, j2: 14648, Empates: 0, WINRATIO p1:26.76 ##
+len p1_traindata: 656216, len p1_testdata: 65690
+len p1_trainlabels: 656216, len p1_testlabels: 65690
+len p2_traindata: 605034, len p2_testdata: 60561
+len p2_trainlabels: 605034, len p2_testlabels: 60561
+
+3. Guardando partidas en Disco (pickle) con prefijo:value_pickles\gen17_...
+  ...guardado!
+
+  ##   Train_Save   ##
+
+  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo 'value_pickles\gen17_'
+
+  ## Entrenando Red para P1ayer 1
+Epoch 1/10
+ - 52s - loss: 1.7128 - mean_absolute_error: 0.8753
+Epoch 2/10
+ - 47s - loss: 1.4983 - mean_absolute_error: 0.7505
+Epoch 3/10
+ - 47s - loss: 1.4519 - mean_absolute_error: 0.7241
+Epoch 4/10
+ - 47s - loss: 1.4283 - mean_absolute_error: 0.7108
+Epoch 5/10
+ - 47s - loss: 1.4135 - mean_absolute_error: 0.7060
+Epoch 6/10
+ - 47s - loss: 1.4036 - mean_absolute_error: 0.7016
+Epoch 7/10
+ - 47s - loss: 1.3972 - mean_absolute_error: 0.6979
+Epoch 8/10
+ - 47s - loss: 1.3978 - mean_absolute_error: 0.6981
+Epoch 9/10
+ - 47s - loss: 1.4065 - mean_absolute_error: 0.6988
+Epoch 10/10
+ - 47s - loss: 1.4009 - mean_absolute_error: 0.6955
+test_acc: 0.6895161868602577
+
+  ...guardando Red DQN de p1 con prefijo 'value_pickles\gen17_'
+    ...value_pickles\gen17_p1_DQN.h5 guardado!
+## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo 'value_pickles\gen17_'
+
+## Entrenando Red para P1ayer 2
+Epoch 1/10
+ - 48s - loss: 1.6865 - mean_absolute_error: 0.8398
+Epoch 2/10
+ - 42s - loss: 1.3801 - mean_absolute_error: 0.6700
+Epoch 3/10
+ - 42s - loss: 1.3066 - mean_absolute_error: 0.6229
+Epoch 4/10
+ - 42s - loss: 1.2718 - mean_absolute_error: 0.6031
+Epoch 5/10
+ - 42s - loss: 1.2494 - mean_absolute_error: 0.5912
+Epoch 6/10
+ - 42s - loss: 1.2427 - mean_absolute_error: 0.5865
+Epoch 7/10
+ - 42s - loss: 1.2701 - mean_absolute_error: 0.5865
+Epoch 8/10
+ - 42s - loss: 7.6295 - mean_absolute_error: 0.6521
+Epoch 9/10
+ - 42s - loss: 207.1738 - mean_absolute_error: 1.0900
+Epoch 10/10
+ - 42s - loss: 64790.4858 - mean_absolute_error: 8.6145
+test_acc: 5.3731027819620145
+
+  ...guardando red DQN de p2 con prefijo 'value_pickles\gen17_'
+    ...value_pickles\gen17_p2_DQN.h5 guardado!
+  ##   Load_and_Test   ##
+
+  ## Carga de partidas de Test desde Disco (pickles) con prefijo: value_pickles\gen17_
+
+## Loading model from disk
+## p1 test_acc: 0.6895161868602577
+## p2 test_acc: 5.3731027819620145
+###########################
+##   Partida de Prueba   ##
+###########################
+
+1) p1 juega c1, acciones de p2 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+2) p2 grito Truco, acciones de p1 disponibles
+[<Accion.FOLD: 6>, <Accion.QUIERO_GRITO: 4>]
+
+3) p1 acepto, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+4) p2 jugo c3, acciones de p1 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+5) p1 jugo c2, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>]
+
+>> Cartas jugadas hasta ahora: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+Le toca a p2
+ cartas en mesa: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+ cartas totales: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40, ID:1, 4-Copa, vt:10]
+ cartas restates: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40]
+
+p2> accion posible: JUGAR_C1,  valor:[[0.5902197]]
+p2> accion posible: JUGAR_C2,  valor:[[0.6098461]]
+
+##########################
+##     GENERACION 18     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 6111, j2: 13889, Empates: 0, WINRATIO p1:30.55 ##
+Epoch: 2
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 5980, j2: 14020, Empates: 0, WINRATIO p1:29.9 ##
+Epoch: 3
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 5972, j2: 14028, Empates: 0, WINRATIO p1:29.86 ##
+Epoch: 4
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 6078, j2: 13922, Empates: 0, WINRATIO p1:30.39 ##
+Epoch: 5
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 5989, j2: 14011, Empates: 0, WINRATIO p1:29.94 ##
+Epoch: 6
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 5909, j2: 14091, Empates: 0, WINRATIO p1:29.54 ##
+Epoch: 7
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 5968, j2: 14032, Empates: 0, WINRATIO p1:29.84 ##
+Epoch: 8
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 5927, j2: 14073, Empates: 0, WINRATIO p1:29.63 ##
+Epoch: 9
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 5992, j2: 14008, Empates: 0, WINRATIO p1:29.96 ##
+Epoch: 10
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 6085, j2: 13915, Empates: 0, WINRATIO p1:30.42 ##
+
+2. Generando Partidas de test
+Generando Partidas.. ( epochs=1,   batch_size=20000 )
+
+Epoch: 1
+100.0 % Training completado ## RESULTADO ##  N= 20000 - j1: 6011, j2: 13989, Empates: 0, WINRATIO p1:30.05 ##
+len p1_traindata: 648843, len p1_testdata: 64864
+len p1_trainlabels: 648843, len p1_testlabels: 64864
+len p2_traindata: 581760, len p2_testdata: 58103
+len p2_trainlabels: 581760, len p2_testlabels: 58103
+
+3. Guardando partidas en Disco (pickle) con prefijo:value_pickles\gen18_...
+  ...guardado!
+
+  ##   Train_Save   ##
+
+  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo 'value_pickles\gen18_'
+
+  ## Entrenando Red para P1ayer 1
+Epoch 1/10
+ - 57s - loss: 3.7993 - mean_absolute_error: 1.3911
+Epoch 2/10
+ - 51s - loss: 3.3637 - mean_absolute_error: 1.2486
+Epoch 3/10
+ - 51s - loss: 3.2637 - mean_absolute_error: 1.2122
+Epoch 4/10
+ - 51s - loss: 3.2106 - mean_absolute_error: 1.1906
+Epoch 5/10
+ - 51s - loss: 3.1690 - mean_absolute_error: 1.1769
+Epoch 6/10
+ - 51s - loss: 3.1522 - mean_absolute_error: 1.1702
+Epoch 7/10
+ - 51s - loss: 3.1409 - mean_absolute_error: 1.1731
+Epoch 8/10
+ - 51s - loss: 9127429512174.6348 - mean_absolute_error: 955399.3668
+Epoch 9/10
+ - 51s - loss: nan - mean_absolute_error: nan
+Epoch 10/10
+ - 51s - loss: nan - mean_absolute_error: nan
+test_acc: nan
+
+  ...guardando Red DQN de p1 con prefijo 'value_pickles\gen18_'
+    ...value_pickles\gen18_p1_DQN.h5 guardado!
+## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo 'value_pickles\gen18_'
+
+## Entrenando Red para P1ayer 2
+Epoch 1/10
+ - 48s - loss: 3.9588 - mean_absolute_error: 1.4301
+Epoch 2/10
+ - 42s - loss: 3.4238 - mean_absolute_error: 1.2468
+Epoch 3/10
+ - 42s - loss: 3.2663 - mean_absolute_error: 1.1841
+Epoch 4/10
+ - 42s - loss: 3.1857 - mean_absolute_error: 1.1568
+Epoch 5/10
+ - 42s - loss: 3.1357 - mean_absolute_error: 1.1413
+Epoch 6/10
+ - 42s - loss: 3.1087 - mean_absolute_error: 1.1371
+Epoch 7/10
+ - 42s - loss: 14917364208653.0781 - mean_absolute_error: 1460588.9147
+Epoch 8/10
+ - 42s - loss: nan - mean_absolute_error: nan
+Epoch 9/10
+ - 44s - loss: nan - mean_absolute_error: nan
+Epoch 10/10
+ - 44s - loss: nan - mean_absolute_error: nan
+test_acc: nan
+
+  ...guardando red DQN de p2 con prefijo 'value_pickles\gen18_'
+    ...value_pickles\gen18_p2_DQN.h5 guardado!
+  ##   Load_and_Test   ##
+
+  ## Carga de partidas de Test desde Disco (pickles) con prefijo: value_pickles\gen18_
+
+## Loading model from disk
+## p1 test_acc: nan
+## p2 test_acc: nan
+###########################
+##   Partida de Prueba   ##
+###########################
+
+1) p1 juega c1, acciones de p2 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+2) p2 grito Truco, acciones de p1 disponibles
+[<Accion.FOLD: 6>, <Accion.QUIERO_GRITO: 4>]
+
+3) p1 acepto, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+4) p2 jugo c3, acciones de p1 disponibles
+[<Accion.GRITAR: 5>, <Accion.JUGAR_C2: 2>, <Accion.JUGAR_C3: 3>]
+
+5) p1 jugo c2, acciones de p2 disponibles
+[<Accion.JUGAR_C1: 1>, <Accion.JUGAR_C2: 2>]
+
+>> Cartas jugadas hasta ahora: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+Le toca a p2
+ cartas en mesa: [ID:9, 1-Espada, vt:90, ID:1, 4-Copa, vt:10, ID:5, 11-Basto, vt:30]
+ cartas totales: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40, ID:1, 4-Copa, vt:10]
+ cartas restates: [ID:8, 1-Basto, vt:80, ID:6, 2-Basto, vt:40]
+
+p2> accion posible: JUGAR_C1,  valor:[[nan]]
+p2> accion posible: JUGAR_C2,  valor:[[nan]]
+
+##########################
+##     GENERACION 19     ##
+##########################
+
+  ##   Generate_and_Save   ##
+
+1. Generando Partidas de entrenamiento
+Generando Partidas.. ( epochs=10,   batch_size=20000 )
+
+Epoch: 1
+0.005 % Training completado D:\Onedrive\Material\AI\Curso Digital House\XX - Proyecto Truco\pycharm2\Truco_Core_v2_r2.py:349: RuntimeWarning: invalid value encountered in greater
+  if value > best :
+Traceback (most recent call last):
+  File "D:/Onedrive/Material/AI/Curso Digital House/XX - Proyecto Truco/pycharm2/Truco_Pruebas_v2_r2.py", line 667, in <module>
+    ValueNetworkEngine.ValueNetworkTrainer(200000, 40)
+  File "D:\Onedrive\Material\AI\Curso Digital House\XX - Proyecto Truco\pycharm2\Truco_Value_Network_v2_r2.py", line 299, in ValueNetworkTrainer
+    ValueNetworkEngine.Generate_and_Save(gen_n, gen_next, round(games_per_gen / 10), 10)
+  File "D:\Onedrive\Material\AI\Curso Digital House\XX - Proyecto Truco\pycharm2\Truco_Value_Network_v2_r2.py", line 78, in Generate_and_Save
+    (p1_traindata, p1_trainlabels), (p2_traindata, p2_trainlabels) = Motor.Generate_Value_Training_Games(p1, p2, batch_size, epochs)
+  File "D:\Onedrive\Material\AI\Curso Digital House\XX - Proyecto Truco\pycharm2\Truco_Core_v2_r2.py", line 948, in Generate_Value_Training_Games
+    for i in range(epochs):
+  File "D:\Onedrive\Material\AI\Curso Digital House\XX - Proyecto Truco\pycharm2\Truco_Core_v2_r2.py", line 837, in Play_random_games
+    else:
+  File "D:\Onedrive\Material\AI\Curso Digital House\XX - Proyecto Truco\pycharm2\Truco_Core_v2_r2.py", line 342, in Elegir_Accion
+    
+  File "D:\Onedrive\Material\AI\Curso Digital House\XX - Proyecto Truco\pycharm2\Truco_Core_v2_r2.py", line 896, in ConverToPolicyVector
+    if len(estado.acciones_hechas) > i:
+AttributeError: 'NoneType' object has no attribute 'value'
+
+Process finished with exit code 1

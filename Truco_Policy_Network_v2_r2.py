@@ -281,14 +281,14 @@ class PolicyNetworkEngine:
 
 
     @staticmethod
-    def PolicyNetworkTrainer(games_per_gen, generations):
+    def PolicyNetworkTrainer(games_per_gen, generations, start_gen =0):
         printDebug("COMIENZO!")
         print("")
 
         import logging
         logging.getLogger('tensorflow').disabled = True
 
-        for i in range(generations):
+        for i in range(start_gen, start_gen+generations):
             print("")
             print("##########################")
             print("##     GENERACION " + str(i+1) + "     ##")

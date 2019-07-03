@@ -242,7 +242,7 @@ class AgenteRandom:
 # Este agente usa su Red de Valor para decidir acciones
 class AgenteDVN:
     def __init__(self, jugador, dvn):
-        self.eps = 0.1
+        self.eps = 0.05
         self.cartas_totales = []
         self.cartas_restantes = []
         self.state_history = []
@@ -318,7 +318,7 @@ class AgenteDVN:
 
         # TODO: PROBAR OTRO QUE NO SEA EPSILON GREEDY. bayesian sampling no esta bueno por las prob negativas
         # podemos usar decaying epsilon (usando variable interna de clase) para el agente que vaya reduciendo eps. Esto me sirve porque cada training agent es nuevo.
-        if r < (1/(1+self.eps)):
+        if r < self.eps:
             # take a random action
             if debug: printDebug("  Taking a random action")
             idx = np.random.choice(len(self.get_acciones_posibles(s)))  # random 0,1 y 2
@@ -964,3 +964,7 @@ class Motor:
 
 
         return (p1_data, p1_labels), (p2_data, p2_labels)
+
+    @staticmethod
+    def GameListDiagnose(p1_data, p1_labels, p2_data, p2_labels):
+        pass
