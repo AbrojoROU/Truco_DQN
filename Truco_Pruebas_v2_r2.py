@@ -1,7 +1,9 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
+os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '0'
 from Truco_Core_v2_r2 import *
 from Truco_Policy_Network_v2_r2 import *
 from Truco_Value_Network_v2_r2 import *
-
 import keras
 
 
@@ -533,6 +535,40 @@ def prueba_Generate_Policy_Training_Games():
     print(p2_labels)
     print("")
 
+def prueba_MultiProcess_Value_Training_Games():
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Generate_Value_Training_Games - ##")
+    print("===================================================")
+    print("")
+    #p1 = AgenteRandom(Reglas.JUGADOR1)
+    #p2 = AgenteRandom(Reglas.JUGADOR2)
+
+    genX = "value_pickles\gen2_"
+    p1_DQN = keras.models.load_model(genX + "p1_DQN.h5")
+    p2_DQN = keras.models.load_model(genX + "p2_DQN.h5")
+
+    p1 = AgenteDVN(Reglas.JUGADOR1, p1_DQN)
+    p2 = AgenteDVN(Reglas.JUGADOR2, p2_DQN)
+
+
+    (p1_data, p1_labels), (p2_data, p2_labels) = Motor.MP_Generate_Value_Training_Games(p1, p2, 20000, False)
+
+    print("")
+    print("p1 data")
+    print(*p1_data, sep='\n')
+    print("")
+    print("p1 labels")
+    print(p1_labels)
+    print("")
+    print("p2 data")
+    print(*p2_data, sep='\n')
+    print("")
+    print("p2 labels")
+    print(p2_labels)
+    print("")
+
+
 def prueba_Generate_Value_Training_Games(gen):
     print("")
     print("===================================================")
@@ -652,10 +688,21 @@ def prueba_Play_VERSUS():
 ###                    MAIN                         ###
 #######################################################
 if __name__ == '__main__':
+    def warn(*args, **kwargs):
+        pass
+    import warnings
+    warnings.warn = warn
+
     printDebug("COMIENZO!")
     print("")
-    import logging
-    logging.getLogger('tensorflow').disabled = True
+    from tensorflow.python.util import deprecation
+    deprecation._PRINT_DEPRECATION_WARNINGS = False
+    import tensorflow as tf
+    if type(tf.contrib) != type(tf): tf.contrib._warning = None
+
+    import tensorflow as tf
+
+
 
     ### PRUEBAS ESTADO
     # prueba_QuienGanoManos()
@@ -677,6 +724,7 @@ if __name__ == '__main__':
     # REDES
     # prueba_Generate_Value_Training_Games()
     # prueba_Generate_Policy_Training_Games()
+    # prueba_MultiProcess_Value_Training_Games()
     # prueba_Play_DVN_RandomGames()we
     # prueba_Play_DPN_RandomGames()
 
@@ -689,8 +737,9 @@ if __name__ == '__main__':
     # AHORA
     ##############
 
-    #traienr
-    ValueNetworkEngine.ValueNetworkTrainer(200000, 30, 0, True)
+    #trainer
+
+    ValueNetworkEngine.ValueNetworkTrainer(300000, 40, 0, True)
 
     # versus
     #ValueNetworkEngine.ValueTrainingTest(1, 5, 5000, False)

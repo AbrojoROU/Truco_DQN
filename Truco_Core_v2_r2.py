@@ -1,16 +1,14 @@
 # OPTIMISTIC INITIAL VALUES
-
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
+os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '0'
 import numpy as np
 import inspect
 import random
 import copy
 from enum import Enum
 import pickle
-import itertools
-import json
-import matplotlib.pyplot as plt
-# %matplotlib inline
-
+import multiprocessing as mp
 import time
 
 # FUNCIONES A NIVEL MODULO
@@ -28,15 +26,46 @@ def GenerarMazo():
     Carta.ResetContCarta()
     MAZO = []
     MAZO.append(Carta("carta nula", 0))  # ID: 0 para que Carta.ID = Mazo[index]
-    MAZO.append(Carta("4-Copa", 10))  # ID: 1
-    MAZO.append(Carta("6-Copa", 20))  # ID: 2
-    MAZO.append(Carta("6-Basto", 20))  # ID: 3
-    MAZO.append(Carta("11-Copa", 30))  # ID: 4
-    MAZO.append(Carta("11-Basto", 30))  # ID: 5
-    MAZO.append(Carta("2-Basto", 40))  # ID: 6
-    MAZO.append(Carta("2-Copa", 40))  # ID: 7
-    MAZO.append(Carta("1-Basto", 80))  # ID: 8
-    MAZO.append(Carta("1-Espada", 90))  # ID: 9
+    MAZO.append(Carta("4-Copa", 7))  # ID: 1
+    MAZO.append(Carta("4-Oro", 7))  # ID: 2
+    MAZO.append(Carta("4-Basto", 7))  # ID: 3
+    MAZO.append(Carta("4-Espada", 7))  # ID: 4
+    MAZO.append(Carta("5-Copa", 14))  # ID: 5
+    MAZO.append(Carta("5-Oro", 14))  # ID: 6
+    MAZO.append(Carta("5-Basto", 14))  # ID: 7
+    MAZO.append(Carta("5-Espada", 14))  # ID: 8
+    MAZO.append(Carta("6-Copa", 21))  # ID: 9
+    MAZO.append(Carta("6-Oro", 21))  # ID: 10
+    MAZO.append(Carta("6-Basto", 21))  # ID: 11
+    MAZO.append(Carta("6-Espada", 21))  # ID: 12
+    MAZO.append(Carta("7-Copa", 28))  # ID: 13
+    MAZO.append(Carta("7-Basto", 28))  # ID: 14
+    MAZO.append(Carta("10-Copa", 35))  # ID: 15
+    MAZO.append(Carta("10-Oro", 35))  # ID: 16
+    MAZO.append(Carta("10-Basto", 35))  # ID: 17
+    MAZO.append(Carta("10-Espada", 35))  # ID: 18
+    MAZO.append(Carta("11-Copa", 42))  # ID: 19
+    MAZO.append(Carta("11-Oro", 42))  # ID: 20
+    MAZO.append(Carta("11-Basto", 42))  # ID: 21
+    MAZO.append(Carta("11-Espada", 42))  # ID: 22
+    MAZO.append(Carta("12-Copa", 49))  # ID: 23
+    MAZO.append(Carta("12-Oro", 49))  # ID: 24
+    MAZO.append(Carta("12-Basto", 49))  # ID: 25
+    MAZO.append(Carta("12-Espada", 49))  # ID: 26
+    MAZO.append(Carta("1-Copa", 56))  # ID: 27
+    MAZO.append(Carta("1-Oro", 56))  # ID: 28
+    MAZO.append(Carta("2-Copa", 63))  # ID: 29
+    MAZO.append(Carta("2-Oro", 63))  # ID: 30
+    MAZO.append(Carta("2-Basto", 63))  # ID: 31
+    MAZO.append(Carta("2-Espada", 63))  # ID: 32
+    MAZO.append(Carta("3-Copa", 70))  # ID: 33
+    MAZO.append(Carta("3-Oro", 70))  # ID: 34
+    MAZO.append(Carta("3-Basto", 70))  # ID: 35
+    MAZO.append(Carta("3-Espada", 70))  # ID: 36
+    MAZO.append(Carta("7-Oro", 77))  # ID: 37
+    MAZO.append(Carta("7-Espada", 84))  # ID: 38
+    MAZO.append(Carta("1-Basto", 91))  # ID: 39
+    MAZO.append(Carta("1-Espada", 98))  # ID: 40
     return MAZO
 
 
@@ -875,18 +904,18 @@ class Motor:
         result = []
 
         # 1ro ESTADO TRUCO (1 neurona)
-        if normalized : result.append(estado.truco.value / len(Reglas.EstadoTruco))  # normalizo usando total de estados posibles de truco
+        if normalized : result.append((estado.truco.value ) - len(Reglas.EstadoTruco)/ len(Reglas.EstadoTruco))  # normalizo usando total de estados posibles de truco
         else: result.append(estado.truco.value)
 
         # 2do CARTAS DEL JUGADOR (3 neuronas)
         for c in jugador.cartas_totales:
-            if normalized : result.append(c.ValorTruco / 101)    # 100 es maximo valortruco de cualquier carta, uso 101 para normalizar
+            if normalized : result.append((c.ValorTruco -50)/ 100)    # 100 es maximo valortruco de cualquier carta, lo centro en el origen
             else: result.append(c.ValorTruco)
 
         # 3ro CARTAS JUGADAS (6 neuronas, fijo), en su forma de valor truco. (esto reduce total de combinaciones, de 40 ID posibles a 14 valores truco posibles)
         for i in range(6):
             if len(estado.cartas_jugadas) > i:
-                if normalized : result.append(estado.cartas_jugadas[i].ValorTruco/101)  # 100 es maximo valortruco de cualquier carta, uso 101 para normalizar
+                if normalized : result.append((estado.cartas_jugadas[i].ValorTruco-50)/100)  # 100 es maximo valortruco de cualquier carta, lo centro en el origen
                 else: result.append(estado.cartas_jugadas[i].ValorTruco)
             else:  # padding (largo fijo 6, el resto completo con 0's)
                 result.append(0)
@@ -895,7 +924,7 @@ class Motor:
         for i in range(20):
             if len(estado.acciones_hechas) > i:
                 result.append(estado.acciones_hechas[i][0])
-                if normalized : result.append(estado.acciones_hechas[i][1].value/(len(Reglas.Accion)+1))
+                if normalized : result.append((estado.acciones_hechas[i][1].value-len(Reglas.Accion))/(len(Reglas.Accion)+1))
                 else: result.append(estado.acciones_hechas[i][1].value)
 
             else: # padding (largo fijo 20, el resto completo con 0's)
@@ -964,6 +993,90 @@ class Motor:
 
 
         return (p1_data, p1_labels), (p2_data, p2_labels)
+
+    @staticmethod
+    def MP_value_worker(p1, p2, N, queue):
+        print("")
+
+        import os
+        import logging
+        logging.getLogger('tensorflow').disabled = True
+        from tensorflow.python.util import deprecation
+        deprecation._PRINT_DEPRECATION_WARNINGS = False
+        import tensorflow as tf
+        if type(tf.contrib) != type(tf): tf.contrib._warning = None
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
+
+        # printing process id
+        p1 = copy.deepcopy(p1)
+        p2 = copy.deepcopy(p2)
+        episodios = Motor.Play_random_games(p1, p2, N, False)
+        queue.put(episodios)
+        import sys
+        #sys.stdout.flush()
+
+    @staticmethod
+    def MP_Generate_Value_Training_Games(p1, p2, batch_size, normalized=True):
+        p1_data = []
+        p1_labels = []
+        p2_data = []
+        p2_labels = []
+        assert(batch_size>=4)
+        print("Generando Partidas.. ( batch_size=" + str(batch_size) + " )")
+        print("")
+
+        # Me divido la partidas entre la cantidad de workers
+        N = round(batch_size / 5)
+        #creo las colas de retorno
+        queue1 = mp.Queue()
+        queue2 = mp.Queue()
+        queue3 = mp.Queue()
+        queue4 = mp.Queue()
+        queue5 = mp.Queue()
+        #creo los 5 workers
+        process1 = mp.Process(target=Motor.MP_value_worker, args=(p1, p2, N, queue1))
+        process2 = mp.Process(target=Motor.MP_value_worker, args=(p1, p2, N, queue2))
+        process3 = mp.Process(target=Motor.MP_value_worker, args=(p1, p2, N, queue3))
+        process4 = mp.Process(target=Motor.MP_value_worker, args=(p1, p2, N, queue4))
+        process5 = mp.Process(target=Motor.MP_value_worker, args=(p1, p2, N, queue5))
+        #comienzo la ejecucion de los 4 workers en paralelo
+        process1.start()
+        process2.start()
+        process3.start()
+        process4.start()
+        process5.start()
+        #obtengo el retorno de los 4 workers
+        episodios1 = queue1.get()
+        episodios2 = queue2.get()
+        episodios3 = queue3.get()
+        episodios4 = queue4.get()
+        episodios5 = queue5.get()
+        #espero que retornen
+        process1.join()
+        process2.join()
+        process3.join()
+        process4.join()
+        process5.join()
+        #sumo los resultados
+        from itertools import chain
+        #print("eps totales:" + str(len(episodios))+ ", ep1:" + str(len(episodios1))+", ep2:" + str(len(episodios2))+", ep3:" + str(len(episodios3))+", ep4:" + str(len(episodios4)))
+
+        for e in chain(episodios1,episodios2, episodios3, episodios4, episodios5):
+            # pero quizas esto sea con otra Red de Value (esta es policy)
+            for s in reversed(range(len(e.estados))):
+                # logica: "si en [s-1] me toca a mi, en [s] ya jugue yo. Guardo ese estado con mi movimiento hecho y el puntaje total
+
+                if s > 0 and e.estados[s - 1].QuienActua() is Reglas.JUGADOR1:
+                    p1_data.append(Motor.ConverToPolicyVector(e.p1, e.estados[s], normalized))
+                    p1_labels.append(e.CalcularPuntosFinales()[0] - e.CalcularPuntosFinales()[1])
+
+                if s > 0 and e.estados[s - 1].QuienActua() is Reglas.JUGADOR2:
+                    p2_data.append(Motor.ConverToPolicyVector(e.p2, e.estados[s], normalized))
+                    p2_labels.append(e.CalcularPuntosFinales()[1] - e.CalcularPuntosFinales()[0])
+
+        return (p1_data, p1_labels), (p2_data, p2_labels)
+
+
 
     @staticmethod
     def GameListDiagnose(p1_data, p1_labels, p2_data, p2_labels):

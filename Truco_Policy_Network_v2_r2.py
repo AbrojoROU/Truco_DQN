@@ -1,3 +1,6 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
+os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '0'
 from Truco_Core_v2_r2 import *
 import keras
 import tensorflow as tf

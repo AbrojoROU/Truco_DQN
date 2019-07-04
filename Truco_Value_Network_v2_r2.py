@@ -1,6 +1,8 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
+os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '0'
 from Truco_Core_v2_r2 import *
 import keras
-import tensorflow as tf
 
 
 class ValueNetworkEngine:
@@ -18,12 +20,12 @@ class ValueNetworkEngine:
         p2 = AgenteRandom(Reglas.JUGADOR2)
         cartas_j1 = []
         cartas_j2 = []
-        cartas_j1.append(Reglas.MAZO[9])
-        cartas_j1.append(Reglas.MAZO[5])
-        cartas_j1.append(Reglas.MAZO[3])
-        cartas_j2.append(Reglas.MAZO[8])
-        cartas_j2.append(Reglas.MAZO[6])
-        cartas_j2.append(Reglas.MAZO[1])
+        cartas_j1.append(Reglas.MAZO[40])
+        cartas_j1.append(Reglas.MAZO[21])
+        cartas_j1.append(Reglas.MAZO[10])
+        cartas_j2.append(Reglas.MAZO[39])
+        cartas_j2.append(Reglas.MAZO[30])
+        cartas_j2.append(Reglas.MAZO[3])
 
         p1.TomarCartas(cartas_j1)
         p2.TomarCartas(cartas_j2)
@@ -34,7 +36,7 @@ class ValueNetworkEngine:
         print(str(p2.get_acciones_posibles(s)))
         print("")
 
-        #return p1, p2, s  # poner esta linea donde quiera testear predict de la red
+        return p1, p2, s  # poner esta linea donde quiera testear predict de la red
 
         print("2) p2 grito Truco, acciones de p1 disponibles")
         p2.EjecutarAccion(s, Reglas.Accion.GRITAR)
@@ -57,10 +59,14 @@ class ValueNetworkEngine:
         print("")
         print(">> Cartas jugadas hasta ahora: " + str(s.cartas_jugadas))
 
-        return p1, p2, s # poner esta linea donde quiera testear predict de la red
+        #return p1, p2, s # poner esta linea donde quiera testear predict de la red
 
     @staticmethod
-    def Generate_and_Save(input_prefix, output_prefix, batch_size, epochs):
+    def Generate_and_Save(input_prefix, output_prefix, games_per_gen):
+        import logging
+        logging.getLogger('tensorflow').disabled = True
+        from tensorflow.python.util import deprecation
+        deprecation._PRINT_DEPRECATION_WARNINGS = False
         print("  ##   Generate_and_Save   ##")
         print("")
 
@@ -77,11 +83,11 @@ class ValueNetworkEngine:
             p2 = AgenteRandom(Reglas.JUGADOR2)
 
         print("1. Generando Partidas de entrenamiento")
-        (p1_traindata, p1_trainlabels), (p2_traindata, p2_trainlabels) = Motor.Generate_Value_Training_Games(p1, p2, batch_size, epochs)
+        (p1_traindata, p1_trainlabels), (p2_traindata, p2_trainlabels) = Motor.MP_Generate_Value_Training_Games(p1, p2, games_per_gen)
 
         print("")
         print("2. Generando Partidas de test")
-        (p1_testdata, p1_testlabels), (p2_testdata, p2_testlabels) = Motor.Generate_Value_Training_Games(p1, p2, batch_size, 1)
+        (p1_testdata, p1_testlabels), (p2_testdata, p2_testlabels) = Motor.MP_Generate_Value_Training_Games(p1, p2, games_per_gen/10) # decima parte de training sirve para test
         print("len p1_traindata: " + str(len(p1_traindata)) + ", len p1_testdata: " + str(len(p1_testdata)))
         print("len p1_trainlabels: " + str(len(p1_trainlabels)) + ", len p1_testlabels: " + str(len(p1_testlabels)))
         print("len p2_traindata: " + str(len(p2_traindata)) + ", len p2_testdata: " + str(len(p2_testdata)))
@@ -114,8 +120,14 @@ class ValueNetworkEngine:
         p1_testlabels = Motor.Load_Games_From_Disk(gen_prefix + "p1_testlabels.pickle")
 
         if load_previous is True:
-            prev_gen = int(gen_prefix[-2]) - 1  # tomo el numero de generacion del string, lo parseo a int y le resto 1
-            prev_gen = gen_prefix[:-2] + str(prev_gen) + gen_prefix[-1:]  #vuelvo a recrear el string
+            if len(gen_prefix) == 19:
+                prev_gen = int(gen_prefix[-2]) - 1  # tomo el numero de generacion del string, lo parseo a int y le resto 1
+                prev_gen = gen_prefix[:-2] + str(prev_gen) + gen_prefix[-1:]  #vuelvo a recrear el string
+            elif len(gen_prefix) == 20:
+                prev_gen = int(gen_prefix[-3:-1:]) - 1  # tomo el numero de generacion del string, lo parseo a int y le resto 1
+                prev_gen = gen_prefix[:-3] + str(prev_gen) + gen_prefix[-1:]  # vuelvo a recrear el string
+            else:
+                assert False # length of string gen_prefix unexpected
             # cargo y anexo
             p1_traindata = p1_traindata + Motor.Load_Games_From_Disk(prev_gen + "p1_traindata.pickle")
             p1_trainlabels = p1_trainlabels + Motor.Load_Games_From_Disk(prev_gen + "p1_trainlabels.pickle")
@@ -124,6 +136,8 @@ class ValueNetworkEngine:
         # ENTRENANDO REDES
         from keras import models
         from keras import layers
+        from keras import backend as K
+        K.set_session(K.tf.Session(config=K.tf.ConfigProto(intra_op_‌_parallelism_threads=‌​32, inter_op_parallelism_threads = 32)))
 
         #########################
         ## ENTRENO RED PARA p1
@@ -131,15 +145,15 @@ class ValueNetworkEngine:
         print("  ## Entrenando Red para P1ayer 1")
         p1_DQN = models.Sequential()
         p1_DQN.add(layers.Dense(50, activation='relu', input_shape=(50,)))
-        p1_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p1_DQN.add(layers.Dense(60, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
         #p1_DQN.add(layers.Dropout(0.2))
-        p1_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p1_DQN.add(layers.Dense(60, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
         #p1_DQN.add(layers.Dropout(0.2))
-        p1_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p1_DQN.add(layers.Dense(60, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
         #p1_DQN.add(layers.Dropout(0.2))
-        p1_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p1_DQN.add(layers.Dense(60, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
         #p1_DQN.add(layers.Dropout(0.2))
-        p1_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p1_DQN.add(layers.Dense(60, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
         p1_DQN.add(layers.Dense(1))
 
         p1_DQN.compile(optimizer='adam', loss='mse', metrics=['mae'])
@@ -178,8 +192,14 @@ class ValueNetworkEngine:
         p2_testlabels = Motor.Load_Games_From_Disk(gen_prefix + "p2_testlabels.pickle")
 
         if load_previous is True:
-            prev_gen = int(gen_prefix[-2]) - 1  # tomo el numero de generacion del string, lo parseo a int y le resto 1
-            prev_gen = gen_prefix[:-2] + str(prev_gen) + gen_prefix[-1:]  #vuelvo a recrear el string
+            if len(gen_prefix) == 19:
+                prev_gen = int(gen_prefix[-2]) - 1  # tomo el numero de generacion del string, lo parseo a int y le resto 1
+                prev_gen = gen_prefix[:-2] + str(prev_gen) + gen_prefix[-1:]  # vuelvo a recrear el string
+            elif len(gen_prefix) == 20:
+                prev_gen = int(gen_prefix[-3:-1:]) - 1  # tomo el numero de generacion del string, lo parseo a int y le resto 1
+                prev_gen = gen_prefix[:-3] + str(prev_gen) + gen_prefix[-1:]  # vuelvo a recrear el string
+            else:
+                assert False  # length of string gen_prefix unexpected
             # cargo y anexo
             p2_traindata = p2_traindata + Motor.Load_Games_From_Disk(prev_gen + "p1_traindata.pickle")
             p2_trainlabels = p2_trainlabels + Motor.Load_Games_From_Disk(prev_gen + "p1_trainlabels.pickle")
@@ -188,15 +208,15 @@ class ValueNetworkEngine:
         print("## Entrenando Red para P1ayer 2")
         p2_DQN = models.Sequential()
         p2_DQN.add(layers.Dense(50, activation='relu', input_shape=(50,)))
-        p2_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p2_DQN.add(layers.Dense(60, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
         #p2_DQN.add(layers.Dropout(0.2))
-        p2_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p2_DQN.add(layers.Dense(60, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
         #p2_DQN.add(layers.Dropout(0.2))
-        p2_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p2_DQN.add(layers.Dense(60, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
         #p2_DQN.add(layers.Dropout(0.2))
-        p2_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p2_DQN.add(layers.Dense(60, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
         #p2_DQN.add(layers.Dropout(0.2))
-        p2_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p2_DQN.add(layers.Dense(60, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
         p2_DQN.add(layers.Dense(1))
 
         p2_DQN.compile(optimizer='adam', loss='mse', metrics=['mae'])
@@ -324,8 +344,14 @@ class ValueNetworkEngine:
         printDebug("COMIENZO!")
         print("")
 
+        import os
         import logging
         logging.getLogger('tensorflow').disabled = True
+        from tensorflow.python.util import deprecation
+        deprecation._PRINT_DEPRECATION_WARNINGS = False
+        import tensorflow as tf
+        if type(tf.contrib) != type(tf): tf.contrib._warning = None
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
 
         for i in range(start_gen, start_gen+generations):
             print("")
@@ -338,7 +364,7 @@ class ValueNetworkEngine:
             if i == 0: gen_n = None
 
             # Genero las partidas y guardo los pickles en disco (omitir si ya tengo un buen pickle generado)
-            ValueNetworkEngine.Generate_and_Save(gen_n, gen_next, round(games_per_gen / 10), 10)
+            ValueNetworkEngine.Generate_and_Save(gen_n, gen_next, games_per_gen)
             # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
             if i == 0:
                 ValueNetworkEngine.Train_Save(gen_next, 10, False)
