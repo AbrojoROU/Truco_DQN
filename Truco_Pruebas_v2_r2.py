@@ -633,6 +633,43 @@ def prueba_Play_DVN_RandomGames(gen):
 
     Motor.Play_random_games(p1, p2, 10000, True)
 
+def prueba_Play_HUMAN():
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Play HUMAN - ##")
+    print("===================================================")
+    print("")
+
+    # RANDOM AGENTS
+    #random_p1 = AgenteRandom(Reglas.JUGADOR1)
+    #random_p2 = AgenteRandom(Reglas.JUGADOR2)
+
+    # VALUE AGENTS
+    #genV = "value_pickles\gen2_"
+    #p1_DVN = keras.models.load_model(genV + "p1_DQN.h5")
+    #p2_DVN = keras.models.load_model(genV + "p2_DQN.h5")
+    #value_p1 = AgenteDVN(Reglas.JUGADOR1, p1_DVN)
+    #value_p2 = AgenteDVN(Reglas.JUGADOR2, p2_DVN)
+
+    # POLICY AGENTS
+    #genP = "policy_pickles\gen2_"
+    #p1_DPN = keras.models.load_model(genP + "p1_DQN.h5")
+    #p2_DPN = keras.models.load_model(genP + "p2_DQN.h5")
+    #policy_p1 = AgenteDPN(Reglas.JUGADOR1, p1_DPN)
+    #policy_p2 = AgenteDPN(Reglas.JUGADOR2, p2_DPN)
+
+    # PARTIDAS
+    #Motor.Play_random_games(random_p1, random_p2, 1, True)
+    #Motor.Play_random_games(value_p1, value_p2, 1, True)
+    #Motor.Play_random_games(policy_p1, policy_p2, 1, True)
+
+    # MIXTA
+    print("")
+    Motor.Play_Human_game(Humano(Reglas.JUGADOR1),
+                            AgenteDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen6_p2_DQN.h5")),
+                            True)
+
+
 def prueba_Play_VERSUS():
     print("")
     print("===================================================")
@@ -699,9 +736,7 @@ if __name__ == '__main__':
     deprecation._PRINT_DEPRECATION_WARNINGS = False
     import tensorflow as tf
     if type(tf.contrib) != type(tf): tf.contrib._warning = None
-
     import tensorflow as tf
-
 
 
     ### PRUEBAS ESTADO
@@ -739,7 +774,7 @@ if __name__ == '__main__':
 
     #trainer
 
-    ValueNetworkEngine.ValueNetworkTrainer(200000, 20, 7, True)
+    ValueNetworkEngine.ValueNetworkTrainer(200000, 20, 6, True)
 
     # versus
     #ValueNetworkEngine.ValueTrainingTest(1, 5, 5000, False)
@@ -748,7 +783,7 @@ if __name__ == '__main__':
     # pruebas acidas
     #ValueNetworkEngine.Load_and_Test("value_pickles\gen5_")
     #ValueNetworkEngine.Load_and_Test("value_pickles\gen11_")
-
+    #prueba_Play_HUMAN()
 
 
     print("")

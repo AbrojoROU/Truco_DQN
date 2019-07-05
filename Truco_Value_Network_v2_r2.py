@@ -109,7 +109,7 @@ class ValueNetworkEngine:
         print("")
 
     @staticmethod
-    def Train_Save(gen_prefix, eps, load_previous = False):
+    def Train_Save(gen_prefix, training_epochs, load_previous = False):
         print("  ##   Train_Save   ##")
         print("")
         print("  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo '" + gen_prefix + "'")
@@ -136,8 +136,6 @@ class ValueNetworkEngine:
         # ENTRENANDO REDES
         from keras import models
         from keras import layers
-        from keras import backend as K
-        K.set_session(K.tf.Session(config=K.tf.ConfigProto(inter_op_parallelism_threads = 8)))
 
         #########################
         ## ENTRENO RED PARA p1
@@ -145,15 +143,19 @@ class ValueNetworkEngine:
         print("  ## Entrenando Red para P1ayer 1")
         p1_DQN = models.Sequential()
         p1_DQN.add(layers.Dense(50, activation='relu', input_shape=(50,)))
-        p1_DQN.add(layers.Dense(100, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p1_DQN.add(layers.Dense(80, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
         #p1_DQN.add(layers.Dropout(0.2))
-        p1_DQN.add(layers.Dense(100, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p1_DQN.add(layers.Dense(80, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
         #p1_DQN.add(layers.Dropout(0.2))
-        p1_DQN.add(layers.Dense(100, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p1_DQN.add(layers.Dense(80, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
         #p1_DQN.add(layers.Dropout(0.2))
-        p1_DQN.add(layers.Dense(100, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p1_DQN.add(layers.Dense(80, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
+        # p1_DQN.add(layers.Dropout(0.2))
+        p1_DQN.add(layers.Dense(80, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
+        # p1_DQN.add(layers.Dropout(0.2))
+        p1_DQN.add(layers.Dense(80, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
         #p1_DQN.add(layers.Dropout(0.2))
-        p1_DQN.add(layers.Dense(50, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p1_DQN.add(layers.Dense(50, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
         p1_DQN.add(layers.Dense(1))
 
         p1_DQN.compile(optimizer='adam', loss='mse', metrics=['mae'])
@@ -169,7 +171,7 @@ class ValueNetworkEngine:
         p1_testdata = p1_testdata.astype('float32')
 
         # Fiteo la red
-        p1_DQN.fit(p1_traindata, p1_trainlabels, epochs=eps, batch_size=256, shuffle=True, verbose=2)
+        p1_DQN.fit(p1_traindata, p1_trainlabels, epochs=training_epochs, batch_size=256, shuffle=True, verbose=2)
 
         # Evaluo contra Test
         test_loss, test_acc = p1_DQN.evaluate(p1_testdata, p1_testlabels, verbose=2)
@@ -180,7 +182,9 @@ class ValueNetworkEngine:
         p1_DQN.save(gen_prefix+"p1_DQN.h5")
         print("    ..." + gen_prefix + "p1_DQN.h5 guardado!")
 
+        # Free memory
         del p1_traindata
+        del p1_DQN
 
         #########################
         ## ENTRENO RED PARA p2
@@ -208,15 +212,19 @@ class ValueNetworkEngine:
         print("## Entrenando Red para P1ayer 2")
         p2_DQN = models.Sequential()
         p2_DQN.add(layers.Dense(50, activation='relu', input_shape=(50,)))
-        p2_DQN.add(layers.Dense(10, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p2_DQN.add(layers.Dense(80, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
         #p2_DQN.add(layers.Dropout(0.2))
-        p2_DQN.add(layers.Dense(60, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p2_DQN.add(layers.Dense(80, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
         #p2_DQN.add(layers.Dropout(0.2))
-        p2_DQN.add(layers.Dense(60, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p2_DQN.add(layers.Dense(80, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
         #p2_DQN.add(layers.Dropout(0.2))
-        p2_DQN.add(layers.Dense(60, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p2_DQN.add(layers.Dense(80, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
+        # p2_DQN.add(layers.Dropout(0.2))
+        p2_DQN.add(layers.Dense(80, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
+        # p2_DQN.add(layers.Dropout(0.2))
+        p2_DQN.add(layers.Dense(80, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
         #p2_DQN.add(layers.Dropout(0.2))
-        p2_DQN.add(layers.Dense(60, activation='relu',kernel_regularizer=keras.regularizers.l2(0.001)))
+        p2_DQN.add(layers.Dense(50, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
         p2_DQN.add(layers.Dense(1))
 
         p2_DQN.compile(optimizer='adam', loss='mse', metrics=['mae'])
@@ -233,7 +241,7 @@ class ValueNetworkEngine:
         p2_testdata = p2_testdata.astype('float32')
 
         # Fiteo la red
-        p2_DQN.fit(p2_traindata, p2_trainlabels, epochs=eps, batch_size=256, shuffle=True, verbose=2)
+        p2_DQN.fit(p2_traindata, p2_trainlabels, epochs=training_epochs, batch_size=256, shuffle=True, verbose=2)
 
         # Evaluo contra Test
         test_loss, test_acc = p2_DQN.evaluate(p2_testdata, p2_testlabels, verbose=2)
@@ -244,7 +252,9 @@ class ValueNetworkEngine:
         p2_DQN.save(gen_prefix + "p2_DQN.h5")
         print("    ..." + gen_prefix + "p2_DQN.h5 guardado!")
 
+        # Free memory
         del p2_traindata
+        del p2_DQN
 
 
     @staticmethod
@@ -252,33 +262,13 @@ class ValueNetworkEngine:
         print("  ##   Load_and_Test   ##")
         print("")
         print("  ## Carga de partidas de Test desde Disco (pickles) con prefijo: " + gen_prefix)
-        # test
-        p1_testdata = Motor.Load_Games_From_Disk(gen_prefix + "p1_testdata.pickle")
-        p1_testlabels = Motor.Load_Games_From_Disk(gen_prefix + "p1_testlabels.pickle")
-        p2_testdata = Motor.Load_Games_From_Disk(gen_prefix + "p2_testdata.pickle")
-        p2_testlabels = Motor.Load_Games_From_Disk(gen_prefix + "p2_testlabels.pickle")
-
-        # Convierto a nparray y reshape a lo especificado en las capas de la red neuronal (shape a 50)
-        # p1
-        p1_testdata = np.squeeze(np.asarray(p1_testdata))
-        p1_testdata = p1_testdata.reshape((len(p1_testdata), 50))
-        p1_testdata = p1_testdata.astype('float32')
-
-        # p2
-        p2_testdata = np.squeeze(np.asarray(p2_testdata))
-        p2_testdata = p2_testdata.reshape((len(p2_testdata), 50))
-        p2_testdata = p2_testdata.astype('float32')
 
         print("")
         print("## Loading model from disk")
         # p1
         p1_DQN = keras.models.load_model(gen_prefix + "p1_DQN.h5")
-        test_loss_p1, test_acc_p1 = p1_DQN.evaluate(p1_testdata, p1_testlabels, verbose=2)
-        print('## p1 test_acc:', test_acc_p1)
         # p2
         p2_DQN = keras.models.load_model(gen_prefix + "p2_DQN.h5")
-        test_loss_p2, test_acc_p2 = p2_DQN.evaluate(p2_testdata, p2_testlabels, verbose=2)
-        print('## p2 test_acc:', test_acc_p2)
 
         # AHORA SI, EJECUTO PRUEBA
         p1,p2, s = ValueNetworkEngine.Get_VectorEstado_Prueba()
@@ -315,11 +305,23 @@ class ValueNetworkEngine:
             if _cp.jugador is Reglas.JUGADOR2 : output = p2_DQN.predict(_s)
             print("p" + str(_cp.jugador) + "> accion posible: " + str(i.name) + ",  valor:" + str(output))
 
+            # Free memory
+            del _p1
+            del _p2
+            del _s
+
+        #Free memory
+        del p1
+        del p2
+        del s
+        del p1_DQN
+        del p2_DQN
+
+
     @staticmethod
     def ValueTrainingTest(gen_p1,gen_p2, N, debug):
         print("")
-        print("ENTRENANDO gen" + str(gen_p1) + " versus gen" + str(gen_p2))
-
+        print("JUGANDO gen" + str(gen_p1) + " versus gen" + str(gen_p2))
 
         if gen_p1 > 0:
             gen_p1 = "value_pickles\gen" + str(gen_p1) + "_"
