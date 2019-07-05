@@ -739,7 +739,7 @@ if __name__ == '__main__':
 
     #trainer
 
-    ValueNetworkEngine.ValueNetworkTrainer(400000, 40, 0, True)
+    ValueNetworkEngine.ValueNetworkTrainer(200000, 20, 7, True)
 
     # versus
     #ValueNetworkEngine.ValueTrainingTest(1, 5, 5000, False)

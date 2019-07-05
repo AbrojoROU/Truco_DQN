@@ -341,6 +341,16 @@ class AgenteDVN:
         return result
 
     def Elegir_Accion(self, s, debug=False):
+        def warn(*args, **kwargs):
+            pass
+        import warnings
+        warnings.warn = warn
+        from tensorflow.python.util import deprecation
+        deprecation._PRINT_DEPRECATION_WARNINGS = False
+        import logging
+        logging.getLogger('tensorflow').disabled = True
+        import tensorflow as tf
+        if type(tf.contrib) != type(tf): tf.contrib._warning = None
 
         # choose an action based on epsilon-greedy strategy
         r = np.random.rand()
@@ -1026,42 +1036,37 @@ class Motor:
         print("")
 
         # Me divido la partidas entre la cantidad de workers
-        N = round(batch_size / 5)
+        N = round(batch_size / 4)
         #creo las colas de retorno
         queue1 = mp.Queue()
         queue2 = mp.Queue()
         queue3 = mp.Queue()
         queue4 = mp.Queue()
-        queue5 = mp.Queue()
         #creo los 5 workers
         process1 = mp.Process(target=Motor.MP_value_worker, args=(p1, p2, N, queue1))
         process2 = mp.Process(target=Motor.MP_value_worker, args=(p1, p2, N, queue2))
         process3 = mp.Process(target=Motor.MP_value_worker, args=(p1, p2, N, queue3))
         process4 = mp.Process(target=Motor.MP_value_worker, args=(p1, p2, N, queue4))
-        process5 = mp.Process(target=Motor.MP_value_worker, args=(p1, p2, N, queue5))
         #comienzo la ejecucion de los 4 workers en paralelo
         process1.start()
         process2.start()
         process3.start()
         process4.start()
-        process5.start()
         #obtengo el retorno de los 4 workers
         episodios1 = queue1.get()
         episodios2 = queue2.get()
         episodios3 = queue3.get()
         episodios4 = queue4.get()
-        episodios5 = queue5.get()
         #espero que retornen
         process1.join()
         process2.join()
         process3.join()
         process4.join()
-        process5.join()
         #sumo los resultados
         from itertools import chain
         #print("eps totales:" + str(len(episodios))+ ", ep1:" + str(len(episodios1))+", ep2:" + str(len(episodios2))+", ep3:" + str(len(episodios3))+", ep4:" + str(len(episodios4)))
 
-        for e in chain(episodios1,episodios2, episodios3, episodios4, episodios5):
+        for e in chain(episodios1,episodios2, episodios3, episodios4):
             # pero quizas esto sea con otra Red de Value (esta es policy)
             for s in reversed(range(len(e.estados))):
                 # logica: "si en [s-1] me toca a mi, en [s] ya jugue yo. Guardo ese estado con mi movimiento hecho y el puntaje total
