@@ -2,7 +2,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
 os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '0'
 from Truco_Core_v4 import *
-from Truco_Value_Network_v4 import *
+#from Truco_Value_Network_v3 import *
 import keras
 
 
@@ -114,7 +114,7 @@ def prueba_QuienActua():
 
     s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.JUGAR_C3))
     s.cartas_jugadas.append(Carta("6-Copa", 20))
-    print("p2 jugó carta 3, le toca a: p" + str(s.QuienActua()))
+    print("p2 jugó carta 3(que gana la mano), le toca a: p" + str(s.QuienActua()))
 
     s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.JUGAR_C1))
     s.cartas_jugadas.append(Carta("6-Basto", 20))
@@ -149,6 +149,168 @@ def prueba_QuienActua():
     s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.FOLD))
     s.truco = Reglas.EstadoTruco.FOLD
     print("p2 no quiso, le toca a: p" + str(s.QuienActua()))
+
+def prueba_QuienActua2():
+    # Pruebo Get Acciones Posibles, no uso ejecutar accion porque no quiero mezclar pruebas
+    # CUIDADO CON CIERTAS JUGADAS QUE PUEDEN DAR MAL POR NO EJECUTAR LA ACCION COMPLETAMENTE BIEN
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Acciones Posibles - ##")
+    print("===================================================")
+    print("")
+
+    # SETUP
+    s = Estado()
+    p1 = AgenteRandom(Reglas.JUGADOR1)
+    p2 = AgenteRandom(Reglas.JUGADOR2)
+    cartas_p1, cartas_p2 = Reglas.RepartirCartas()
+    p1.TomarCartas(cartas_p1)
+    p2.TomarCartas(cartas_p2)
+
+    #Prueba 1
+    print("inicial,")
+    print("quien actua? " + str(s.QuienActua()))
+    print("")
+
+    print("p1 toco Envido,")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.ENVIDO))
+    s.envido = Reglas.EstadoEnvido.E_DICHO
+    print("quien actua? " + str(s.QuienActua()))
+    print("")
+
+    print("p2 reraise Real Envido,")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.REALENVIDO))
+    s.envido = Reglas.EstadoEnvido.R_DICHO
+    print("quien actua? " + str(s.QuienActua()))
+    print("")
+
+    print("p1 rereaise Falta,")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.FALTAENVIDO))
+    s.envido = Reglas.EstadoEnvido.F_DICHO
+    print("quien actua? " + str(s.QuienActua()))
+    print("")
+
+
+def prueba_QuienActua3():
+    # Pruebo Get Acciones Posibles, no uso ejecutar accion porque no quiero mezclar pruebas
+    # CUIDADO CON CIERTAS JUGADAS QUE PUEDEN DAR MAL POR NO EJECUTAR LA ACCION COMPLETAMENTE BIEN
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Acciones Posibles - ##")
+    print("===================================================")
+    print("")
+
+    # SETUP
+    s = Estado()
+    p1 = AgenteRandom(Reglas.JUGADOR1)
+    p2 = AgenteRandom(Reglas.JUGADOR2)
+    cartas_p1, cartas_p2 = Reglas.RepartirCartas()
+    p1.TomarCartas(cartas_p1)
+    p2.TomarCartas(cartas_p2)
+
+    #Prueba 1
+    print("inicial")
+    print("quien actua? " + str(s.QuienActua()))
+    print("")
+
+    print("p1 grito Truco,")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.GRITAR))
+    s.truco = Reglas.EstadoTruco.TRUCO_DICHO
+    print("quien actua? " + str(s.QuienActua()))
+    print("")
+
+    print("p2 toco Real Envido, ")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.REALENVIDO))
+    s.envido = Reglas.EstadoEnvido.R_DICHO
+    print("quien actua? " + str(s.QuienActua()))
+    print("")
+
+    print("p1 rereaise RF, ")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.FALTAENVIDO))
+    s.envido = Reglas.EstadoEnvido.F_DICHO
+    print("quien actua? " + str(s.QuienActua()))
+    print("")
+
+    print("p2 acepta la Falta, ")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.ACEPTAR_TANTO))
+    s.envido = Reglas.EstadoEnvido.F_ACEPTADO
+    print("quien actua? " + str(s.QuienActua()))
+    print("")
+
+    print("p2 acepta el Grito,")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.QUIERO_GRITO))
+    s.truco = Reglas.EstadoTruco.TRUCO_ACEPTADO
+    print("quien actua? " + str(s.QuienActua()))
+    print("")
+
+
+def prueba_QuienActua4():
+    # Pruebo Get Acciones Posibles, no uso ejecutar accion porque no quiero mezclar pruebas
+    # CUIDADO CON CIERTAS JUGADAS QUE PUEDEN DAR MAL POR NO EJECUTAR LA ACCION COMPLETAMENTE BIEN
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Acciones Posibles - ##")
+    print("===================================================")
+    print("")
+
+    # SETUP
+    s = Estado()
+    p1 = AgenteRandom(Reglas.JUGADOR1)
+    p2 = AgenteRandom(Reglas.JUGADOR2)
+    cartas_p1, cartas_p2 = Reglas.RepartirCartas()
+    p1.TomarCartas(cartas_p1)
+    p2.TomarCartas(cartas_p2)
+
+    #Prueba 1
+    print("inicial, ")
+    print("quien actua? " + str(s.QuienActua()))
+    print("")
+
+    print("p1 grito Truco, ")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.GRITAR))
+    s.truco = Reglas.EstadoTruco.TRUCO_DICHO
+    print("quien actua? " + str(s.QuienActua()))
+    print("")
+
+    print("p2 grita ReTruco,")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.GRITAR))
+    s.truco = Reglas.EstadoTruco.RETRUCO_DICHO
+    print("quien actua? " + str(s.QuienActua()))
+    print("")
+
+    print("p1 grita Vale4, ")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.GRITAR))
+    s.truco= Reglas.EstadoTruco.VALE4_DICHO
+    print("quien actua? " + str(s.QuienActua()))
+    print("")
+
+    print("p2 acepta el Vale4,")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.QUIERO_GRITO))
+    s.truco = Reglas.EstadoTruco.VALE4_ACEPTADO
+    print("quien actua? " + str(s.QuienActua()))
+    print("")
+
+
+    """
+    print("p1 acepto, acciones de p2 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.QUIERO_GRITO))
+    s.truco = Reglas.EstadoTruco.TRUCO_ACEPTADO
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("p2 jugo c3, acciones de p1 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.JUGAR_C3))
+    s.cartas_jugadas.append(Carta("4-Copa", 10))
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("p1 hace fold, acciones de p2 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.GRITAR))
+    s.truco = Reglas.EstadoTruco.RETRUCO_DICHO
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+    """
+
 
 def prueba_AccionesPosibles():
     # Pruebo Get Acciones Posibles, no uso ejecutar accion porque no quiero mezclar pruebas
@@ -227,19 +389,19 @@ def prueba_AccionesPosibles2():
 
     print("p1 toco Envido, acciones de p2 disponibles")
     s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.ENVIDO))
-    s.envido = Reglas.EstadoEnvido.ENVIDO_DICHO
+    s.envido = Reglas.EstadoEnvido.E_DICHO
     print(str(p2.get_acciones_posibles(s)))
     print("")
 
     print("p2 reraise Real Envido, acciones de p1 disponibles")
     s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.REALENVIDO))
-    s.envido = Reglas.EstadoEnvido.REAL_DICHO
+    s.envido = Reglas.EstadoEnvido.R_DICHO
     print(str(p1.get_acciones_posibles(s)))
     print("")
 
     print("p1 rereaise Falta, acciones de p2 disponibles")
     s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.FALTAENVIDO))
-    s.envido = Reglas.EstadoEnvido.FALTA_DICHO
+    s.envido = Reglas.EstadoEnvido.F_DICHO
     print(str(p2.get_acciones_posibles(s)))
     print("")
 
@@ -262,6 +424,146 @@ def prueba_AccionesPosibles2():
     print(str(p2.get_acciones_posibles(s)))
     print("")
     """
+
+def prueba_AccionesPosibles3():
+    # Pruebo Get Acciones Posibles, no uso ejecutar accion porque no quiero mezclar pruebas
+    # CUIDADO CON CIERTAS JUGADAS QUE PUEDEN DAR MAL POR NO EJECUTAR LA ACCION COMPLETAMENTE BIEN
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Acciones Posibles - ##")
+    print("===================================================")
+    print("")
+
+    # SETUP
+    s = Estado()
+    p1 = AgenteRandom(Reglas.JUGADOR1)
+    p2 = AgenteRandom(Reglas.JUGADOR2)
+    cartas_p1, cartas_p2 = Reglas.RepartirCartas()
+    p1.TomarCartas(cartas_p1)
+    p2.TomarCartas(cartas_p2)
+
+    #Prueba 1
+    print("inicial, acciones posibles de p1")
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("p1 grito Truco, acciones de p2 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.GRITAR))
+    s.truco = Reglas.EstadoTruco.TRUCO_DICHO
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("p2 toco Real Envido, acciones de p1 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.REALENVIDO))
+    s.envido = Reglas.EstadoEnvido.R_DICHO
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("p1 rereaise RF, acciones de p2 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.FALTAENVIDO))
+    s.envido = Reglas.EstadoEnvido.RF_DICHO
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("p2 acepta la Falta, acciones de p2 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.ACEPTAR_TANTO))
+    s.envido = Reglas.EstadoEnvido.RF_ACEPTADO
+    print(str(p2.get_acciones_posibles(s))) # p2 le queda por responder el truco
+    print("")
+
+    print("p2 acepta el Grito, acciones de p1 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.QUIERO_GRITO))
+    s.truco = Reglas.EstadoTruco.TRUCO_ACEPTADO
+    print(str(p1.get_acciones_posibles(s)))  # p2 le queda por responder el truco
+    print("")
+
+    """
+    print("p1 acepto, acciones de p2 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.QUIERO_GRITO))
+    s.truco = Reglas.EstadoTruco.TRUCO_ACEPTADO
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("p2 jugo c3, acciones de p1 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.JUGAR_C3))
+    s.cartas_jugadas.append(Carta("4-Copa", 10))
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("p1 hace fold, acciones de p2 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.GRITAR))
+    s.truco = Reglas.EstadoTruco.RETRUCO_DICHO
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+    """
+
+def prueba_AccionesPosibles4():
+    # Pruebo Get Acciones Posibles, no uso ejecutar accion porque no quiero mezclar pruebas
+    # CUIDADO CON CIERTAS JUGADAS QUE PUEDEN DAR MAL POR NO EJECUTAR LA ACCION COMPLETAMENTE BIEN
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Acciones Posibles - ##")
+    print("===================================================")
+    print("")
+
+    # SETUP
+    s = Estado()
+    p1 = AgenteRandom(Reglas.JUGADOR1)
+    p2 = AgenteRandom(Reglas.JUGADOR2)
+    cartas_p1, cartas_p2 = Reglas.RepartirCartas()
+    p1.TomarCartas(cartas_p1)
+    p2.TomarCartas(cartas_p2)
+
+    #Prueba 1
+    print("inicial, acciones posibles de p1")
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("p1 grito Truco, acciones de p2 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.GRITAR))
+    s.truco = Reglas.EstadoTruco.TRUCO_DICHO
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("p2 grita ReTruco, acciones de p1 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.GRITAR))
+    s.truco = Reglas.EstadoTruco.RETRUCO_DICHO
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("p1 grita Vale4, acciones de p2 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.GRITAR))
+    s.truco= Reglas.EstadoTruco.VALE4_DICHO
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("p2 acepta el Vale4, acciones de p1 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.QUIERO_GRITO))
+    s.truco = Reglas.EstadoTruco.VALE4_ACEPTADO
+    print(str(p1.get_acciones_posibles(s))) # p2 le queda por responder el truco
+    print("")
+
+
+    """
+    print("p1 acepto, acciones de p2 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.QUIERO_GRITO))
+    s.truco = Reglas.EstadoTruco.TRUCO_ACEPTADO
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("p2 jugo c3, acciones de p1 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.JUGAR_C3))
+    s.cartas_jugadas.append(Carta("4-Copa", 10))
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("p1 hace fold, acciones de p2 disponibles")
+    s.acciones_hechas.append((Reglas.JUGADOR1, Reglas.Accion.GRITAR))
+    s.truco = Reglas.EstadoTruco.RETRUCO_DICHO
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+    """
+
 
 def prueba_EjecutarAccion():
     print("")
@@ -564,7 +866,7 @@ def prueba_CalcularPuntos():
     episodios = Motor.Play_random_games(p1, p2, 1, False)
     for e in episodios:
         for s in e.estados:
-            print("estado: " + str(s))
+            print("estadoT: " + str(s))
         print("")
         print("puntos" + str(e.CalcularPuntosFinales()))
 
@@ -579,7 +881,7 @@ def prueba_Generate_Policy_Training_Games():
     print("")
     p1 = AgenteRandom(Reglas.JUGADOR1)
     p2 = AgenteRandom(Reglas.JUGADOR2)
-    (p1_data, p1_labels), (p2_data, p2_labels) = Motor.Generate_Policy_Training_Games(p1, p2, 1, 1, False)
+    (p1_data, p1_labels), (p2_data, p2_labels) = Motor.Generate_Value_Training_Games(p1, p2, 1, 1, False)
 
     print("")
     print("p1 data")
@@ -785,30 +1087,22 @@ def prueba_Play_VERSUS():
 ###                    MAIN                         ###
 #######################################################
 if __name__ == '__main__':
-    def warn(*args, **kwargs):
-        pass
-    import warnings
-    warnings.warn = warn
-
-    printDebug("COMIENZO!")
-    print("")
-    from tensorflow.python.util import deprecation
-    deprecation._PRINT_DEPRECATION_WARNINGS = False
-    import tensorflow as tf
-    if type(tf.contrib) != type(tf): tf.contrib._warning = None
-    import tensorflow as tf
-
 
     ### PRUEBAS ESTADO
-    # prueba_QuienGanoManos()
-    # prueba_QuienJugariaCarta()
-    # prueba_QuienActua()
-    # prueba_CalcularPuntos()
+    #prueba_QuienGanoManos()
+    #prueba_QuienJugariaCarta()
+    #prueba_QuienActua()
+    #prueba_QuienActua2()
+    #prueba_QuienActua3()
+    #prueba_QuienActua4()
+    prueba_CalcularPuntos()
 
     ### PRUEBAS AGENTE
-    prueba_AccionesPosibles()
-    prueba_AccionesPosibles2()
-    # prueba_EjecutarAccion()
+    #prueba_AccionesPosibles()
+    #prueba_AccionesPosibles2()
+    #prueba_AccionesPosibles3()
+    #prueba_AccionesPosibles4()
+    #prueba_EjecutarAccion()
     # prueba_Elegir_Accion_Random()
     # prueba_HastaVALE4()
 
@@ -838,13 +1132,10 @@ if __name__ == '__main__':
     ##  parametros de trainer ( start_gen, number_of_generations,  iterations_per_generation, load_previous)
     #ValueNetworkEngine.ValueNetworkTrainer(22, 5, 100000, True)
 
-
-
     #gen_next = "value_pickles\gen2_"
     #ValueNetworkEngine.Generate_and_Save(gen_n, gen_next, games_per_gen)
     #ValueNetworkEngine.Train_Save(gen_next, 50, True)
     #ValueNetworkEngine.Load_and_Test(gen_next)
-
 
     # versus
     #ValueNetworkEngine.ValueTrainingTest(2, 6, 10000, False)
