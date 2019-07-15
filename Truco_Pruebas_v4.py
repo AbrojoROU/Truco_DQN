@@ -636,6 +636,151 @@ def prueba_EjecutarAccion():
     print("p2, cartas restantes:")
     print(str(p2.cartas_restantes))
 
+def prueba_EjecutarAccion2():
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Ejecutar Accion 2 - ##")
+    print("===================================================")
+    print("")
+
+    # SETUP
+    s = Estado()
+    p1 = AgenteRandom(Reglas.JUGADOR1)
+    p2 = AgenteRandom(Reglas.JUGADOR2)
+    cartas_j1 = []
+    cartas_j2 = []
+    cartas_j1.append(Reglas.MAZO[9])
+    cartas_j1.append(Reglas.MAZO[5])
+    cartas_j1.append(Reglas.MAZO[3])
+    cartas_j2.append(Reglas.MAZO[8])
+    cartas_j2.append(Reglas.MAZO[6])
+    cartas_j2.append(Reglas.MAZO[1])
+
+    p1.TomarCartas(cartas_j1)
+    p2.TomarCartas(cartas_j2)
+
+    #Prueba 1
+    print("inicial")
+    print("")
+
+    print("1) p1 juega c1, acciones de p2 disponibles")
+    p1.EjecutarAccion(s,Reglas.Accion.JUGAR_C1)
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("2) p2 Envido, acciones de p1 disponibles")
+    p2.EjecutarAccion(s, Reglas.Accion.ENVIDO)
+    print("estado envido: " + s.envido.name)
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("3) p1 acepto, acciones de p2 disponibles")
+    p1.EjecutarAccion(s, Reglas.Accion.ACEPTAR_TANTO)
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("5) p2 jugo c2, acciones de p1 disponibles")
+    p2.EjecutarAccion(s, Reglas.Accion.JUGAR_C2)
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("6) p1 jugo c2, acciones de p2 disponibles")
+    p1.EjecutarAccion(s, Reglas.Accion.JUGAR_C2)
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("Fin de prueba, estado S final")
+    print("")
+    print("Cartas Jugadas:")
+    print(str(s.cartas_jugadas))
+    print("")
+    print("Acciones Hechas Jugadas:")
+    print(str(s.acciones_hechas))
+    print("")
+    print("p1, cartas restantes:")
+    print(str(p1.cartas_restantes))
+    print("")
+    print("p2, cartas restantes:")
+    print(str(p2.cartas_restantes))
+
+#poner ciclos retruco a ver si anda el grito regritar sin un aceptar en el medio
+def prueba_EjecutarAccion3():
+    print("")
+    print("===================================================")
+    print("## PRUEBA - Ejecutar Accion 3 - ##")
+    print("===================================================")
+    print("")
+
+    # SETUP
+    s = Estado()
+    p1 = AgenteRandom(Reglas.JUGADOR1)
+    p2 = AgenteRandom(Reglas.JUGADOR2)
+    cartas_j1 = []
+    cartas_j2 = []
+    cartas_j1.append(Reglas.MAZO[9])
+    cartas_j1.append(Reglas.MAZO[5])
+    cartas_j1.append(Reglas.MAZO[3])
+    cartas_j2.append(Reglas.MAZO[8])
+    cartas_j2.append(Reglas.MAZO[6])
+    cartas_j2.append(Reglas.MAZO[1])
+
+    p1.TomarCartas(cartas_j1)
+    p2.TomarCartas(cartas_j2)
+
+    #Prueba 1
+    print("inicial")
+    print("")
+
+    print("1) p1 juega c1, acciones de p2 disponibles")
+    p1.EjecutarAccion(s,Reglas.Accion.JUGAR_C1)
+    print("estadoT: " + s.truco.name)
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("2) p2 grito Truco, acciones de p1 disponibles")
+    p2.EjecutarAccion(s, Reglas.Accion.GRITAR)
+    print("estadoT: " + s.truco.name)
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("3) p1 GRITA, acciones de p2 disponibles")
+    p1.EjecutarAccion(s, Reglas.Accion.GRITAR)
+    print("estadoT: " + s.truco.name)
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("4) p2 GRITA, acciones de p1 disponibles")
+    p2.EjecutarAccion(s, Reglas.Accion.GRITAR)
+    print("estadoT: " + s.truco.name)
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("5) p1 quiere grito, acciones de p2 disponibles")
+    p1.EjecutarAccion(s, Reglas.Accion.QUIERO_GRITO)
+    print("estadoT: " + s.truco.name)
+    print(str(p2.get_acciones_posibles(s)))
+    print("")
+
+    print("6) p2 juega C2, acciones de p1 disponibles")
+    p2.EjecutarAccion(s, Reglas.Accion.JUGAR_C2)
+    print("estadoT: " + s.truco.name)
+    print(str(p1.get_acciones_posibles(s)))
+    print("")
+
+    print("Fin de prueba, estado S final")
+    print("")
+    print("Cartas Jugadas:")
+    print(str(s.cartas_jugadas))
+    print("")
+    print("Acciones Hechas Jugadas:")
+    print(str(s.acciones_hechas))
+    print("")
+    print("p1, cartas restantes:")
+    print(str(p1.cartas_restantes))
+    print("")
+    print("p2, cartas restantes:")
+    print(str(p2.cartas_restantes))
+
 def prueba_HastaVALE4():
     print("")
     print("===================================================")
@@ -1103,6 +1248,8 @@ if __name__ == '__main__':
     #prueba_AccionesPosibles3()
     #prueba_AccionesPosibles4()
     #prueba_EjecutarAccion()
+    #prueba_EjecutarAccion2()
+    #prueba_EjecutarAccion3()
     # prueba_Elegir_Accion_Random()
     # prueba_HastaVALE4()
 
