@@ -460,6 +460,8 @@ class Humano:
         self.cartas_restantes = []
         self.state_history = []
         self.eps = 0
+        self.puntos_envido = 0
+
         if jugador == Reglas.JUGADOR1:
             self.jugador = Reglas.JUGADOR1
         elif jugador == Reglas.JUGADOR2:
@@ -479,47 +481,96 @@ class Humano:
             self.cartas_totales.append(i)
         if debug: printDebug(str(self.cartas_restantes))
 
+        self.puntos_envido = Reglas.ContarEnvido(self.cartas_totales)
+
     def get_acciones_posibles(self,s):
-        # Este metodo construye y retorna el vector de acciones posibles (tomados del enum Reglas.Acciones) con base en el estado actual s
+        # Este metodo construye y retorna el vector de acciones posibles (tomados del enum Reglas.Acciones) con base en el estado actual "s"
         result = []
 
-        if s.QuienJugariaCarta() == self.jugador: # me toca
-            # Opciones de Truco : si me gritaron, agregar las acciones de aceptar (call) y subir apuesta (raise)
-            if s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO :
-                for j, a in reversed(s.acciones_hechas):
-                    if a is Reglas.Accion.GRITAR:
-                        if j is not self.jugador:
-                            result.append(Reglas.Accion.GRITAR)
-                        break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
+        # ESTAMOS EN PLENO CICLO DE ENVIDO?  (prioritario, debe resolverse antes de hablar de otra cosa)
+        if s.envido is Reglas.EstadoEnvido.E_DICHO:
+            result.append(Reglas.Accion.ENVIDO)
+            result.append(Reglas.Accion.REALENVIDO)
+            result.append(Reglas.Accion.FALTAENVIDO)
+            result.append(Reglas.Accion.ACEPTAR_TANTO)
+            result.append(Reglas.Accion.RECHAZAR_TANTO)
+        elif s.envido is Reglas.EstadoEnvido.EE_DICHO:
+            result.append(Reglas.Accion.FALTAENVIDO)
+            result.append(Reglas.Accion.ACEPTAR_TANTO)
+            result.append(Reglas.Accion.RECHAZAR_TANTO)
+        elif s.envido in [Reglas.EstadoEnvido.R_DICHO, Reglas.EstadoEnvido.ER_DICHO]:
+            result.append(Reglas.Accion.FALTAENVIDO)
+            result.append(Reglas.Accion.ACEPTAR_TANTO)
+            result.append(Reglas.Accion.RECHAZAR_TANTO)
+        elif s.envido in [Reglas.EstadoEnvido.EF_DICHO, Reglas.EstadoEnvido.EEF_DICHO ,
+                          Reglas.EstadoEnvido.ERF_DICHO , Reglas.EstadoEnvido.RF_DICHO ,
+                          Reglas.EstadoEnvido.F_DICHO]:
+            result.append(Reglas.Accion.ACEPTAR_TANTO)
+            result.append(Reglas.Accion.RECHAZAR_TANTO)
 
-            elif s.truco is Reglas.EstadoTruco.RETRUCO_ACEPTADO :
-                for j, a in reversed(s.acciones_hechas):
-                    if a is Reglas.Accion.GRITAR:
-                        if j is not self.jugador:
-                            result.append(Reglas.Accion.GRITAR)
-                        break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
-            elif s.truco == Reglas.EstadoTruco.NADA_DICHO: result.append(Reglas.Accion.GRITAR)
-            elif s.truco == Reglas.EstadoTruco.VALE4_ACEPTADO : pass
-            else:
-                assert False  # WARNING: Si me toca, el estado del truco deberia estar en alguno case de los elif, a menos que permita Re-Raise
+        else: # NO ESTAMOS EN MEDIO DE UN CICLO DE ENVIDO
 
-            # solo resta agregar las acciones de jugar cartas aun en mano
-            for c in self.cartas_restantes:
-                result.append(Reglas.Accion(self.cartas_totales.index(c) + 1))
-
-        else:
-            result.append(Reglas.Accion.FOLD)
-            # No me toca jugar carta, seguramente me gritaron
+            # ESTAMOS EN UN CICLO DE TRUCO?  (prioritario luego del envido)
             if s.truco is Reglas.EstadoTruco.TRUCO_DICHO:
+                if (s.envido is Reglas.EstadoEnvido.NADA_DICHO) and (len(self.cartas_restantes) == 3):
+                    result.append(Reglas.Accion.ENVIDO)
+                    result.append(Reglas.Accion.REALENVIDO)
+                    result.append(Reglas.Accion.FALTAENVIDO)
                 result.append(Reglas.Accion.QUIERO_GRITO)
-                # if len(self.cartas_restantes) == 0: result.append(Reglas.Accion.GRITAR_RETRUCO)  # Permitimos Re-Raise en la ultima mano
-            elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO :
+                result.append(Reglas.Accion.GRITAR)  # Permitimos Re-Raise (poco lógico, lo podriamos restringir a ultima mano bajo un if len(self.cartas_restantes) == 0)
+                result.append(Reglas.Accion.FOLD)
+            elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO:
                 result.append(Reglas.Accion.QUIERO_GRITO)
-                # if len(self.cartas_restantes) == 0: result.append(Reglas.Accion.GRITAR_VALE4)  # Permitimos Re-Raise en la ultima mano
+                result.append(Reglas.Accion.GRITAR)  # Permitimos Re-Raise (poco lógico, lo podriamos restringir a ultima mano bajo un if len(self.cartas_restantes) == 0)
+                result.append(Reglas.Accion.FOLD)
             elif s.truco == Reglas.EstadoTruco.VALE4_DICHO:
                 result.append(Reglas.Accion.QUIERO_GRITO)
+                result.append(Reglas.Accion.FOLD)
+
+            # NO ESTAMOS EN MEDIO DE UN CICLO DE TRUCO
+            else:
+                # ES POSIBLE DECIR ENVIDO: todavia no pasamos por envido y tengo 3 cartas en la mano (si jugue algo ya fui)
+                if (s.envido is Reglas.EstadoEnvido.NADA_DICHO) and (len(self.cartas_restantes) == 3):
+                    # validar que el truco lo permite (todavia no se dijo el Truco)
+                    if s.truco is Reglas.EstadoTruco.NADA_DICHO:
+                        result.append(Reglas.Accion.ENVIDO)
+                        result.append(Reglas.Accion.REALENVIDO)
+                        result.append(Reglas.Accion.FALTAENVIDO)
+
+                # ENVIDO YA GESTIONADO QUEDA TRUCO Y CARTAS
+                if s.QuienJugariaCarta() == self.jugador: # me toca
+                    # Opciones de Truco : si me gritaron, agregar las acciones de aceptar (call) y subir apuesta (raise)
+                    if s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO :
+                        for j, a in reversed(s.acciones_hechas):
+                            if a is Reglas.Accion.GRITAR:
+                                if j is not self.jugador:
+                                    result.append(Reglas.Accion.GRITAR)
+                                break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
+
+                    elif s.truco is Reglas.EstadoTruco.RETRUCO_ACEPTADO :
+                        for j, a in reversed(s.acciones_hechas):
+                            if a is Reglas.Accion.GRITAR:
+                                if j is not self.jugador:
+                                    result.append(Reglas.Accion.GRITAR)
+                                break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
+                    elif s.truco == Reglas.EstadoTruco.NADA_DICHO: result.append(Reglas.Accion.GRITAR)
+                    elif s.truco == Reglas.EstadoTruco.VALE4_ACEPTADO : pass
+                    else:
+                        assert False  # WARNING: Si me toca, el estado del truco deberia estar en alguno case de los elif, a menos que permita Re-Raise
+
+                    # solo resta agregar las acciones de jugar cartas aun en mano
+                    for c in self.cartas_restantes:
+                        result.append(Reglas.Accion(self.cartas_totales.index(c) + 1))
+
+                else:
+                    assert False  # caso no posible (no estamos en ciclo de envido o truco y tampoco me toca jugar)
+
+        # VERSION CON FILTRADO DE DUPLICADOS (lo quito para que salten problemas de flujo si los hay)
+        #from more_itertools import unique_everseen
+        #return list(unique_everseen(result))
 
         return result
+
 
     def Elegir_Accion(self, s, debug=False):
         print("")
@@ -545,16 +596,50 @@ class Humano:
     # Ejecuta la accion que le llega, actualizando el estado y el agente de forma acorde
     def EjecutarAccion(self, s, a, DEBUG=False):
 
-        if a is Reglas.Accion.FOLD : s.truco = Reglas.EstadoTruco.FOLD
+        if a is Reglas.Accion.FOLD: s.truco = Reglas.EstadoTruco.FOLD
 
-        if a is Reglas.Accion.GRITAR :
-            if s.truco is Reglas.EstadoTruco.RETRUCO_ACEPTADO: s.truco = Reglas.EstadoTruco.VALE4_DICHO
-            elif s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO: s.truco = Reglas.EstadoTruco.RETRUCO_DICHO
+        if a is Reglas.Accion.ENVIDO :
+            if s.envido is Reglas.EstadoEnvido.NADA_DICHO : s.envido = Reglas.EstadoEnvido.E_DICHO
+            elif s.envido is Reglas.EstadoEnvido.E_DICHO : s.envido = Reglas.EstadoEnvido.EE_DICHO
+        elif a is Reglas.Accion.REALENVIDO :
+            if s.envido is Reglas.EstadoEnvido.NADA_DICHO : s.envido = Reglas.EstadoEnvido.R_DICHO
+            elif s.envido is Reglas.EstadoEnvido.E_DICHO : s.envido = Reglas.EstadoEnvido.ER_DICHO
+        elif a is Reglas.Accion.FALTAENVIDO :
+            if s.envido is Reglas.EstadoEnvido.NADA_DICHO: s.envido = Reglas.EstadoEnvido.F_DICHO
+            elif s.envido is Reglas.EstadoEnvido.E_DICHO : s.envido = Reglas.EstadoEnvido.EF_DICHO
+            elif s.envido is Reglas.EstadoEnvido.ER_DICHO : s.envido = Reglas.EstadoEnvido.ERF_DICHO
+            elif s.envido is Reglas.EstadoEnvido.EE_DICHO : s.envido = Reglas.EstadoEnvido.EEF_DICHO
+            elif s.envido is Reglas.EstadoEnvido.R_DICHO : s.envido = Reglas.EstadoEnvido.RF_DICHO
+        elif a is Reglas.Accion.RECHAZAR_TANTO:
+            if s.envido is Reglas.EstadoEnvido.E_DICHO : s.envido = Reglas.EstadoEnvido.E_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.EF_DICHO : s.envido = Reglas.EstadoEnvido.EF_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.EE_DICHO : s.envido = Reglas.EstadoEnvido.EE_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.EEF_DICHO: s.envido = Reglas.EstadoEnvido.EEF_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.ER_DICHO: s.envido = Reglas.EstadoEnvido.ER_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.ERF_DICHO: s.envido = Reglas.EstadoEnvido.ERF_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.R_DICHO: s.envido = Reglas.EstadoEnvido.R_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.RF_DICHO: s.envido = Reglas.EstadoEnvido.RF_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.F_DICHO: s.envido = Reglas.EstadoEnvido.F_RECHAZADO
+        elif a is Reglas.Accion.ACEPTAR_TANTO:
+            if s.envido is Reglas.EstadoEnvido.E_DICHO: s.envido = Reglas.EstadoEnvido.E_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.EF_DICHO: s.envido = Reglas.EstadoEnvido.EF_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.EE_DICHO: s.envido = Reglas.EstadoEnvido.EE_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.EEF_DICHO: s.envido = Reglas.EstadoEnvido.EEF_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.ER_DICHO: s.envido = Reglas.EstadoEnvido.ER_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.ERF_DICHO: s.envido = Reglas.EstadoEnvido.ERF_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.R_DICHO: s.envido = Reglas.EstadoEnvido.R_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.RF_DICHO: s.envido = Reglas.EstadoEnvido.RF_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.F_DICHO: s.envido = Reglas.EstadoEnvido.F_ACEPTADO
+
+        elif a is Reglas.Accion.GRITAR :
+            if s.truco in [Reglas.EstadoTruco.RETRUCO_ACEPTADO, Reglas.EstadoTruco.RETRUCO_DICHO]:
+                s.truco = Reglas.EstadoTruco.VALE4_DICHO
+            elif s.truco in [Reglas.EstadoTruco.TRUCO_ACEPTADO,Reglas.EstadoTruco.TRUCO_DICHO]:
+                s.truco = Reglas.EstadoTruco.RETRUCO_DICHO
             elif s.truco is Reglas.EstadoTruco.NADA_DICHO: s.truco = Reglas.EstadoTruco.TRUCO_DICHO
             elif s.truco is Reglas.EstadoTruco.VALE4_ACEPTADO : assert False # no se puede gritar cuando ya esta dicho el vale4
 
-
-        if a is Reglas.Accion.QUIERO_GRITO:
+        elif a is Reglas.Accion.QUIERO_GRITO:
             if s.truco is Reglas.EstadoTruco.TRUCO_DICHO: s.truco = Reglas.EstadoTruco.TRUCO_ACEPTADO
             elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO: s.truco = Reglas.EstadoTruco.RETRUCO_ACEPTADO
             elif s.truco is Reglas.EstadoTruco.VALE4_DICHO: s.truco = Reglas.EstadoTruco.VALE4_ACEPTADO
@@ -579,7 +664,7 @@ class Humano:
             self.cartas_restantes.remove(c)  # la quito de las cartas restantes
 
         # finalmente agrego la accion al log de acciones hechas por el estado
-        if DEBUG: print(">>>  P" + str(self.jugador) + " - ejecutando: " + str(a))
+        if DEBUG : printDebug("  p" + str(self.jugador) + " - ejecutando accion: " + str(a))
         s.acciones_hechas.append((self.jugador, a))
 
 
@@ -591,6 +676,7 @@ class AgenteDVN:
         self.cartas_restantes = []
         self.state_history = []
         self.DVN = dvn
+        self.puntos_envido = 9
 
         if jugador == Reglas.JUGADOR1:
             self.jugador = Reglas.JUGADOR1
@@ -611,49 +697,96 @@ class AgenteDVN:
             self.cartas_totales.append(i)
         if debug: printDebug(str(self.cartas_restantes))
 
-    def get_acciones_posibles(self, s):
-        # Este metodo construye y retorna el vector de acciones posibles (tomados del enum Reglas.Acciones) con base en el estado actual s
+        self.puntos_envido = Reglas.ContarEnvido(self.cartas_totales)
+
+    def get_acciones_posibles(self,s):
+        # Este metodo construye y retorna el vector de acciones posibles (tomados del enum Reglas.Acciones) con base en el estado actual "s"
         result = []
 
-        if s.QuienJugariaCarta() == self.jugador:  # me toca
-            # Opciones de Truco : si me gritaron, agregar las acciones de aceptar (call) y subir apuesta (raise)
-            if s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO:
-                for j, a in reversed(s.acciones_hechas):
-                    if a is Reglas.Accion.GRITAR:
-                        if j is not self.jugador:
-                            result.append(Reglas.Accion.GRITAR)
-                        break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
+        # ESTAMOS EN PLENO CICLO DE ENVIDO?  (prioritario, debe resolverse antes de hablar de otra cosa)
+        if s.envido is Reglas.EstadoEnvido.E_DICHO:
+            result.append(Reglas.Accion.ENVIDO)
+            result.append(Reglas.Accion.REALENVIDO)
+            result.append(Reglas.Accion.FALTAENVIDO)
+            result.append(Reglas.Accion.ACEPTAR_TANTO)
+            result.append(Reglas.Accion.RECHAZAR_TANTO)
+        elif s.envido is Reglas.EstadoEnvido.EE_DICHO:
+            result.append(Reglas.Accion.FALTAENVIDO)
+            result.append(Reglas.Accion.ACEPTAR_TANTO)
+            result.append(Reglas.Accion.RECHAZAR_TANTO)
+        elif s.envido in [Reglas.EstadoEnvido.R_DICHO, Reglas.EstadoEnvido.ER_DICHO]:
+            result.append(Reglas.Accion.FALTAENVIDO)
+            result.append(Reglas.Accion.ACEPTAR_TANTO)
+            result.append(Reglas.Accion.RECHAZAR_TANTO)
+        elif s.envido in [Reglas.EstadoEnvido.EF_DICHO, Reglas.EstadoEnvido.EEF_DICHO ,
+                          Reglas.EstadoEnvido.ERF_DICHO , Reglas.EstadoEnvido.RF_DICHO ,
+                          Reglas.EstadoEnvido.F_DICHO]:
+            result.append(Reglas.Accion.ACEPTAR_TANTO)
+            result.append(Reglas.Accion.RECHAZAR_TANTO)
 
-            elif s.truco is Reglas.EstadoTruco.RETRUCO_ACEPTADO:
-                for j, a in reversed(s.acciones_hechas):
-                    if a is Reglas.Accion.GRITAR:
-                        if j is not self.jugador:
-                            result.append(Reglas.Accion.GRITAR)
-                        break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
-            elif s.truco == Reglas.EstadoTruco.NADA_DICHO:
-                result.append(Reglas.Accion.GRITAR)
-            elif s.truco == Reglas.EstadoTruco.VALE4_ACEPTADO:
-                pass
-            else:
-                assert False  # WARNING: Si me toca, el estado del truco deberia estar en alguno case de los elif, a menos que permita Re-Raise
+        else: # NO ESTAMOS EN MEDIO DE UN CICLO DE ENVIDO
 
-            # solo resta agregar las acciones de jugar cartas aun en mano
-            for c in self.cartas_restantes:
-                result.append(Reglas.Accion(self.cartas_totales.index(c) + 1))
-
-        else:
-            result.append(Reglas.Accion.FOLD)
-            # No me toca jugar carta, seguramente me gritaron
+            # ESTAMOS EN UN CICLO DE TRUCO?  (prioritario luego del envido)
             if s.truco is Reglas.EstadoTruco.TRUCO_DICHO:
+                if (s.envido is Reglas.EstadoEnvido.NADA_DICHO) and (len(self.cartas_restantes) == 3):
+                    result.append(Reglas.Accion.ENVIDO)
+                    result.append(Reglas.Accion.REALENVIDO)
+                    result.append(Reglas.Accion.FALTAENVIDO)
                 result.append(Reglas.Accion.QUIERO_GRITO)
-                # if len(self.cartas_restantes) == 0: result.append(Reglas.Accion.GRITAR_RETRUCO)  # Permitimos Re-Raise en la ultima mano
+                result.append(Reglas.Accion.GRITAR)  # Permitimos Re-Raise (poco lógico, lo podriamos restringir a ultima mano bajo un if len(self.cartas_restantes) == 0)
+                result.append(Reglas.Accion.FOLD)
             elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO:
                 result.append(Reglas.Accion.QUIERO_GRITO)
-                # if len(self.cartas_restantes) == 0: result.append(Reglas.Accion.GRITAR_VALE4)  # Permitimos Re-Raise en la ultima mano
+                result.append(Reglas.Accion.GRITAR)  # Permitimos Re-Raise (poco lógico, lo podriamos restringir a ultima mano bajo un if len(self.cartas_restantes) == 0)
+                result.append(Reglas.Accion.FOLD)
             elif s.truco == Reglas.EstadoTruco.VALE4_DICHO:
                 result.append(Reglas.Accion.QUIERO_GRITO)
+                result.append(Reglas.Accion.FOLD)
+
+            # NO ESTAMOS EN MEDIO DE UN CICLO DE TRUCO
+            else:
+                # ES POSIBLE DECIR ENVIDO: todavia no pasamos por envido y tengo 3 cartas en la mano (si jugue algo ya fui)
+                if (s.envido is Reglas.EstadoEnvido.NADA_DICHO) and (len(self.cartas_restantes) == 3):
+                    # validar que el truco lo permite (todavia no se dijo el Truco)
+                    if s.truco is Reglas.EstadoTruco.NADA_DICHO:
+                        result.append(Reglas.Accion.ENVIDO)
+                        result.append(Reglas.Accion.REALENVIDO)
+                        result.append(Reglas.Accion.FALTAENVIDO)
+
+                # ENVIDO YA GESTIONADO QUEDA TRUCO Y CARTAS
+                if s.QuienJugariaCarta() == self.jugador: # me toca
+                    # Opciones de Truco : si me gritaron, agregar las acciones de aceptar (call) y subir apuesta (raise)
+                    if s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO :
+                        for j, a in reversed(s.acciones_hechas):
+                            if a is Reglas.Accion.GRITAR:
+                                if j is not self.jugador:
+                                    result.append(Reglas.Accion.GRITAR)
+                                break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
+
+                    elif s.truco is Reglas.EstadoTruco.RETRUCO_ACEPTADO :
+                        for j, a in reversed(s.acciones_hechas):
+                            if a is Reglas.Accion.GRITAR:
+                                if j is not self.jugador:
+                                    result.append(Reglas.Accion.GRITAR)
+                                break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
+                    elif s.truco == Reglas.EstadoTruco.NADA_DICHO: result.append(Reglas.Accion.GRITAR)
+                    elif s.truco == Reglas.EstadoTruco.VALE4_ACEPTADO : pass
+                    else:
+                        assert False  # WARNING: Si me toca, el estado del truco deberia estar en alguno case de los elif, a menos que permita Re-Raise
+
+                    # solo resta agregar las acciones de jugar cartas aun en mano
+                    for c in self.cartas_restantes:
+                        result.append(Reglas.Accion(self.cartas_totales.index(c) + 1))
+
+                else:
+                    assert False  # caso no posible (no estamos en ciclo de envido o truco y tampoco me toca jugar)
+
+        # VERSION CON FILTRADO DE DUPLICADOS (lo quito para que salten problemas de flujo si los hay)
+        #from more_itertools import unique_everseen
+        #return list(unique_everseen(result))
 
         return result
+
 
     def Elegir_Accion(self, s, debug=False):
         def warn(*args, **kwargs):
@@ -681,13 +814,11 @@ class AgenteDVN:
             a = self.get_acciones_posibles(s)[idx]
 
         else:
-
             a = None
             best = -10000
 
             _cp = AgenteDVN(self.jugador, self.DVN)
             _cp.cartas_totales = self.cartas_totales
-
 
             for i in self.get_acciones_posibles(s):
                 # 1. copio
@@ -700,7 +831,7 @@ class AgenteDVN:
                 # 3. convierto
                 _s = Motor.ConvertStateToVector(_cp, _s, True)
                 _s = np.squeeze(np.asarray(_s))  # Convierto a array de Red
-                _s = _s.reshape(1, 50)
+                _s = _s.reshape(1, Motor.STATE_VECTOR_LENGTH)
                 _s = _s.astype('float32')
 
                 # 4. Estimo
@@ -717,187 +848,75 @@ class AgenteDVN:
 
         if a is Reglas.Accion.FOLD: s.truco = Reglas.EstadoTruco.FOLD
 
-        if a is Reglas.Accion.GRITAR :
-            if s.truco is Reglas.EstadoTruco.RETRUCO_ACEPTADO: s.truco = Reglas.EstadoTruco.VALE4_DICHO
-            elif s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO: s.truco = Reglas.EstadoTruco.RETRUCO_DICHO
+        if a is Reglas.Accion.ENVIDO :
+            if s.envido is Reglas.EstadoEnvido.NADA_DICHO : s.envido = Reglas.EstadoEnvido.E_DICHO
+            elif s.envido is Reglas.EstadoEnvido.E_DICHO : s.envido = Reglas.EstadoEnvido.EE_DICHO
+        elif a is Reglas.Accion.REALENVIDO :
+            if s.envido is Reglas.EstadoEnvido.NADA_DICHO : s.envido = Reglas.EstadoEnvido.R_DICHO
+            elif s.envido is Reglas.EstadoEnvido.E_DICHO : s.envido = Reglas.EstadoEnvido.ER_DICHO
+        elif a is Reglas.Accion.FALTAENVIDO :
+            if s.envido is Reglas.EstadoEnvido.NADA_DICHO: s.envido = Reglas.EstadoEnvido.F_DICHO
+            elif s.envido is Reglas.EstadoEnvido.E_DICHO : s.envido = Reglas.EstadoEnvido.EF_DICHO
+            elif s.envido is Reglas.EstadoEnvido.ER_DICHO : s.envido = Reglas.EstadoEnvido.ERF_DICHO
+            elif s.envido is Reglas.EstadoEnvido.EE_DICHO : s.envido = Reglas.EstadoEnvido.EEF_DICHO
+            elif s.envido is Reglas.EstadoEnvido.R_DICHO : s.envido = Reglas.EstadoEnvido.RF_DICHO
+        elif a is Reglas.Accion.RECHAZAR_TANTO:
+            if s.envido is Reglas.EstadoEnvido.E_DICHO : s.envido = Reglas.EstadoEnvido.E_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.EF_DICHO : s.envido = Reglas.EstadoEnvido.EF_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.EE_DICHO : s.envido = Reglas.EstadoEnvido.EE_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.EEF_DICHO: s.envido = Reglas.EstadoEnvido.EEF_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.ER_DICHO: s.envido = Reglas.EstadoEnvido.ER_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.ERF_DICHO: s.envido = Reglas.EstadoEnvido.ERF_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.R_DICHO: s.envido = Reglas.EstadoEnvido.R_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.RF_DICHO: s.envido = Reglas.EstadoEnvido.RF_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.F_DICHO: s.envido = Reglas.EstadoEnvido.F_RECHAZADO
+        elif a is Reglas.Accion.ACEPTAR_TANTO:
+            if s.envido is Reglas.EstadoEnvido.E_DICHO: s.envido = Reglas.EstadoEnvido.E_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.EF_DICHO: s.envido = Reglas.EstadoEnvido.EF_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.EE_DICHO: s.envido = Reglas.EstadoEnvido.EE_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.EEF_DICHO: s.envido = Reglas.EstadoEnvido.EEF_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.ER_DICHO: s.envido = Reglas.EstadoEnvido.ER_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.ERF_DICHO: s.envido = Reglas.EstadoEnvido.ERF_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.R_DICHO: s.envido = Reglas.EstadoEnvido.R_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.RF_DICHO: s.envido = Reglas.EstadoEnvido.RF_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.F_DICHO: s.envido = Reglas.EstadoEnvido.F_ACEPTADO
+
+        elif a is Reglas.Accion.GRITAR :
+            if s.truco in [Reglas.EstadoTruco.RETRUCO_ACEPTADO, Reglas.EstadoTruco.RETRUCO_DICHO]:
+                s.truco = Reglas.EstadoTruco.VALE4_DICHO
+            elif s.truco in [Reglas.EstadoTruco.TRUCO_ACEPTADO,Reglas.EstadoTruco.TRUCO_DICHO]:
+                s.truco = Reglas.EstadoTruco.RETRUCO_DICHO
             elif s.truco is Reglas.EstadoTruco.NADA_DICHO: s.truco = Reglas.EstadoTruco.TRUCO_DICHO
             elif s.truco is Reglas.EstadoTruco.VALE4_ACEPTADO : assert False # no se puede gritar cuando ya esta dicho el vale4
 
-        if a is Reglas.Accion.QUIERO_GRITO:
-            if s.truco is Reglas.EstadoTruco.TRUCO_DICHO:
-                s.truco = Reglas.EstadoTruco.TRUCO_ACEPTADO
-            elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO:
-                s.truco = Reglas.EstadoTruco.RETRUCO_ACEPTADO
-            elif s.truco is Reglas.EstadoTruco.VALE4_DICHO:
-                s.truco = Reglas.EstadoTruco.VALE4_ACEPTADO
-            else:
-                assert False  # No es posible pasar por aca, si quiso un grito es porque habia un truco, retruco o vale4 dicho
+        elif a is Reglas.Accion.QUIERO_GRITO:
+            if s.truco is Reglas.EstadoTruco.TRUCO_DICHO: s.truco = Reglas.EstadoTruco.TRUCO_ACEPTADO
+            elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO: s.truco = Reglas.EstadoTruco.RETRUCO_ACEPTADO
+            elif s.truco is Reglas.EstadoTruco.VALE4_DICHO: s.truco = Reglas.EstadoTruco.VALE4_ACEPTADO
+            else: assert False # No es posible pasar por aca, si quiso un grito es porque habia un truco, retruco o vale4 dicho
 
         if a is Reglas.Accion.JUGAR_C1:
             c = self.cartas_totales[0]
-            assert c in self.cartas_restantes  # valido que la carta a jugar aun esta en mi mano
+            assert c in self.cartas_restantes # valido que la carta a jugar aun esta en mi mano
             s.cartas_jugadas.append(c)  # actualizo el estado
             self.cartas_restantes.remove(c)  # la quito de las cartas restantes
 
         if a is Reglas.Accion.JUGAR_C2:
             c = self.cartas_totales[1]
-            assert c in self.cartas_restantes  # valido que la carta a jugar aun esta en mi mano
+            assert c in self.cartas_restantes # valido que la carta a jugar aun esta en mi mano
             s.cartas_jugadas.append(c)  # actualizo el estado
             self.cartas_restantes.remove(c)  # la quito de las cartas restantes
 
         if a is Reglas.Accion.JUGAR_C3:
             c = self.cartas_totales[2]
-            assert c in self.cartas_restantes  # valido que la carta a jugar aun esta en mi mano
+            assert c in self.cartas_restantes # valido que la carta a jugar aun esta en mi mano
             s.cartas_jugadas.append(c)  # actualizo el estado
             self.cartas_restantes.remove(c)  # la quito de las cartas restantes
 
         # finalmente agrego la accion al log de acciones hechas por el estado
-        if DEBUG: print(">>>  P" + str(self.jugador) + " - ejecutando: " + str(a))
+        if DEBUG : printDebug("  p" + str(self.jugador) + " - ejecutando accion: " + str(a))
         s.acciones_hechas.append((self.jugador, a))
 
-# Este agente usa su Red de Policy para decidir acciones
-class AgenteDPN:
-    def __init__(self, jugador, dpn):
-        self.eps = 0.05
-        self.cartas_totales = []
-        self.cartas_restantes = []
-        self.state_history = []
-        self.DPN = dpn
-
-        if jugador == Reglas.JUGADOR1:
-            self.jugador = Reglas.JUGADOR1
-        elif jugador == Reglas.JUGADOR2:
-            self.jugador = Reglas.JUGADOR2
-        elif jugador != self.jugador:
-            self.jugador = None
-            assert self.jugador is not None
-
-    def TomarCartas(self, listaCartas, debug=False):
-        self.cartas_totales = []
-        self.cartas_restantes = []
-
-        # Aqui asignamos las cartas al jugador en orden que coincide con el diseño de acciones
-        listaCartas.sort(key=lambda x: x.ValorTruco, reverse=True)
-        for i in listaCartas:
-            self.cartas_restantes.append(i)
-            self.cartas_totales.append(i)
-        if debug: printDebug(str(self.cartas_restantes))
-
-    def get_acciones_posibles(self, s):
-        # Este metodo construye y retorna el vector de acciones posibles (tomados del enum Reglas.Acciones) con base en el estado actual s
-        result = []
-
-        if s.QuienJugariaCarta() == self.jugador:  # me toca
-            # Opciones de Truco : si me gritaron, agregar las acciones de aceptar (call) y subir apuesta (raise)
-            if s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO:
-                for j, a in reversed(s.acciones_hechas):
-                    if a is Reglas.Accion.GRITAR:
-                        if j is not self.jugador:
-                            result.append(Reglas.Accion.GRITAR)
-                        break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
-
-            elif s.truco is Reglas.EstadoTruco.RETRUCO_ACEPTADO:
-                for j, a in reversed(s.acciones_hechas):
-                    if a is Reglas.Accion.GRITAR:
-                        if j is not self.jugador:
-                            result.append(Reglas.Accion.GRITAR)
-                        break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
-            elif s.truco == Reglas.EstadoTruco.NADA_DICHO:
-                result.append(Reglas.Accion.GRITAR)
-            elif s.truco == Reglas.EstadoTruco.VALE4_ACEPTADO:
-                pass
-            else:
-                assert False  # WARNING: Si me toca, el estado del truco deberia estar en alguno case de los elif, a menos que permita Re-Raise
-
-            # solo resta agregar las acciones de jugar cartas aun en mano
-            for c in self.cartas_restantes:
-                result.append(Reglas.Accion(self.cartas_totales.index(c) + 1))
-
-        else:
-            result.append(Reglas.Accion.FOLD)
-            # No me toca jugar carta, seguramente me gritaron
-            if s.truco is Reglas.EstadoTruco.TRUCO_DICHO:
-                result.append(Reglas.Accion.QUIERO_GRITO)
-                # if len(self.cartas_restantes) == 0: result.append(Reglas.Accion.GRITAR_RETRUCO)  # Permitimos Re-Raise en la ultima mano
-            elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO:
-                result.append(Reglas.Accion.QUIERO_GRITO)
-                # if len(self.cartas_restantes) == 0: result.append(Reglas.Accion.GRITAR_VALE4)  # Permitimos Re-Raise en la ultima mano
-            elif s.truco == Reglas.EstadoTruco.VALE4_DICHO:
-                result.append(Reglas.Accion.QUIERO_GRITO)
-
-        return result
-
-    def Elegir_Accion(self, s, debug=False):
-        a = None
-
-        best = -10000
-
-        # 1. convierto
-        vector = Motor.ConvertStateToVector(self, s, True)
-        vector = np.squeeze(np.asarray(vector))  # Convierto a array de Red
-        vector = vector.reshape(1, 50)
-        vector = vector.astype('float32')
-
-        # 2. Estimo
-        output = self.DPN.predict(vector)
-        # a = Reglas.Accion(np.argmax(output) + 1)
-        if debug: print("vector pronostico: " + str(output))
-
-        # 3. Comparo los puntajes con las acciones posibles de verdad
-
-        for i in self.get_acciones_posibles(s):
-            value = output[0][i.value-1]
-
-            if value > best:
-                a = i
-                best = value
-
-
-        return a
-
-    # Ejecuta la accion que le llega, actualizando el estado y el agente de forma acorde
-    def EjecutarAccion(self, s, a, DEBUG=False):
-
-        if a is Reglas.Accion.FOLD: s.truco = Reglas.EstadoTruco.FOLD
-
-        if a is Reglas.Accion.GRITAR :
-            if s.truco is Reglas.EstadoTruco.RETRUCO_ACEPTADO: s.truco = Reglas.EstadoTruco.VALE4_DICHO
-            elif s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO: s.truco = Reglas.EstadoTruco.RETRUCO_DICHO
-            elif s.truco is Reglas.EstadoTruco.NADA_DICHO: s.truco = Reglas.EstadoTruco.TRUCO_DICHO
-            elif s.truco is Reglas.EstadoTruco.VALE4_ACEPTADO : assert False # no se puede gritar cuando ya esta dicho el vale4
-
-
-        if a is Reglas.Accion.QUIERO_GRITO:
-            if s.truco is Reglas.EstadoTruco.TRUCO_DICHO:
-                s.truco = Reglas.EstadoTruco.TRUCO_ACEPTADO
-            elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO:
-                s.truco = Reglas.EstadoTruco.RETRUCO_ACEPTADO
-            elif s.truco is Reglas.EstadoTruco.VALE4_DICHO:
-                s.truco = Reglas.EstadoTruco.VALE4_ACEPTADO
-            else:
-                assert False  # No es posible pasar por aca, si quiso un grito es porque habia un truco, retruco o vale4 dicho
-
-        if a is Reglas.Accion.JUGAR_C1:
-            c = self.cartas_totales[0]
-            assert c in self.cartas_restantes  # valido que la carta a jugar aun esta en mi mano
-            s.cartas_jugadas.append(c)  # actualizo el estado
-            self.cartas_restantes.remove(c)  # la quito de las cartas restantes
-
-        if a is Reglas.Accion.JUGAR_C2:
-            c = self.cartas_totales[1]
-            assert c in self.cartas_restantes  # valido que la carta a jugar aun esta en mi mano
-            s.cartas_jugadas.append(c)  # actualizo el estado
-            self.cartas_restantes.remove(c)  # la quito de las cartas restantes
-
-        if a is Reglas.Accion.JUGAR_C3:
-            c = self.cartas_totales[2]
-            assert c in self.cartas_restantes  # valido que la carta a jugar aun esta en mi mano
-            s.cartas_jugadas.append(c)  # actualizo el estado
-            self.cartas_restantes.remove(c)  # la quito de las cartas restantes
-
-        # finalmente agrego la accion al log de acciones hechas por el estado
-        if DEBUG: printDebug("  p" + str(self.jugador) + " - ejecutando accion: " + str(a))
-        s.acciones_hechas.append((self.jugador, a))
 
 class Episodio:
     def __init__(self):
@@ -1211,6 +1230,8 @@ class Estado:
 
 class Motor:
 
+    STATE_VECTOR_LENGTH = 100
+
     @staticmethod
     def Construir_Lista_Cartas(lista_id_cartas):
         result = []
@@ -1495,34 +1516,6 @@ class Motor:
                 result.append(0)
 
         return result
-
-    @staticmethod
-    def Generate_Policy_Training_Games(p1, p2, batch_size, epochs, normalized=True):
-        p1_data = []
-        p1_labels= []
-        p2_data = []
-        p2_labels = []
-
-        print("Generando Partidas.. ( epochs=" + str(epochs) + ",   batch_size=" + str(batch_size) + " )")
-        print("")
-
-        # Corremos los epochs
-        for i in range(epochs):
-            print("Epoch: " + str(i + 1))
-            episodios = Motor.Play_random_games(p1, p2, batch_size, False)
-            for e in episodios:
-                # pero quizas esto sea con otra Red de Value (esta es policy)
-                for s in reversed(range(len(e.estados))):
-                    if e.ganador is Reglas.JUGADOR1:
-                        if s > 0 and e.estados[s-1].QuienActua() is Reglas.JUGADOR1:
-                            p1_data.append(Motor.ConvertStateToVector(e.p1, e.estados[s - 1], normalized))
-                            p1_labels.append(e.estados[s].get_last_action_from_player(Reglas.JUGADOR1).value)
-                    elif e.ganador is Reglas.JUGADOR2:
-                        if s > 0 and e.estados[s - 1].QuienActua() is Reglas.JUGADOR2:
-                            p2_data.append(Motor.ConvertStateToVector(e.p2, e.estados[s - 1], normalized))
-                            p2_labels.append(e.estados[s].get_last_action_from_player(Reglas.JUGADOR2).value)
-
-        return (p1_data, p1_labels), (p2_data, p2_labels)
 
     @staticmethod
     def Generate_Value_Training_Games(p1, p2, batch_size, epochs, normalized=True):

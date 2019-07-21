@@ -10,13 +10,12 @@ from matplotlib import pyplot
 
 
 class ValueNetworkEngine:
-    INPUT_LENGTH = 100
     MAX_EPOCHS_PERGEN = 50
 
     @staticmethod
     def Generate_Player_DVN():
         player_DVN = models.Sequential()
-        player_DVN.add(layers.Dense(100, activation='relu', input_shape=(ValueNetworkEngine.INPUT_LENGTH,)))
+        player_DVN.add(layers.Dense(100, activation='relu', input_shape=(Motor.STATE_VECTOR_LENGTH,)))
         player_DVN.add(layers.Dense(120, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
         # p1_DQN.add(layers.Dropout(0.2))
         player_DVN.add(layers.Dense(120, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
@@ -172,14 +171,14 @@ class ValueNetworkEngine:
         print("  ## Entrenando Red para P1ayer 1")
         p1_DVN = ValueNetworkEngine.Generate_Player_DVN()
 
-        # Convierto a nparray y reshape a lo especificado en las capas de la red neuronal (shape a ValueNetworkEngine.INPUT_LENGTH)
+        # Convierto a nparray y reshape a lo especificado en las capas de la red neuronal (shape a Motor.STATE_VECTOR_LENGTH)
         # Train
         p1_traindata = np.squeeze(np.asarray(p1_traindata))
-        p1_traindata = p1_traindata.reshape((len(p1_traindata), ValueNetworkEngine.INPUT_LENGTH))
+        p1_traindata = p1_traindata.reshape((len(p1_traindata), Motor.STATE_VECTOR_LENGTH))
         p1_traindata = p1_traindata.astype('float32')
         # Test
         p1_testdata = np.squeeze(np.asarray(p1_testdata))
-        p1_testdata = p1_testdata.reshape((len(p1_testdata), ValueNetworkEngine.INPUT_LENGTH))
+        p1_testdata = p1_testdata.reshape((len(p1_testdata), Motor.STATE_VECTOR_LENGTH))
         p1_testdata = p1_testdata.astype('float32')
 
         # patient early stopping
@@ -238,15 +237,15 @@ class ValueNetworkEngine:
         print("## Entrenando Red para P1ayer 2")
         p2_DVN = ValueNetworkEngine.Generate_Player_DVN()
 
-        # Convierto a nparray y reshape a lo especificado en las capas de la red neuronal (shape a ValueNetworkEngine.INPUT_LENGTH)
+        # Convierto a nparray y reshape a lo especificado en las capas de la red neuronal (shape a Motor.STATE_VECTOR_LENGTH)
         # Train
         p2_traindata = np.squeeze(np.asarray(p2_traindata))
-        p2_traindata = p2_traindata.reshape((len(p2_traindata), ValueNetworkEngine.INPUT_LENGTH))
+        p2_traindata = p2_traindata.reshape((len(p2_traindata), Motor.STATE_VECTOR_LENGTH))
         p2_traindata = p2_traindata.astype('float32')
 
         # Test
         p2_testdata = np.squeeze(np.asarray(p2_testdata))
-        p2_testdata = p2_testdata.reshape((len(p2_testdata), ValueNetworkEngine.INPUT_LENGTH))
+        p2_testdata = p2_testdata.reshape((len(p2_testdata), Motor.STATE_VECTOR_LENGTH))
         p2_testdata = p2_testdata.astype('float32')
 
         # patient early stopping
@@ -318,7 +317,7 @@ class ValueNetworkEngine:
             # 3. convierto
             _s = Motor.ConvertStateToVector(_cp, _s, True)
             _s = np.squeeze(np.asarray(_s))# Convierto a array de Red
-            _s = _s.reshape(1, ValueNetworkEngine.INPUT_LENGTH)
+            _s = _s.reshape(1, Motor.STATE_VECTOR_LENGTH)
             _s = _s.astype('float32')
 
             # 4. Estimo
