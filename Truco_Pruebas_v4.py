@@ -2,7 +2,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
 os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '0'
 from Truco_Core_v4 import *
-#from Truco_Value_Network_v3 import *
+from Truco_Value_Network_v4 import *
 import keras
 
 
@@ -950,17 +950,22 @@ def prueba_ConvertVector():
     p2 = AgenteRandom(Reglas.JUGADOR2)
     cartas_j1 = []
     cartas_j2 = []
-    cartas_j1.append(Reglas.MAZO[9])
-    cartas_j1.append(Reglas.MAZO[5])
-    cartas_j1.append(Reglas.MAZO[3])
-    cartas_j2.append(Reglas.MAZO[8])
-    cartas_j2.append(Reglas.MAZO[6])
-    cartas_j2.append(Reglas.MAZO[1])
+    cartas_j2.append(Reglas.MAZO[9])
+    cartas_j2.append(Reglas.MAZO[5])
+    cartas_j2.append(Reglas.MAZO[3])
+    cartas_j1.append(Reglas.MAZO[8])
+    cartas_j1.append(Reglas.MAZO[6])
+    cartas_j1.append(Reglas.MAZO[1])
 
     p1.TomarCartas(cartas_j1)
     p2.TomarCartas(cartas_j2)
+    print("cartas p1: " + str(p1.cartas_totales))
+    print("cartas p2: " + str(p2.cartas_totales))
+    s.puntos_envido_p1 = p1.puntos_envido
+    s.puntos_envido_p2 = p2.puntos_envido
 
     # Prueba 1
+    print("")
     print("inicial")
     print("")
 
@@ -969,33 +974,29 @@ def prueba_ConvertVector():
     print(str(p2.get_acciones_posibles(s)))
     print("")
 
-    print("2) p2 grito Truco, acciones de p1 disponibles")
-    p2.EjecutarAccion(s, Reglas.Accion.GRITAR)
+    print("2) p2 Envido, acciones de p1 disponibles")
+    p2.EjecutarAccion(s, Reglas.Accion.ENVIDO)
+    print("estado envido: " + s.envido.name)
     print(str(p1.get_acciones_posibles(s)))
     print("")
 
     print("3) p1 acepto, acciones de p2 disponibles")
-    p1.EjecutarAccion(s, Reglas.Accion.QUIERO_GRITO)
+    p1.EjecutarAccion(s, Reglas.Accion.ACEPTAR_TANTO)
     print(str(p2.get_acciones_posibles(s)))
     print("")
 
-    print("4) p2 jugo c3, acciones de p1 disponibles")
-    p2.EjecutarAccion(s, Reglas.Accion.JUGAR_C3)
+    print("5) p2 jugo c2, acciones de p1 disponibles")
+    p2.EjecutarAccion(s, Reglas.Accion.JUGAR_C2)
     print(str(p1.get_acciones_posibles(s)))
     print("")
 
-    print("5) p1 jugo c2, acciones de p2 disponibles")
+    print("6) p1 jugo c2, acciones de p2 disponibles")
     p1.EjecutarAccion(s, Reglas.Accion.JUGAR_C2)
     print(str(p2.get_acciones_posibles(s)))
     print("")
 
-    print("6) p2 hace fold, acciones de p1 disponibles")
-    s.acciones_hechas.append((Reglas.JUGADOR2, Reglas.Accion.FOLD))
-    s.truco = Reglas.EstadoTruco.FOLD
-    print(str(p1.get_acciones_posibles(s)))
-    print("")
-
     print(str(Motor.ConvertStateToVector(p1, s, True)))
+    print("")
     print(len(Motor.ConvertStateToVector(p1, s, True)))
 
 def prueba_CalcularPuntos():
@@ -1009,6 +1010,8 @@ def prueba_CalcularPuntos():
     p2 = AgenteRandom(Reglas.JUGADOR2)
 
     episodios = Motor.Play_random_games(p1, p2, 1, False)
+    print("cartas p1: " + str(p1.cartas_totales) + ",   puntos envido:" + str(p1.puntos_envido))
+    print("cartas p2: " + str(p2.cartas_totales) + ",   puntos envido:" + str(p2.puntos_envido))
     for e in episodios:
         for s in e.estados:
             print("estadoT: " + str(s))
@@ -1017,6 +1020,25 @@ def prueba_CalcularPuntos():
 
     print("puntos: " + str(e.CalcularPuntosFinales()[0]))
     print("puntos: " + str(e.CalcularPuntosFinales()[1]))
+
+
+def prueba_CalcularPuntosEnvido():
+    print("")
+    print("===================================================")
+    print("## PRUEBA - CalcularPuntos - ##")
+    print("===================================================")
+    print("")
+
+    p1 = AgenteRandom(Reglas.JUGADOR1)
+    p2 = AgenteRandom(Reglas.JUGADOR2)
+
+    cartas_p1, cartas_p2 = Reglas.RepartirCartas()
+    p1.TomarCartas(cartas_p1)
+    p2.TomarCartas(cartas_p2)
+
+    print("cartas p1: " + str(p1.cartas_totales) + ",   puntos envido:" + str(p1.puntos_envido))
+    print("cartas p2: " + str(p2.cartas_totales) + ",   puntos envido:" + str(p2.puntos_envido))
+
 
 def prueba_Generate_Policy_Training_Games():
     print("")
@@ -1240,7 +1262,8 @@ if __name__ == '__main__':
     #prueba_QuienActua2()
     #prueba_QuienActua3()
     #prueba_QuienActua4()
-    prueba_CalcularPuntos()
+    #prueba_CalcularPuntos()
+    #prueba_CalcularPuntosEnvido()
 
     ### PRUEBAS AGENTE
     #prueba_AccionesPosibles()
@@ -1256,7 +1279,7 @@ if __name__ == '__main__':
     ### PRUEBAS MOTOR
     #prueba_PlayRandomGames()
     # prueba_Save_Load_Games()
-    # prueba_ConvertVector()
+    prueba_ConvertVector()
 
     # REDES
     # prueba_Generate_Value_Training_Games()
@@ -1270,14 +1293,17 @@ if __name__ == '__main__':
     # PolicyNetworkEngine.PolicyNetworkTrainer(10000, 3)
 
 
+
+
+
     ##############
     # AHORA
     ##############
 
     #trainer
 
-    ##  parametros de trainer ( start_gen, number_of_generations,  iterations_per_generation, load_previous)
-    #ValueNetworkEngine.ValueNetworkTrainer(22, 5, 100000, True)
+    ##  parametros de trainer ( start_gen 0?, number_of_generations,  iterations_per_generation, load_previous)
+    ValueNetworkEngine.ValueNetworkTrainer(0, 4, 10000, True)
 
     #gen_next = "value_pickles\gen2_"
     #ValueNetworkEngine.Generate_and_Save(gen_n, gen_next, games_per_gen)

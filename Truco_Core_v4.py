@@ -10,6 +10,8 @@ from enum import Enum
 import pickle
 import multiprocessing as mp
 import time
+import itertools
+from itertools import chain
 
 # FUNCIONES A NIVEL MODULO
 global start_timer
@@ -25,47 +27,47 @@ def GenerarMazo():
     # Solucion final sera con 9 cartas (reduce statespace y permite codificar en base 10) tomadas al azar de las 40
     Carta.ResetContCarta()
     MAZO = []
-    MAZO.append(Carta("carta nula", 0))  # ID: 0 para que Carta.ID = Mazo[index]
-    MAZO.append(Carta("4-Copa", 7))  # ID: 1
-    MAZO.append(Carta("4-Oro", 7))  # ID: 2
-    MAZO.append(Carta("4-Basto", 7))  # ID: 3
-    MAZO.append(Carta("4-Espada", 7))  # ID: 4
-    MAZO.append(Carta("5-Copa", 14))  # ID: 5
-    MAZO.append(Carta("5-Oro", 14))  # ID: 6
-    MAZO.append(Carta("5-Basto", 14))  # ID: 7
-    MAZO.append(Carta("5-Espada", 14))  # ID: 8
-    MAZO.append(Carta("6-Copa", 21))  # ID: 9
-    MAZO.append(Carta("6-Oro", 21))  # ID: 10
-    MAZO.append(Carta("6-Basto", 21))  # ID: 11
-    MAZO.append(Carta("6-Espada", 21))  # ID: 12
-    MAZO.append(Carta("7-Copa", 28))  # ID: 13
-    MAZO.append(Carta("7-Basto", 28))  # ID: 14
-    MAZO.append(Carta("10-Copa", 35))  # ID: 15
-    MAZO.append(Carta("10-Oro", 35))  # ID: 16
-    MAZO.append(Carta("10-Basto", 35))  # ID: 17
-    MAZO.append(Carta("10-Espada", 35))  # ID: 18
-    MAZO.append(Carta("11-Copa", 42))  # ID: 19
-    MAZO.append(Carta("11-Oro", 42))  # ID: 20
-    MAZO.append(Carta("11-Basto", 42))  # ID: 21
-    MAZO.append(Carta("11-Espada", 42))  # ID: 22
-    MAZO.append(Carta("12-Copa", 49))  # ID: 23
-    MAZO.append(Carta("12-Oro", 49))  # ID: 24
-    MAZO.append(Carta("12-Basto", 49))  # ID: 25
-    MAZO.append(Carta("12-Espada", 49))  # ID: 26
-    MAZO.append(Carta("1-Copa", 56))  # ID: 27
-    MAZO.append(Carta("1-Oro", 56))  # ID: 28
-    MAZO.append(Carta("2-Copa", 63))  # ID: 29
-    MAZO.append(Carta("2-Oro", 63))  # ID: 30
-    MAZO.append(Carta("2-Basto", 63))  # ID: 31
-    MAZO.append(Carta("2-Espada", 63))  # ID: 32
-    MAZO.append(Carta("3-Copa", 70))  # ID: 33
-    MAZO.append(Carta("3-Oro", 70))  # ID: 34
-    MAZO.append(Carta("3-Basto", 70))  # ID: 35
-    MAZO.append(Carta("3-Espada", 70))  # ID: 36
-    MAZO.append(Carta("7-Oro", 77))  # ID: 37
-    MAZO.append(Carta("7-Espada", 84))  # ID: 38
-    MAZO.append(Carta("1-Basto", 91))  # ID: 39
-    MAZO.append(Carta("1-Espada", 98))  # ID: 40
+    MAZO.append(Carta("carta nula", 0, 0, 0))  # ID: 0 para que Carta.ID = Mazo[index]
+    MAZO.append(Carta("4-Copa", 7, Carta.Palo.COPA, 4))  # ID: 1
+    MAZO.append(Carta("4-Oro", 7, Carta.Palo.ORO, 4))  # ID: 2
+    MAZO.append(Carta("4-Basto", 7, Carta.Palo.BASTO, 4))  # ID: 3
+    MAZO.append(Carta("4-Espada", 7, Carta.Palo.ESPADA, 4))  # ID: 4
+    MAZO.append(Carta("5-Copa", 14, Carta.Palo.COPA, 5))  # ID: 5
+    MAZO.append(Carta("5-Oro", 14, Carta.Palo.ORO, 5))  # ID: 6
+    MAZO.append(Carta("5-Basto", 14, Carta.Palo.BASTO, 5))  # ID: 7
+    MAZO.append(Carta("5-Espada", 14, Carta.Palo.ESPADA, 5))  # ID: 8
+    MAZO.append(Carta("6-Copa", 21, Carta.Palo.COPA, 6))  # ID: 9
+    MAZO.append(Carta("6-Oro", 21, Carta.Palo.ORO, 6))  # ID: 10
+    MAZO.append(Carta("6-Basto", 21, Carta.Palo.BASTO, 6))  # ID: 11
+    MAZO.append(Carta("6-Espada", 21, Carta.Palo.ESPADA, 6))  # ID: 12
+    MAZO.append(Carta("7-Copa", 28, Carta.Palo.COPA, 7))  # ID: 13
+    MAZO.append(Carta("7-Basto", 28, Carta.Palo.BASTO, 7))  # ID: 14
+    MAZO.append(Carta("10-Copa", 35, Carta.Palo.COPA, 0))  # ID: 15
+    MAZO.append(Carta("10-Oro", 35, Carta.Palo.ORO, 0))  # ID: 16
+    MAZO.append(Carta("10-Basto", 35, Carta.Palo.BASTO, 0))  # ID: 17
+    MAZO.append(Carta("10-Espada", 35, Carta.Palo.ESPADA, 0))  # ID: 18
+    MAZO.append(Carta("11-Copa", 42, Carta.Palo.COPA, 0))  # ID: 19
+    MAZO.append(Carta("11-Oro", 42, Carta.Palo.ORO, 0))  # ID: 20
+    MAZO.append(Carta("11-Basto", 42, Carta.Palo.BASTO, 0))  # ID: 21
+    MAZO.append(Carta("11-Espada", 42, Carta.Palo.ESPADA, 0))  # ID: 22
+    MAZO.append(Carta("12-Copa", 49, Carta.Palo.COPA, 0))  # ID: 23
+    MAZO.append(Carta("12-Oro", 49, Carta.Palo.ORO, 0))  # ID: 24
+    MAZO.append(Carta("12-Basto", 49, Carta.Palo.BASTO, 0))  # ID: 25
+    MAZO.append(Carta("12-Espada", 49, Carta.Palo.ESPADA, 0))  # ID: 26
+    MAZO.append(Carta("1-Copa", 56, Carta.Palo.COPA, 1))  # ID: 27
+    MAZO.append(Carta("1-Oro", 56, Carta.Palo.ORO, 1))  # ID: 28
+    MAZO.append(Carta("2-Copa", 63, Carta.Palo.COPA, 2))  # ID: 29
+    MAZO.append(Carta("2-Oro", 63, Carta.Palo.ORO, 2))  # ID: 30
+    MAZO.append(Carta("2-Basto", 63, Carta.Palo.BASTO, 2))  # ID: 31
+    MAZO.append(Carta("2-Espada", 63, Carta.Palo.ESPADA, 2))  # ID: 32
+    MAZO.append(Carta("3-Copa", 70, Carta.Palo.COPA, 3))  # ID: 33
+    MAZO.append(Carta("3-Oro", 70, Carta.Palo.ORO, 3))  # ID: 34
+    MAZO.append(Carta("3-Basto", 70, Carta.Palo.BASTO, 3))  # ID: 35
+    MAZO.append(Carta("3-Espada", 70, Carta.Palo.ESPADA, 3))  # ID: 36
+    MAZO.append(Carta("7-Oro", 77, Carta.Palo.ORO, 7))  # ID: 37
+    MAZO.append(Carta("7-Espada", 84, Carta.Palo.ESPADA, 7))  # ID: 38
+    MAZO.append(Carta("1-Basto", 91, Carta.Palo.BASTO, 1))  # ID: 39
+    MAZO.append(Carta("1-Espada", 98, Carta.Palo.ESPADA, 1))  # ID: 40
     return MAZO
 
 def get_non_negative_int(prompt, list_valid_numbers):
@@ -86,10 +88,18 @@ def get_non_negative_int(prompt, list_valid_numbers):
 class Carta:
     cont_interno = 0
 
-    def __init__(self, nombre, valor_truco):
+    class Palo(Enum):
+        BASTO = 1
+        COPA = 2
+        ESPADA = 3
+        ORO = 4
+
+    def __init__(self, nombre, valor_truco, palo, valor_envido):
         self.ID = Carta.cont_interno
         self.Nombre = nombre
         self.ValorTruco = valor_truco
+        self.Palo = palo
+        self.ValorEnvido = valor_envido
         Carta.cont_interno += 1
 
     def __repr__(self):
@@ -104,6 +114,18 @@ class Carta:
 
     def __eq__(self, other):
         return self.ID == other.ID
+
+    def Palo_to_categorical_vector(self):
+        result = []
+        if self.Palo is Carta.Palo.BASTO: result.append(1)
+        else: result.append(0)
+        if self.Palo is Carta.Palo.COPA: result.append(1)
+        else: result.append(0)
+        if self.Palo is Carta.Palo.ESPADA: result.append(1)
+        else: result.append(0)
+        if self.Palo is Carta.Palo.ORO: result.append(1)
+        else: result.append(0)
+        return result
 
     @staticmethod
     def ResetContCarta():
@@ -184,10 +206,18 @@ class Reglas:
 
 
     @staticmethod
-    def ContarEnvido(self):
+    def ContarEnvido(cartas):
         # llega lista con 3 cartas
-        result = round(np.random.choice(33))
-        return result
+        maxT = 0
+
+        for x in itertools.combinations(cartas, 2):
+            if x[0].Palo == x[1].Palo:
+                t = 20 + x[0].ValorEnvido + x[1].ValorEnvido
+            else:
+                t = max(x[0].ValorEnvido, x[1].ValorEnvido)
+            if t > maxT : maxT = t
+
+        return maxT
 
 
     @staticmethod
@@ -889,7 +919,7 @@ class Episodio:
 
         # Finalmente, si se dijo algo y no hay RECHAZAR_TANTO, el que tenga mas puntos
         if self.p1.puntos_envido >= self.p2.puntos_envido : return Reglas.JUGADOR1
-        elif self.p1.puntos_envido < self.p2.puntos_envido : return Reglas.JUGADOR1
+        elif self.p1.puntos_envido < self.p2.puntos_envido : return Reglas.JUGADOR2
 
         assert False  # imposible que calcular el envido llegue aca
 
@@ -928,7 +958,6 @@ class Episodio:
         elif self.QuienGanoEnvido() is Reglas.JUGADOR2: p2 = p2 + bet_Envido
         # else es que ninguno gano, no hay puntajes que asignar
 
-
         # PUNTOS TRUCO
         s = self.estados[-1]
         if s.truco is Reglas.EstadoTruco.FOLD:
@@ -948,15 +977,7 @@ class Episodio:
         elif s.truco is Reglas.EstadoTruco.NADA_DICHO : bet_Truco = 1
         else: assert False
 
-
-
         # PUNTOS TRUCO
-        """
-        for s in self.estados:
-            if s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO : bet_Truco = 2
-            elif s.truco is Reglas.EstadoTruco.RETRUCO_ACEPTADO : bet_Truco = 3
-            elif s.truco is Reglas.EstadoTruco.VALE4_ACEPTADO : bet_Truco = 4        
-        """
         if self.ganador is Reglas.JUGADOR1:
             p1 = p1 + bet_Truco
         elif self.ganador is Reglas.JUGADOR2:
@@ -972,6 +993,8 @@ class Estado:
         self.truco = Reglas.EstadoTruco.NADA_DICHO
         self.envido = Reglas.EstadoEnvido.NADA_DICHO
         self.acciones_hechas = []
+        self.puntos_envido_p1 = 0
+        self.puntos_envido_p2 = 0
 
 
     def __repr__(self):
@@ -1282,6 +1305,8 @@ class Motor:
             cartas_p1, cartas_p2 = Reglas.RepartirCartas()
             p1.TomarCartas(cartas_p1)
             p2.TomarCartas(cartas_p2)
+            s.puntos_envido_p1 = p1.puntos_envido
+            s.puntos_envido_p2 = p2.puntos_envido
             e.p1 = p1
             e.p2 = p2
             e.estados.append(copy.deepcopy(s))
@@ -1312,12 +1337,12 @@ class Motor:
                     if DEBUG: printDebug("- Partida terminada nro:" + str(i+1) + " s:" + str(s.cartas_jugadas))
                     if quien_gano == Reglas.JUGADOR1:
                         # Caso 1: terminal gané
-                        if DEBUG: printDebug(" GANE! (jugador 1)")
+                        if DEBUG: printDebug(" GANE EL TRUCO! (jugador 1)")
                         e.ganador = Reglas.JUGADOR1
                         cont_win_p1 = cont_win_p1 + 1
                     elif quien_gano == Reglas.JUGADOR2:
                         # Caso 3: terminal perdí
-                        if DEBUG: printDebug(" GANE! (jugador 2)")
+                        if DEBUG: printDebug(" GANE EL TRUCO! (jugador 2)")
                         e.ganador = Reglas.JUGADOR2
                         cont_win_p2 = cont_win_p2 + 1
                 else:
@@ -1364,21 +1389,90 @@ class Motor:
         if normalized : result.append((estado.truco.value  - (len(Reglas.EstadoTruco)/2)) / len(Reglas.EstadoTruco) )  # normalizo usando total de estados posibles de truco
         else: result.append(estado.truco.value)
 
-        # 2do CARTAS DEL JUGADOR (3 neuronas)
-        for c in jugador.cartas_totales:
-            if normalized : result.append((c.ValorTruco -50)/ 100)    # 100 es maximo valortruco de cualquier carta, lo centro en el origen
-            else: result.append(c.ValorTruco)
+        # 2do ESTADO ENVIDO (3 neuronas: estado, puntos_p1 si aplica, puntos_p2 si aplica)
+        if normalized:
+            result.append((estado.envido.value - (len(Reglas.EstadoEnvido) / 2)) / len(Reglas.EstadoEnvido))  # normalizo usando total de estados posibles de truco
+            if estado.envido in [Reglas.EstadoEnvido.E_ACEPTADO,
+                                   Reglas.EstadoEnvido.EE_ACEPTADO,
+                                   Reglas.EstadoEnvido.RF_ACEPTADO,
+                                   Reglas.EstadoEnvido.EEF_ACEPTADO,
+                                   Reglas.EstadoEnvido.EF_ACEPTADO,
+                                   Reglas.EstadoEnvido.ER_ACEPTADO,
+                                   Reglas.EstadoEnvido.ERF_ACEPTADO,
+                                   Reglas.EstadoEnvido.R_ACEPTADO,
+                                   Reglas.EstadoEnvido.F_ACEPTADO]:
+                # El envido se jugó, agrego p1 seguro y p2 solo si gano el tanto (de lo contrario diria "buenas" y no muestra)
+                result.append((estado.puntos_envido_p1 - 16) / 33)  # normalizo
+                if estado.puntos_envido_p1 < estado.puntos_envido_p2:
+                    result.append((estado.puntos_envido_p2 - 16) / 33)
+                else:
+                    result.append(0)  # padeo 0 porque p2 dijo "son buenas" y no revelo los puntos
+            else:
+                # El envido NO se jugó, solo me agrego yo
+                if jugador.jugador is Reglas.JUGADOR1 :
+                    result.append((estado.puntos_envido_p1 - 16)/33) #normalizo
+                    result.append(0) # padeo 0 el otro jugador
+                elif jugador.jugador is Reglas.JUGADOR2 :
+                    result.append(0) # padeo 0 el otro jugador
+                    result.append((estado.puntos_envido_p2 - 16)/33) #normalizo
+        else:
+            result.append(estado.envido.value)
+            if estado.envido in [Reglas.EstadoEnvido.E_ACEPTADO,
+                                   Reglas.EstadoEnvido.EE_ACEPTADO,
+                                   Reglas.EstadoEnvido.RF_ACEPTADO,
+                                   Reglas.EstadoEnvido.EEF_ACEPTADO,
+                                   Reglas.EstadoEnvido.EF_ACEPTADO,
+                                   Reglas.EstadoEnvido.ER_ACEPTADO,
+                                   Reglas.EstadoEnvido.ERF_ACEPTADO,
+                                   Reglas.EstadoEnvido.R_ACEPTADO,
+                                   Reglas.EstadoEnvido.F_ACEPTADO]:
+                # El envido se jugó, agrego p1 seguro y p2 solo si gano el tanto (de lo contrario diria "buenas" y no muestra)
+                result.append(estado.puntos_envido_p1)
+                if estado.puntos_envido_p1 < estado.puntos_envido_p2:
+                    result.append(estado.puntos_envido_p2)
+                else:
+                    result.append(0)  # padeo 0 porque p2 dijo "son buenas" y no revelo los puntos
+            else:
+                # El envido NO se jugó, solo me agrego yo
+                if jugador.jugador is Reglas.JUGADOR1 :
+                    result.append(estado.puntos_envido_p1)
+                    result.append(0) # padeo 0 el otro jugador
+                elif jugador.jugador is Reglas.JUGADOR2 :
+                    result.append(0) # padeo 0 el otro jugador
+                    result.append(estado.puntos_envido_p2)
 
-        # 3ro CARTAS JUGADAS (6 neuronas, fijo), en su forma de valor truco. (esto reduce total de combinaciones, de 40 ID posibles a 14 valores truco posibles)
+        # 3ro CARTAS DEL JUGADOR (18 neuronas:  3 cartas con 6 neuronas por carta: truco 4xPalo y envido  )
+        for c in jugador.cartas_totales:
+            if normalized :
+                result.append((c.ValorTruco -50)/ 100)    # 100 es maximo valortruco de cualquier carta, lo centro en el origen
+                result.extend(c.Palo_to_categorical_vector())
+                result.append((c.ValorEnvido - 4) / 8)
+            else:
+                result.append(c.ValorTruco)
+                result.extend(c.Palo_to_categorical_vector())
+                result.append(c.ValorEnvido)
+
+        # 4to CARTAS JUGADAS (36 neuronas, fijo: 6 cartas con 6 neuronas cada una truco, palo y envido)
         for i in range(6):
             if len(estado.cartas_jugadas) > i:
-                if normalized : result.append((estado.cartas_jugadas[i].ValorTruco-50)/100)  # 100 es maximo valortruco de cualquier carta, lo centro en el origen
-                else: result.append(estado.cartas_jugadas[i].ValorTruco)
+                if normalized :
+                    result.append((estado.cartas_jugadas[i].ValorTruco-50)/100)  # 100 es maximo valortruco de cualquier carta, lo centro en el origen
+                    result.extend(estado.cartas_jugadas[i].Palo_to_categorical_vector())
+                    result.append((estado.cartas_jugadas[i].ValorEnvido - 4) / 8)
+                else:
+                    result.append(estado.cartas_jugadas[i].ValorTruco)
+                    result.extend(estado.cartas_jugadas[i].Palo_to_categorical_vector())
+                    result.append(estado.cartas_jugadas[i].ValorEnvido)
             else:  # padding (largo fijo 6, el resto completo con 0's)
                 result.append(0)
+                result.append(0)
+                result.append(0)
+                result.append(0)
+                result.append(0)
+                result.append(0)
 
-        # 4to ACCIONES (40 neuronas, fijo = 20 acciones x 2 (jugador + codigo accion) )
-        for i in range(20):
+        # 5to ACCIONES (42 neuronas, fijo = 21 acciones x 2 (jugador + codigo accion) )
+        for i in range(21):
             if len(estado.acciones_hechas) > i:
                 # Primero agrego el codigo de Jugador que hizo una accion
                 if normalized : result.append(estado.acciones_hechas[i][0]-1.5) # codigo de jugador normalizado (a -0,5 y 0,5)
@@ -1462,8 +1556,6 @@ class Motor:
                         p2_data.append(Motor.ConvertStateToVector(e.p2, e.estados[s], normalized))
                         p2_labels.append(e.CalcularPuntosFinales()[1] - e.CalcularPuntosFinales()[0])
 
-
-
         return (p1_data, p1_labels), (p2_data, p2_labels)
 
     @staticmethod
@@ -1479,12 +1571,12 @@ class Motor:
         if type(tf.contrib) != type(tf): tf.contrib._warning = None
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
 
-        # printing process id
+        # Los clono para evitar que se ensucie con otros threads de generacion de partidas
         p1 = copy.deepcopy(p1)
         p2 = copy.deepcopy(p2)
         episodios = Motor.Play_random_games(p1, p2, N, False)
         queue.put(episodios)
-        import sys
+        #import sys
         #sys.stdout.flush()
 
     @staticmethod
@@ -1525,7 +1617,6 @@ class Motor:
         #process3.join()
         #process4.join()
         #sumo los resultados
-        from itertools import chain
         #print("eps totales:" + str(len(episodios))+ ", ep1:" + str(len(episodios1))+", ep2:" + str(len(episodios2))+", ep3:" + str(len(episodios3))+", ep4:" + str(len(episodios4)))
 
         #for e in chain(episodios1,episodios2, episodios3, episodios4):
