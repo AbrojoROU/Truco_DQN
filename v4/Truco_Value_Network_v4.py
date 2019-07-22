@@ -12,6 +12,8 @@ from matplotlib import pyplot
 class ValueNetworkEngine:
     MAX_EPOCHS_PERGEN = 50
     PATIENCE_PERGEN = 5
+    BATCH_SIZE = 256
+    VALIDATION_RATIO = 0.10 # as % of the total amount of training games
 
     @staticmethod
     def Generate_Player_DVN():
@@ -120,7 +122,8 @@ class ValueNetworkEngine:
 
         print("")
         print("2. Generando Partidas de test")
-        (p1_testdata, p1_testlabels), (p2_testdata, p2_testlabels) = Motor.MP_Generate_Value_Training_Games(p1, p2, games_per_gen/10) # decima parte de training sirve para test
+        (p1_testdata, p1_testlabels), (p2_testdata, p2_testlabels) = Motor.MP_Generate_Value_Training_Games(
+            p1, p2, round(games_per_gen*ValueNetworkEngine.VALIDATION_RATIO)) # Usamos Ratio del Trainign set para determinar tamaño de validation
         print("len p1_traindata: " + str(len(p1_traindata)) + ", len p1_testdata: " + str(len(p1_testdata)))
         print("len p1_trainlabels: " + str(len(p1_trainlabels)) + ", len p1_testlabels: " + str(len(p1_testlabels)))
         print("len p2_traindata: " + str(len(p2_traindata)) + ", len p2_testdata: " + str(len(p2_testdata)))
@@ -187,7 +190,9 @@ class ValueNetworkEngine:
                      ModelCheckpoint(filepath=gen_prefix+"p1_DVN.h5", monitor='val_loss', save_best_only=True)]
 
         # Fiteo la red ACA
-        history = p1_DVN.fit(p1_traindata, p1_trainlabels, validation_data=(p1_testdata, p1_testlabels), callbacks=callbacks, epochs=training_epochs, batch_size=256, shuffle=True, verbose=2)
+        history = p1_DVN.fit(p1_traindata, p1_trainlabels, validation_data=(p1_testdata, p1_testlabels),
+                             callbacks=callbacks, epochs=training_epochs, batch_size=ValueNetworkEngine.BATCH_SIZE,
+                             shuffle=True, verbose=2)
 
         # evaluate the model ACA
         _, train_acc = p1_DVN.evaluate(p1_traindata, p1_trainlabels, verbose=0)
@@ -254,7 +259,9 @@ class ValueNetworkEngine:
                      ModelCheckpoint(filepath=gen_prefix + "p2_DVN.h5", monitor='val_loss', save_best_only=True)]
 
         # Fiteo la red
-        p2_DVN.fit(p2_traindata, p2_trainlabels, validation_data=(p2_testdata, p2_testlabels), callbacks=callbacks, epochs=training_epochs, batch_size=256, shuffle=True, verbose=2)
+        p2_DVN.fit(p2_traindata, p2_trainlabels, validation_data=(p2_testdata, p2_testlabels),
+                   callbacks=callbacks, epochs=training_epochs, batch_size=ValueNetworkEngine.BATCH_SIZE,
+                   shuffle=True, verbose=2)
 
         # evaluate the model ACA
         _, train_acc = p2_DVN.evaluate(p2_traindata, p2_trainlabels, verbose=0)

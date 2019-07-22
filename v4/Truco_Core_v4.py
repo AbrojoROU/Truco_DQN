@@ -1253,21 +1253,26 @@ class Motor:
         cartas_p1, cartas_p2 = Reglas.RepartirCartas()
         p1.TomarCartas(cartas_p1)
         p2.TomarCartas(cartas_p2)
+        s.puntos_envido_p1 = p1.puntos_envido
+        s.puntos_envido_p2 = p2.puntos_envido
         e.p1 = p1
         e.p2 = p2
         e.estados.append(copy.deepcopy(s))
         print("")
-        if con_trampa : print("  Cartas Jugador 1: " + str(p1.cartas_totales))
-        if con_trampa : print("  Cartas Jugador 2: " + str(p2.cartas_totales))
+        if con_trampa : print("  Cartas Jugador 1: " + str(p1.cartas_totales) + ",  puntos envido: " + str(p1.puntos_envido))
+        if con_trampa : print("  Cartas Jugador 2: " + str(p2.cartas_totales) + ",  puntos envido: " + str(p2.puntos_envido))
 
         # Accion inicial
         current_player = p1
         a = p1.Elegir_Accion(s, con_trampa)
 
         # loops until the game is over
-        while (s.QuienGanoManos() is None) and (s.truco is not Reglas.EstadoTruco.FOLD):
+        while (s.QuienGanoManos() is None) and (s.truco is not Reglas.EstadoTruco.FOLD) :
 
             current_player.EjecutarAccion(s, a, True)
+
+            if a is Reglas.Accion.ACEPTAR_TANTO :
+                print(" TANTO ACEPTADO, p1:" + str(p1.puntos_envido) + ", p2:" +   str(p2.puntos_envido) )
 
             # Tomo otro jugador
             if s.QuienActua() == Reglas.JUGADOR1:
@@ -1277,11 +1282,14 @@ class Motor:
 
             # Me fijo si termino, 4 opciones:  Terminal Gane, Terminal empate, Terminal Perdi o No terminal y propago
             if s.QuienGanoEpisodio() is not None:
-                e.ganador = s.QuienGanoEpisodio()
-                if e.ganador == Reglas.JUGADOR1:
-                    print(" GANE! (jugador 1)")
-                elif e.ganador == Reglas.JUGADOR2:
-                    print(" GANE! (jugador 2)")
+                quien_gano = s.QuienGanoEpisodio()
+
+                if quien_gano == Reglas.JUGADOR1:
+                    print(" GANE EL TRUCO! (jugador 1)")
+                    e.ganador = Reglas.JUGADOR1
+                elif quien_gano == Reglas.JUGADOR2:
+                    print(" GANE EL TRUCO! (jugador 2)")
+                    e.ganador = Reglas.JUGADOR1
             else:
                 # Caso no terminal
                 a = next_player.Elegir_Accion(s, con_trampa)

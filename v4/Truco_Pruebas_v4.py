@@ -1131,22 +1131,6 @@ def prueba_Generate_Value_Training_Games(gen):
     print(p2_labels)
     print("")
 
-def prueba_Play_DPN_RandomGames():
-    print("")
-    print("===================================================")
-    print("## PRUEBA - Play DPN Games - ##")
-    print("===================================================")
-    print("")
-
-    genX = "policy_pickles\gen1_"
-    p1_DQN = keras.models.load_model(genX + "p1_DQN.h5")
-    p2_DQN = keras.models.load_model(genX + "p2_DQN.h5")
-
-    p1 = AgenteDPN(Reglas.JUGADOR1, p1_DQN)
-    p2 = AgenteDPN(Reglas.JUGADOR2, p2_DQN)
-
-    Motor.Play_random_games(p1,p2,1,True)
-
 def prueba_Play_DVN_RandomGames(gen):
     print("")
     print("===================================================")
@@ -1195,7 +1179,7 @@ def prueba_Play_HUMAN():
     # MIXTA
     print("")
     Motor.Play_Human_game(Humano(Reglas.JUGADOR1),
-                            AgenteDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen6_p2_DQN.h5")),
+                            AgenteDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen2_p2_DVN.h5")),
                             True)
 
 
@@ -1216,13 +1200,6 @@ def prueba_Play_VERSUS():
     p2_DVN = keras.models.load_model(genV + "p2_DQN.h5")
     value_p1 = AgenteDVN(Reglas.JUGADOR1, p1_DVN)
     value_p2 = AgenteDVN(Reglas.JUGADOR2, p2_DVN)
-
-    # POLICY AGENTS
-    genP = "policy_pickles\gen2_"
-    p1_DPN = keras.models.load_model(genP + "p1_DQN.h5")
-    p2_DPN = keras.models.load_model(genP + "p2_DQN.h5")
-    policy_p1 = AgenteDPN(Reglas.JUGADOR1, p1_DPN)
-    policy_p2 = AgenteDPN(Reglas.JUGADOR2, p2_DPN)
 
     # PARTIDAS
     #Motor.Play_random_games(random_p1, random_p2, 1, True)
@@ -1303,7 +1280,7 @@ if __name__ == '__main__':
     #trainer
 
     ##  parametros de trainer ( start_gen 0?, number_of_generations,  iterations_per_generation, load_previous)
-    ValueNetworkEngine.ValueNetworkTrainer(4, 20, 400000, True)
+    #ValueNetworkEngine.ValueNetworkTrainer(0, 2, 10000, True)
 
     #gen_next = "value_pickles\gen2_"
     #ValueNetworkEngine.Generate_and_Save(gen_n, gen_next, games_per_gen)
@@ -1317,7 +1294,7 @@ if __name__ == '__main__':
     # pruebas acidas
     #ValueNetworkEngine.Load_and_Test("value_pickles\gen5_")
     #ValueNetworkEngine.Load_and_Test("value_pickles\gen11_")
-    #prueba_Play_HUMAN()
+    prueba_Play_HUMAN()
 
     # CODE TO CHECK GPU
 
