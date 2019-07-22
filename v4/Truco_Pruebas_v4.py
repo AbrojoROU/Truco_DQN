@@ -1303,7 +1303,7 @@ if __name__ == '__main__':
     #trainer
 
     ##  parametros de trainer ( start_gen 0?, number_of_generations,  iterations_per_generation, load_previous)
-    ValueNetworkEngine.ValueNetworkTrainer(0, 4, 200000, True)
+    ValueNetworkEngine.ValueNetworkTrainer(4, 20, 400000, True)
 
     #gen_next = "value_pickles\gen2_"
     #ValueNetworkEngine.Generate_and_Save(gen_n, gen_next, games_per_gen)
