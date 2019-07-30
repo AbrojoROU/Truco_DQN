@@ -1,7 +1,4 @@
 # OPTIMISTIC INITIAL VALUES
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
-os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '0'
 import numpy as np
 import inspect
 import random
@@ -13,9 +10,11 @@ import time
 import itertools
 from itertools import chain
 
+
 # FUNCIONES A NIVEL MODULO
 global start_timer
 start_timer = time.time()
+
 
 def printDebug(debugMsg):
     print("   #debug@ " + str(debugMsg) + "   ## " + str(inspect.stack()[1][3]) + "() " + "  ## T=" + str(time.time() - start_timer)[0:7] + "s" )
@@ -115,16 +114,26 @@ class Carta:
     def __eq__(self, other):
         return self.ID == other.ID
 
-    def Palo_to_categorical_vector(self):
+    def Palo_to_categorical_vector(self, normalized):
         result = []
-        if self.Palo is Carta.Palo.BASTO: result.append(1)
-        else: result.append(0)
-        if self.Palo is Carta.Palo.COPA: result.append(1)
-        else: result.append(0)
-        if self.Palo is Carta.Palo.ESPADA: result.append(1)
-        else: result.append(0)
-        if self.Palo is Carta.Palo.ORO: result.append(1)
-        else: result.append(0)
+        if normalized is True:
+            if self.Palo is Carta.Palo.BASTO: result.append(0.5)
+            else: result.append(-0.5)
+            if self.Palo is Carta.Palo.COPA: result.append(0.5)
+            else: result.append(-0.5)
+            if self.Palo is Carta.Palo.ESPADA: result.append(0.5)
+            else: result.append(-0.5)
+            if self.Palo is Carta.Palo.ORO: result.append(0.5)
+            else: result.append(-0.5)
+        else:
+            if self.Palo is Carta.Palo.BASTO: result.append(1)
+            else: result.append(0)
+            if self.Palo is Carta.Palo.COPA: result.append(1)
+            else: result.append(0)
+            if self.Palo is Carta.Palo.ESPADA: result.append(1)
+            else: result.append(0)
+            if self.Palo is Carta.Palo.ORO: result.append(1)
+            else: result.append(0)
         return result
 
     @staticmethod
@@ -243,7 +252,6 @@ class AgenteRandom:
 
         self.cartas_totales = []
         self.cartas_restantes = []
-        self.state_history = []
         self.eps = 0
         self.puntos_envido = 0
 
@@ -458,7 +466,6 @@ class Humano:
     def __init__(self, jugador):
         self.cartas_totales = []
         self.cartas_restantes = []
-        self.state_history = []
         self.eps = 0
         self.puntos_envido = 0
 
@@ -674,7 +681,6 @@ class AgenteDVN:
         self.eps = 0.05
         self.cartas_totales = []
         self.cartas_restantes = []
-        self.state_history = []
         self.DVN = dvn
         self.puntos_envido = 9
 
@@ -789,17 +795,6 @@ class AgenteDVN:
 
 
     def Elegir_Accion(self, s, debug=False):
-        def warn(*args, **kwargs):
-            pass
-        import warnings
-        warnings.warn = warn
-        from tensorflow.python.util import deprecation
-        deprecation._PRINT_DEPRECATION_WARNINGS = False
-        import logging
-        logging.getLogger('tensorflow').disabled = True
-        import tensorflow as tf
-        if type(tf.contrib) != type(tf): tf.contrib._warning = None
-
 
         if debug: print("")
         if debug: print(" p" + str(self.jugador) + " me toca!")
@@ -921,7 +916,8 @@ class AgenteDVN:
 class Episodio:
     def __init__(self):
         self.estados = []
-        self.ganador = None # 4 estados posibles. None si nadie, 0 si empate, p1  o p2
+        self.ganadorTruco = None # 4 estados posibles. None si nadie, 0 si empate, p1  o p2
+        self.ganadorTotal = None  # 4 estados posibles. None si nadie, 0 si empate, p1  o p2
         self.p1 = None
         self.p2 = None
 
@@ -964,12 +960,12 @@ class Episodio:
         elif s.envido is Reglas.EstadoEnvido.R_RECHAZADO : bet_Envido = 1
         elif s.envido is Reglas.EstadoEnvido.RF_RECHAZADO : bet_Envido = 3
         elif s.envido is Reglas.EstadoEnvido.F_RECHAZADO : bet_Envido = 1
-        # la Falta por ahora son 20 para dar fuerte peso, mañana puede ser una funcion
-        elif s.envido is Reglas.EstadoEnvido.EEF_ACEPTADO : bet_Envido = 20
-        elif s.envido is Reglas.EstadoEnvido.RF_ACEPTADO : bet_Envido = 20
-        elif s.envido is Reglas.EstadoEnvido.ERF_ACEPTADO : bet_Envido = 20
-        elif s.envido is Reglas.EstadoEnvido.EF_ACEPTADO : bet_Envido = 20
-        elif s.envido is Reglas.EstadoEnvido.F_ACEPTADO : bet_Envido = 20
+        # la Falta por ahora son 10 para dar fuerte peso, mañana puede ser una funcion
+        elif s.envido is Reglas.EstadoEnvido.EEF_ACEPTADO : bet_Envido = 10
+        elif s.envido is Reglas.EstadoEnvido.RF_ACEPTADO : bet_Envido = 10
+        elif s.envido is Reglas.EstadoEnvido.ERF_ACEPTADO : bet_Envido = 10
+        elif s.envido is Reglas.EstadoEnvido.EF_ACEPTADO : bet_Envido = 10
+        elif s.envido is Reglas.EstadoEnvido.F_ACEPTADO : bet_Envido = 10
         else: assert False  # Todos estados de envido deberian estar cubiertos en algun caso
 
         # ahora si, asigno los puntos del envido
@@ -997,9 +993,9 @@ class Episodio:
         else: assert False
 
         # PUNTOS TRUCO
-        if self.ganador is Reglas.JUGADOR1:
+        if self.ganadorTruco is Reglas.JUGADOR1:
             p1 = p1 + bet_Truco
-        elif self.ganador is Reglas.JUGADOR2:
+        elif self.ganadorTruco is Reglas.JUGADOR2:
             p2 = p2 + bet_Truco
         else:
             assert False  # Nadie gano el truco? es imposiblem
@@ -1286,10 +1282,10 @@ class Motor:
 
                 if quien_gano == Reglas.JUGADOR1:
                     print(" GANE EL TRUCO! (jugador 1)")
-                    e.ganador = Reglas.JUGADOR1
+                    e.ganadorTruco = Reglas.JUGADOR1
                 elif quien_gano == Reglas.JUGADOR2:
                     print(" GANE EL TRUCO! (jugador 2)")
-                    e.ganador = Reglas.JUGADOR1
+                    e.ganadorTruco = Reglas.JUGADOR1
             else:
                 # Caso no terminal
                 a = next_player.Elegir_Accion(s, con_trampa)
@@ -1305,7 +1301,7 @@ class Motor:
         # Terminó el while gameover
         print("")
         print("Termino la partida, cartas jugadas finales: " + str(s.cartas_jugadas))
-        print("Ganó: p" + str(e.ganador) + "! ,  con puntaje:" + str(e.CalcularPuntosFinales()))
+        print("Ganó: p" + str(e.ganadorTruco) + "! ,  con puntaje:" + str(e.CalcularPuntosFinales()))
         print("    >las cartas de p1 eran: " + str(p1.cartas_totales))
         print("    >las cartas de p2 eran: " + str(p2.cartas_totales))
 
@@ -1336,6 +1332,7 @@ class Motor:
             p2.TomarCartas(cartas_p2)
             s.puntos_envido_p1 = p1.puntos_envido
             s.puntos_envido_p2 = p2.puntos_envido
+
             e.p1 = p1
             e.p2 = p2
             e.estados.append(copy.deepcopy(s))
@@ -1362,18 +1359,15 @@ class Motor:
                 # Me fijo si termino, 4 opciones:  Terminal Gane, Terminal empate, Terminal Perdi o No terminal y propago
                 if s.QuienGanoEpisodio() is not None:
                     quien_gano = s.QuienGanoEpisodio()
-
                     if DEBUG: printDebug("- Partida terminada nro:" + str(i+1) + " s:" + str(s.cartas_jugadas))
                     if quien_gano == Reglas.JUGADOR1:
                         # Caso 1: terminal gané
                         if DEBUG: printDebug(" GANE EL TRUCO! (jugador 1)")
-                        e.ganador = Reglas.JUGADOR1
-                        cont_win_p1 = cont_win_p1 + 1
+                        e.ganadorTruco = Reglas.JUGADOR1
                     elif quien_gano == Reglas.JUGADOR2:
                         # Caso 3: terminal perdí
                         if DEBUG: printDebug(" GANE EL TRUCO! (jugador 2)")
-                        e.ganador = Reglas.JUGADOR2
-                        cont_win_p2 = cont_win_p2 + 1
+                        e.ganadorTruco = Reglas.JUGADOR2
                 else:
                     # Caso no terminal
                     a = next_player.Elegir_Accion(s, False)
@@ -1388,12 +1382,18 @@ class Motor:
 
             # Terminó el while gameover
             lista_episodios.append(e)  # Agrego el episodio a la lista de episodios
-            if DEBUG : print("Gano: " + str(e.ganador) + ",   puntaje:" + str(e.CalcularPuntosFinales()))
+            if DEBUG : print("Gano: " + str(e.ganadorTruco) + ",   puntaje:" + str(e.CalcularPuntosFinales()))
+            total_p1, total_p2 = e.CalcularPuntosFinales()
+            if total_p1 > total_p2: cont_win_p1 = cont_win_p1 + 1
+            if total_p1 < total_p2: cont_win_p2 = cont_win_p2 + 1
+            if total_p1 == total_p2: cont_empate = cont_empate + 1
+            e.p1 = copy.copy(p1) #para evitar malentendidos posteriores. para que la variable e.p1 o e.p2 funcionen bien deberia hacer deepcopy que es muy costoso al tener una Red adentro
+            e.p2 = copy.copy(p2) #para evitar malentendidos posteriores. para que la variable e.p1 o e.p2 funcionen bien deberia hacer deepcopy que es muy costoso al tener una Red adentro
         # Terminó el for N
 
         # Despliego resultados de la corrida
         winratio = cont_win_p1*100/(cont_win_p1+cont_win_p2+cont_empate)
-        print("## RESULTADO ##  N= " + str(N) + " - j1: " + str(cont_win_p1) + ", j2: " + str(cont_win_p2) + ", Empates: " + str(cont_empate) + ", WINRATIO p1:"+ str(winratio)[0:5] + " ##")
+        print("## RESULTADO ##  N= " + str(N) + " - j1: " + str(cont_win_p1) + ", j2: " + str(cont_win_p2) + ", Empates: " + str(cont_empate) + ", Total Win Ratio p1:"+ str(winratio)[0:5] + " ##")
 
         return lista_episodios
 
@@ -1444,6 +1444,7 @@ class Motor:
                 elif jugador.jugador is Reglas.JUGADOR2 :
                     result.append(0) # padeo 0 el otro jugador
                     result.append((estado.puntos_envido_p2 - 16)/33) #normalizo
+                else: assert False
         else:
             result.append(estado.envido.value)
             if estado.envido in [Reglas.EstadoEnvido.E_ACEPTADO,
@@ -1469,16 +1470,18 @@ class Motor:
                 elif jugador.jugador is Reglas.JUGADOR2 :
                     result.append(0) # padeo 0 el otro jugador
                     result.append(estado.puntos_envido_p2)
+                else: assert False
+
 
         # 3ro CARTAS DEL JUGADOR (18 neuronas:  3 cartas con 6 neuronas por carta: truco 4xPalo y envido  )
         for c in jugador.cartas_totales:
             if normalized :
                 result.append((c.ValorTruco -50)/ 100)    # 100 es maximo valortruco de cualquier carta, lo centro en el origen
-                result.extend(c.Palo_to_categorical_vector())
+                result.extend(c.Palo_to_categorical_vector(normalized))
                 result.append((c.ValorEnvido - 4) / 8)
             else:
                 result.append(c.ValorTruco)
-                result.extend(c.Palo_to_categorical_vector())
+                result.extend(c.Palo_to_categorical_vector(normalized))
                 result.append(c.ValorEnvido)
 
         # 4to CARTAS JUGADAS (36 neuronas, fijo: 6 cartas con 6 neuronas cada una truco, palo y envido)
@@ -1486,11 +1489,11 @@ class Motor:
             if len(estado.cartas_jugadas) > i:
                 if normalized :
                     result.append((estado.cartas_jugadas[i].ValorTruco-50)/100)  # 100 es maximo valortruco de cualquier carta, lo centro en el origen
-                    result.extend(estado.cartas_jugadas[i].Palo_to_categorical_vector())
+                    result.extend(estado.cartas_jugadas[i].Palo_to_categorical_vector(normalized))
                     result.append((estado.cartas_jugadas[i].ValorEnvido - 4) / 8)
                 else:
                     result.append(estado.cartas_jugadas[i].ValorTruco)
-                    result.extend(estado.cartas_jugadas[i].Palo_to_categorical_vector())
+                    result.extend(estado.cartas_jugadas[i].Palo_to_categorical_vector(normalized))
                     result.append(estado.cartas_jugadas[i].ValorEnvido)
             else:  # padding (largo fijo 6, el resto completo con 0's)
                 result.append(0)
@@ -1500,7 +1503,7 @@ class Motor:
                 result.append(0)
                 result.append(0)
 
-        # 5to ACCIONES (42 neuronas, fijo = 21 acciones x 2 (jugador + codigo accion) )
+        # 5to ACCIONES (42 neuronas, fijo = 21 acciones x 2 (jugador + codigo accion) )  secuencia= Jugador, CodigoAccion
         for i in range(21):
             if len(estado.acciones_hechas) > i:
                 # Primero agrego el codigo de Jugador que hizo una accion
@@ -1526,52 +1529,39 @@ class Motor:
         return result
 
     @staticmethod
-    def Generate_Value_Training_Games(p1, p2, batch_size, epochs, normalized=True):
+    def Generate_Value_Training_Games(p1, p2, batch_size, normalized=True):
         print("")
-        print("####################################")
-        print("DEPRECATED, USE MULTIPROCESS VERSION")
-        print("####################################")
+        print("#########################################")
+        print("  DEPRECATED, USE MULTIPROCESS VERSION")
+        print("(unless you are using GPU, then its fine)")
+        print("#########################################")
         print("")
 
         p1_data = []
         p1_labels= []
         p2_data = []
         p2_labels = []
-        print("Generando Partidas.. ( epochs=" + str(epochs) + ",   batch_size=" + str(batch_size) + " )")
+        print("Generando Partidas.. ( batch_size=" + str(batch_size) + " )")
         print("")
 
-        # Corremos los epochs
-        for i in range(epochs):
-            print("Epoch: " + str(i + 1))
-            episodios = Motor.Play_random_games(p1, p2, batch_size, False)
-            for e in episodios:
-                # pero quizas esto sea con otra Red de Value (esta es policy)
-                for s in reversed(range(len(e.estados))):
-                    # logica: "si en [s-1] me toca a mi, en [s] ya jugue yo. Guardo ese estado con mi movimiento hecho y el puntaje total
+        # Corremos
+        episodios = Motor.Play_random_games(p1, p2, batch_size, False)
+        for e in episodios:
+            for s in reversed(range(len(e.estados))):
+                # logica: "si en [s-1] me toca a mi, en [s] ya jugue yo. Guardo ese estado con mi movimiento hecho y el puntaje total
+                if s > 0 and e.estados[s-1].QuienActua() is Reglas.JUGADOR1:
+                    p1_data.append(Motor.ConvertStateToVector(e.p1, e.estados[s], normalized))
+                    p1_labels.append(e.CalcularPuntosFinales()[0] - e.CalcularPuntosFinales()[1])
 
-                    if s > 0 and e.estados[s-1].QuienActua() is Reglas.JUGADOR1:
-                        p1_data.append(Motor.ConvertStateToVector(e.p1, e.estados[s], normalized))
-                        p1_labels.append(e.CalcularPuntosFinales()[0] - e.CalcularPuntosFinales()[1])
-
-                    if s > 0 and e.estados[s - 1].QuienActua() is Reglas.JUGADOR2:
-                        p2_data.append(Motor.ConvertStateToVector(e.p2, e.estados[s], normalized))
-                        p2_labels.append(e.CalcularPuntosFinales()[1] - e.CalcularPuntosFinales()[0])
+                if s > 0 and e.estados[s - 1].QuienActua() is Reglas.JUGADOR2:
+                    p2_data.append(Motor.ConvertStateToVector(e.p2, e.estados[s], normalized))
+                    p2_labels.append(e.CalcularPuntosFinales()[1] - e.CalcularPuntosFinales()[0])
 
         return (p1_data, p1_labels), (p2_data, p2_labels)
 
     @staticmethod
     def MP_value_worker(p1, p2, N, queue):
         print("")
-
-        import os
-        import logging
-        logging.getLogger('tensorflow').disabled = True
-        from tensorflow.python.util import deprecation
-        deprecation._PRINT_DEPRECATION_WARNINGS = False
-        import tensorflow as tf
-        if type(tf.contrib) != type(tf): tf.contrib._warning = None
-        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
-
         # Los clono para evitar que se ensucie con otros threads de generacion de partidas
         p1 = copy.deepcopy(p1)
         p2 = copy.deepcopy(p2)
@@ -1637,5 +1627,55 @@ class Motor:
         return (p1_data, p1_labels), (p2_data, p2_labels)
 
     @staticmethod
-    def GameListDiagnose(p1_data, p1_labels, p2_data, p2_labels):
-        pass
+    def MP_TestDVNAgents(p1,p2, N, debug):
+        # Me divido la partidas entre la cantidad de workers
+
+        N = round(N / 4)
+        # creo las colas de retorno
+        queue1 = mp.Queue()
+        queue2 = mp.Queue()
+        queue3 = mp.Queue()
+        queue4 = mp.Queue()
+        # creo los 4 workers
+        process1 = mp.Process(target=Motor.MP_value_worker, args=(p1, p2, N, queue1))
+        process2 = mp.Process(target=Motor.MP_value_worker, args=(p1, p2, N, queue2))
+        process3 = mp.Process(target=Motor.MP_value_worker, args=(p1, p2, N, queue3))
+        process4 = mp.Process(target=Motor.MP_value_worker, args=(p1, p2, N, queue4))
+        # comienzo la ejecucion de los 4 workers en paralelo
+        process1.start()
+        process2.start()
+        process3.start()
+        process4.start()
+        # obtengo el retorno de los 4 workers
+        episodios1 = queue1.get()
+        episodios2 = queue2.get()
+        episodios3 = queue3.get()
+        episodios4 = queue4.get()
+        # espero que retornen
+        process1.join()
+        process2.join()
+        process3.join()
+        process4.join()
+        # sumo los resultados
+        # print("eps totales:" + str(len(episodios))+ ", ep1:" + str(len(episodios1))+", ep2:" + str(len(episodios2))+", ep3:" + str(len(episodios3))+", ep4:" + str(len(episodios4)))
+
+        cont_p1 = 0
+        cont_p2 = 0
+
+        for e in chain(episodios1, episodios2, episodios3, episodios4):
+            puntos_p1, puntos_p2 = e.CalcularPuntosFinales()
+            if puntos_p1 > puntos_p2 : cont_p1 = cont_p1 + 1
+            if puntos_p1 < puntos_p2: cont_p2 = cont_p2 + 1
+
+        winratio = cont_p1 * 100 / (cont_p1 + cont_p2)
+
+        if debug:
+            print("")
+            print("#############")
+            print("#############")
+            print("## RESULTADO ##  N= " + str(N*4) + " - j1: " + str(cont_p1) + ", j2: " + str(cont_p2) + ", Empates: " + str((N*4)-cont_p1-cont_p2) + ", WINRATIO p1:" + str(winratio)[0:5] + " ##")
+            print("#############")
+            print("#############")
+            print("")
+        return winratio
+

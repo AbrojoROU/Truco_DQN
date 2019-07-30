@@ -3,7 +3,9 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
 os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '0'
 from Truco_Core_v4 import *
 from Truco_Value_Network_v4 import *
-import keras
+
+
+
 
 
 def prueba_QuienGanoManos():
@@ -1040,30 +1042,6 @@ def prueba_CalcularPuntosEnvido():
     print("cartas p2: " + str(p2.cartas_totales) + ",   puntos envido:" + str(p2.puntos_envido))
 
 
-def prueba_Generate_Policy_Training_Games():
-    print("")
-    print("===================================================")
-    print("## PRUEBA - Generate_Policy_Training_Games - ##")
-    print("===================================================")
-    print("")
-    p1 = AgenteRandom(Reglas.JUGADOR1)
-    p2 = AgenteRandom(Reglas.JUGADOR2)
-    (p1_data, p1_labels), (p2_data, p2_labels) = Motor.Generate_Value_Training_Games(p1, p2, 1, 1, False)
-
-    print("")
-    print("p1 data")
-    print(*p1_data, sep='\n')
-    print("")
-    print("p1 labels")
-    print(p1_labels)
-    print("")
-    print("p2 data")
-    print(*p2_data, sep='\n')
-    print("")
-    print("p2 labels")
-    print(p2_labels)
-    print("")
-
 def prueba_MultiProcess_Value_Training_Games():
     print("")
     print("===================================================")
@@ -1097,25 +1075,25 @@ def prueba_MultiProcess_Value_Training_Games():
     print(p2_labels)
     print("")
 
-
 def prueba_Generate_Value_Training_Games(gen):
     print("")
     print("===================================================")
     print("## PRUEBA - Generate_Value_Training_Games - ##")
     print("===================================================")
     print("")
-    #p1 = AgenteRandom(Reglas.JUGADOR1)
-    #p2 = AgenteRandom(Reglas.JUGADOR2)
 
-    genX = "value_pickles\gen2_"
-    p1_DQN = keras.models.load_model(genX + "p1_DQN.h5")
-    p2_DQN = keras.models.load_model(genX + "p2_DQN.h5")
+    if gen == 0:
+        p1 = AgenteRandom(Reglas.JUGADOR1)
+        p2 = AgenteRandom(Reglas.JUGADOR2)
+    else:
+        gen_n = "value_pickles\gen" + str(gen) + "_"
+        p1_DQN = keras.models.load_model(gen_n + "p1_DVN.h5")
+        p2_DQN = keras.models.load_model(gen_n + "p2_DVN.h5")
+        p1 = AgenteDVN(Reglas.JUGADOR1, p1_DQN)
+        p2 = AgenteDVN(Reglas.JUGADOR2, p2_DQN)
 
-    p1 = AgenteDVN(Reglas.JUGADOR1, p1_DQN)
-    p2 = AgenteDVN(Reglas.JUGADOR2, p2_DQN)
 
-
-    (p1_data, p1_labels), (p2_data, p2_labels) = Motor.Generate_Value_Training_Games(p1, p2, 1, 1, False)
+    (p1_data, p1_labels), (p2_data, p2_labels) = Motor.Generate_Value_Training_Games(p1, p2, 2, True)
 
     print("")
     print("p1 data")
@@ -1137,7 +1115,6 @@ def prueba_Play_DVN_RandomGames(gen):
     print("## PRUEBA - Play DVN Games - ##")
     print("===================================================")
     print("")
-
     genV = "value_pickles\gen" + str(gen) + "_"
     p1_DVN = keras.models.load_model(genV + "p1_DQN.h5")
     p2_DVN = keras.models.load_model(genV + "p2_DQN.h5")
@@ -1152,6 +1129,7 @@ def prueba_Play_HUMAN():
     print("## PRUEBA - Play HUMAN - ##")
     print("===================================================")
     print("")
+
 
     # RANDOM AGENTS
     #random_p1 = AgenteRandom(Reglas.JUGADOR1)
@@ -1189,7 +1167,6 @@ def prueba_Play_VERSUS():
     print("## PRUEBA - Play VERSUS Games - ##")
     print("===================================================")
     print("")
-
     # RANDOM AGENTS
     random_p1 = AgenteRandom(Reglas.JUGADOR1)
     random_p2 = AgenteRandom(Reglas.JUGADOR2)
@@ -1259,8 +1236,7 @@ if __name__ == '__main__':
     #prueba_ConvertVector()
 
     # REDES
-    # prueba_Generate_Value_Training_Games()
-    # prueba_Generate_Policy_Training_Games()
+    #prueba_Generate_Value_Training_Games(0)
     # prueba_MultiProcess_Value_Training_Games()
     # prueba_Play_DVN_RandomGames()we
     # prueba_Play_DPN_RandomGames()
@@ -1270,17 +1246,23 @@ if __name__ == '__main__':
     # PolicyNetworkEngine.PolicyNetworkTrainer(10000, 3)
 
 
-
-
-
     ##############
     # AHORA
     ##############
 
     #trainer
 
-    ##  parametros de trainer ( start_gen 0?, number_of_generations,  iterations_per_generation, load_previous)
-    #ValueNetworkEngine.ValueNetworkTrainer(0, 2, 10000, True)
+    ##  parametros de trainer ( start_gen 0?, number_of_generations,  iterations_per_generation, multiprocess=False)
+    ## start_gen ultima version donde debe existir el DVN.h5. Primer output sera la startgen+1
+    #ValueNetworkEngine.ValueNetworkTrainer(7, 8, 300000, True)
+
+    #gen_next = "value_pickles\gen1_"
+    #ValueNetworkEngine.Load_and_Test(gen_next)
+    #prueba_Generate_Value_Training_Games(0)
+
+    # para entrenar la red con los pickles de la generacion ya generados (nextgen, maxepocs, loadprecvious)
+    #ValueNetworkEngine.Train_Save("value_pickles\gen9_", 50, True)
+
 
     #gen_next = "value_pickles\gen2_"
     #ValueNetworkEngine.Generate_and_Save(gen_n, gen_next, games_per_gen)
@@ -1288,13 +1270,22 @@ if __name__ == '__main__':
     #ValueNetworkEngine.Load_and_Test(gen_next)
 
     # versus
-    #ValueNetworkEngine.ValueTrainingTest(2, 6, 10000, False)
-    #ValueNetworkEngine.ValueTrainingTest(6, 2, 10000, False)
+
+    ValueNetworkEngine.ValueTrainingTest(6, 7, 50000, False)
+    ValueNetworkEngine.ValueTrainingTest(7, 6, 50000, False)
+    ValueNetworkEngine.ValueTrainingTest(7, 8, 50000, False)
+    ValueNetworkEngine.ValueTrainingTest(8, 7, 50000, False)
+    ValueNetworkEngine.ValueTrainingTest(8, 9, 50000, False)
+    ValueNetworkEngine.ValueTrainingTest(9, 8, 50000, False)
+    #ValueNetworkEngine.ValueTrainingTest(6, 3, 50000, False)
+    #ValueNetworkEngine.ValueTrainingTest(6, 4, 50000, False)
+    #ValueNetworkEngine.ValueTrainingTest(6, 5, 50000, False)
+
 
     # pruebas acidas
     #ValueNetworkEngine.Load_and_Test("value_pickles\gen5_")
     #ValueNetworkEngine.Load_and_Test("value_pickles\gen11_")
-    prueba_Play_HUMAN()
+    #prueba_Play_HUMAN()
 
     # CODE TO CHECK GPU
 

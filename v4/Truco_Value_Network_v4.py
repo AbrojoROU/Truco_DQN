@@ -1,42 +1,48 @@
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
-os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '0'
 from Truco_Core_v4 import *
-import keras
-from keras import models
-from keras import layers
-from keras.callbacks import EarlyStopping, ModelCheckpoint
 from matplotlib import pyplot
+from contextlib import contextmanager
+import sys, os
+import keras
+from keras import models, layers
+from keras.callbacks import EarlyStopping, ModelCheckpoint
+
 
 
 class ValueNetworkEngine:
-    MAX_EPOCHS_PERGEN = 50
-    PATIENCE_PERGEN = 5
+    MAX_EPOCHS_PERGEN = 70
+    PATIENCE_PERGEN = 6
     BATCH_SIZE = 256
-    VALIDATION_RATIO = 0.10 # as % of the total amount of training games
+    VALIDATION_RATIO = 0.40 # as % of the total amount of training games
 
     @staticmethod
     def Generate_Player_DVN():
+        from keras.layers import LeakyReLU
+
         player_DVN = models.Sequential()
-        player_DVN.add(layers.Dense(100, activation='relu', input_shape=(Motor.STATE_VECTOR_LENGTH,)))
-        player_DVN.add(layers.Dense(120, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
-        player_DVN.add(layers.Dropout(0.2))
-        player_DVN.add(layers.Dense(120, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
-        player_DVN.add(layers.Dropout(0.2))
-        player_DVN.add(layers.Dense(120, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
-        player_DVN.add(layers.Dropout(0.2))
-        player_DVN.add(layers.Dense(120, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
-        player_DVN.add(layers.Dropout(0.2))
-        player_DVN.add(layers.Dense(120, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
-        player_DVN.add(layers.Dropout(0.2))
-        player_DVN.add(layers.Dense(120, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
-        player_DVN.add(layers.Dropout(0.2))
-        player_DVN.add(layers.Dense(120, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
-        player_DVN.add(layers.Dropout(0.2))
-        player_DVN.add(layers.Dense(120, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
-        player_DVN.add(layers.Dropout(0.2))
-        player_DVN.add(layers.Dense(120, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
+        player_DVN.add(layers.Dense(100, input_shape=(Motor.STATE_VECTOR_LENGTH,)))
+        player_DVN.add(LeakyReLU(alpha=0.1))
+        player_DVN.add(layers.Dense(100, kernel_regularizer=keras.regularizers.l2(0.01)))
+        player_DVN.add(LeakyReLU(alpha=0.1))
+        player_DVN.add(layers.Dense(100, kernel_regularizer=keras.regularizers.l2(0.01)))
+        player_DVN.add(LeakyReLU(alpha=0.1))
+        player_DVN.add(layers.Dropout(0.2))  # DROPOUT
+        player_DVN.add(layers.Dense(100, kernel_regularizer=keras.regularizers.l2(0.01)))
+        player_DVN.add(LeakyReLU(alpha=0.1))
+        #player_DVN.add(layers.Dropout(0.2)) # DROPOUT
+        player_DVN.add(layers.Dense(100, kernel_regularizer=keras.regularizers.l2(0.01)))
+        player_DVN.add(LeakyReLU(alpha=0.1))
+        player_DVN.add(layers.Dropout(0.2)) # DROPOUT
+        player_DVN.add(layers.Dense(100, kernel_regularizer=keras.regularizers.l2(0.01)))
+        player_DVN.add(LeakyReLU(alpha=0.1))
+        player_DVN.add(layers.Dense(100, kernel_regularizer=keras.regularizers.l2(0.01)))
+        player_DVN.add(LeakyReLU(alpha=0.1))
+        player_DVN.add(layers.Dense(100, kernel_regularizer=keras.regularizers.l2(0.01)))
+        player_DVN.add(LeakyReLU(alpha=0.1))
         player_DVN.add(layers.Dense(1))
+
+        #version alternativa para tunear el optimizer mejor
+        #r_optimizer = keras.optimizers.Adam(lr=0.0001, decay=.02)
+        #player_DVN.compile(optimizer=r_optimizer, loss='mse', metrics=['mae'])
 
         player_DVN.compile(optimizer='adam', loss='mse', metrics=['mae'])
 
@@ -65,6 +71,8 @@ class ValueNetworkEngine:
 
         p1.TomarCartas(cartas_j1)
         p2.TomarCartas(cartas_j2)
+        s.puntos_envido_p1 = p1.puntos_envido
+        s.puntos_envido_p2 = p2.puntos_envido
 
         # Prueba
         print("1) p1 juega c1, acciones de p2 disponibles")
@@ -97,11 +105,8 @@ class ValueNetworkEngine:
         return p1, p2, s # poner esta linea donde quiera testear predict de la red
 
     @staticmethod
-    def Generate_and_Save(input_prefix, output_prefix, games_per_gen):
-        import logging
-        logging.getLogger('tensorflow').disabled = True
-        from tensorflow.python.util import deprecation
-        deprecation._PRINT_DEPRECATION_WARNINGS = False
+    def Generate_and_Save(input_prefix, output_prefix, games_per_gen, multi_process=False):
+
         print("  ##   Generate_and_Save   ##")
         print("")
 
@@ -118,12 +123,18 @@ class ValueNetworkEngine:
             p2 = AgenteRandom(Reglas.JUGADOR2)
 
         print("1. Generando Partidas de entrenamiento")
-        (p1_traindata, p1_trainlabels), (p2_traindata, p2_trainlabels) = Motor.MP_Generate_Value_Training_Games(p1, p2, games_per_gen)
+        if multi_process is True : (p1_traindata, p1_trainlabels), (p2_traindata, p2_trainlabels) = Motor.MP_Generate_Value_Training_Games(p1, p2, games_per_gen)
+        else : (p1_traindata, p1_trainlabels), (p2_traindata, p2_trainlabels) = Motor.Generate_Value_Training_Games(p1, p2, games_per_gen)
 
         print("")
         print("2. Generando Partidas de test")
-        (p1_testdata, p1_testlabels), (p2_testdata, p2_testlabels) = Motor.MP_Generate_Value_Training_Games(
-            p1, p2, round(games_per_gen*ValueNetworkEngine.VALIDATION_RATIO)) # Usamos Ratio del Trainign set para determinar tamaño de validation
+        if multi_process is True :
+            (p1_testdata, p1_testlabels), (p2_testdata, p2_testlabels) = Motor.MP_Generate_Value_Training_Games(
+                    p1, p2, round(games_per_gen*ValueNetworkEngine.VALIDATION_RATIO)) # Usamos Ratio del Trainign set para determinar tamaño de validation
+        else:
+            (p1_testdata, p1_testlabels), (p2_testdata, p2_testlabels) = Motor.Generate_Value_Training_Games(
+                    p1, p2, round(games_per_gen*ValueNetworkEngine.VALIDATION_RATIO)) # Usamos Ratio del Trainign set para determinar tamaño de validation
+
         print("len p1_traindata: " + str(len(p1_traindata)) + ", len p1_testdata: " + str(len(p1_testdata)))
         print("len p1_trainlabels: " + str(len(p1_trainlabels)) + ", len p1_testlabels: " + str(len(p1_testlabels)))
         print("len p2_traindata: " + str(len(p2_traindata)) + ", len p2_testdata: " + str(len(p2_testdata)))
@@ -146,14 +157,20 @@ class ValueNetworkEngine:
 
     @staticmethod
     def Train_Save(gen_prefix, training_epochs, load_previous = False):
+
         print("  ##   Train_Save   ##")
         print("")
+
+        #########################
+        ## ENTRENO RED PARA p1
+
         print("  ## Carga de partidas de entrenamiento P1 desde Disco (pickles) con prefijo '" + gen_prefix + "'")
         # p1
         p1_traindata = Motor.Load_Games_From_Disk(gen_prefix + "p1_traindata.pickle")
         p1_trainlabels = Motor.Load_Games_From_Disk(gen_prefix + "p1_trainlabels.pickle")
         p1_testdata = Motor.Load_Games_From_Disk(gen_prefix + "p1_testdata.pickle")
         p1_testlabels = Motor.Load_Games_From_Disk(gen_prefix + "p1_testlabels.pickle")
+
 
         if load_previous is True:
             if len(gen_prefix) == 19:
@@ -169,8 +186,10 @@ class ValueNetworkEngine:
             p1_trainlabels = p1_trainlabels + Motor.Load_Games_From_Disk(prev_gen + "p1_trainlabels.pickle")
 
 
-        #########################
-        ## ENTRENO RED PARA p1
+        ## VALIDO LEN VECTORES
+        assert len(p1_traindata) == len(p1_trainlabels)
+        assert len(p1_testdata) == len(p1_testlabels)
+
         print("")
         print("  ## Entrenando Red para P1ayer 1")
         p1_DVN = ValueNetworkEngine.Generate_Player_DVN()
@@ -217,6 +236,8 @@ class ValueNetworkEngine:
         del p1_traindata
         del p1_DVN
 
+
+
         #########################
         ## ENTRENO RED PARA p2
         print("## Carga de partidas de entrenamiento P2 desde Disco (pickles) con prefijo '" + gen_prefix + "'")
@@ -227,6 +248,7 @@ class ValueNetworkEngine:
         p2_testlabels = Motor.Load_Games_From_Disk(gen_prefix + "p2_testlabels.pickle")
 
         if load_previous is True:
+            #este IF es para corregir el string del path cuando la generacion cambia de 1 digito a 2 digitos
             if len(gen_prefix) == 19:
                 prev_gen = int(gen_prefix[-2]) - 1  # tomo el numero de generacion del string, lo parseo a int y le resto 1
                 prev_gen = gen_prefix[:-2] + str(prev_gen) + gen_prefix[-1:]  # vuelvo a recrear el string
@@ -238,6 +260,10 @@ class ValueNetworkEngine:
             # cargo y anexo
             p2_traindata = p2_traindata + Motor.Load_Games_From_Disk(prev_gen + "p1_traindata.pickle")
             p2_trainlabels = p2_trainlabels + Motor.Load_Games_From_Disk(prev_gen + "p1_trainlabels.pickle")
+
+        ## VALIDO LEN VECTORES
+        assert len(p2_traindata) == len(p2_trainlabels)
+        assert len(p2_testdata) == len(p2_testlabels)
 
         print("")
         print("## Entrenando Red para P1ayer 2")
@@ -334,9 +360,9 @@ class ValueNetworkEngine:
             print("p" + str(_cp.jugador) + "> accion posible: " + str(i.name) + ",  valor:" + str(output))
 
             # Free memory
-            del _p1
-            del _p2
-            del _s
+            #del _p1
+            #del _p2
+            #del _s
 
         #Free memory
         del p1
@@ -348,9 +374,11 @@ class ValueNetworkEngine:
 
     @staticmethod
     def ValueTrainingTest(gen_p1,gen_p2, N, debug):
+        gen1 = gen_p1
+        gen2 = gen_p2
+
         print("")
         print("JUGANDO gen" + str(gen_p1) + " versus gen" + str(gen_p2))
-
         if gen_p1 > 0:
             gen_p1 = "value_pickles\gen" + str(gen_p1) + "_"
             p1_DVN = keras.models.load_model(gen_p1 + "p1_DVN.h5")
@@ -368,23 +396,24 @@ class ValueNetworkEngine:
             value_p2 = AgenteRandom(Reglas.JUGADOR2)
 
         Motor.Play_random_games(value_p1, value_p2, N, debug)
+        print("### JUGANDO gen" + str(gen_p1) + " versus gen" + str(gen_p2))
+        print("############################################################")
+        print("############################################################")
+        print("############################################################")
+        print("")
+
+        # Free memory
+        del value_p1
+        del value_p2
+        #FINMETODO
 
     @staticmethod
-    def ValueNetworkTrainer(start_gen, generations, games_per_gen, load_previous=False):
+    def ValueNetworkTrainer(start_gen, generations, games_per_gen, multi_process=False):
         # WARNING: Debe existir start_gen tanto en h5 como pickles
         # Detalle: Los start_gen.h5 los levanta en Generate_and_Save para generar juegos de aprendizaje
         # Los pickles son necesarios porque el entrenamiento de start_gen + 1 los tambien (a menos que deshabilitemos load_previous)
         printDebug("COMIENZO!")
         print("")
-
-        import os
-        import logging
-        logging.getLogger('tensorflow').disabled = True
-        from tensorflow.python.util import deprecation
-        deprecation._PRINT_DEPRECATION_WARNINGS = False
-        import tensorflow as tf
-        if type(tf.contrib) != type(tf): tf.contrib._warning = None
-        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
 
         for i in range(start_gen, start_gen+generations):
             print("")
@@ -397,12 +426,12 @@ class ValueNetworkEngine:
             if i == 0: gen_n = None
 
             # Genero las partidas y guardo los pickles en disco (omitir si ya tengo un buen pickle generado)
-            ValueNetworkEngine.Generate_and_Save(gen_n, gen_next, games_per_gen)
+            ValueNetworkEngine.Generate_and_Save(gen_n, gen_next, games_per_gen, multi_process)
             # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
             if i == 0:
                 ValueNetworkEngine.Train_Save(gen_next, ValueNetworkEngine.MAX_EPOCHS_PERGEN, False)
             else:
-                ValueNetworkEngine.Train_Save(gen_next, ValueNetworkEngine.MAX_EPOCHS_PERGEN, load_previous)
+                ValueNetworkEngine.Train_Save(gen_next, ValueNetworkEngine.MAX_EPOCHS_PERGEN, True)
             # finalmente, cargo una Red de disco (formato h5) y juego/testeo
             ValueNetworkEngine.Load_and_Test(gen_next)
 
