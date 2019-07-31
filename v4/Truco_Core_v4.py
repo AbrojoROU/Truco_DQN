@@ -582,7 +582,7 @@ class Humano:
     def Elegir_Accion(self, s, debug=False):
         print("")
         print("###  TE TOCA HUMANO, p" + str(self.jugador) + "  ###")
-        print("   El estado del Truco es: " + s.truco.name)
+        print("   Truco: " + s.truco.name + "    Envido: " + s.envido.name)
         print("   Se jugaron las siguientes cartas: " + str(s.cartas_jugadas))
         print("   Cartas en la mano: " + str(self.cartas_restantes))
         print("")
@@ -834,8 +834,8 @@ class AgenteDVN:
                 if value > best :
                     best = value
                     a = i
-                if debug : printDebug("     p" + str(_cp.jugador) + " pensando en: " + str(i.name) + ",  valor:" + str(value))
-        if debug: printDebug("     p" + str(self.jugador) + "> accion elegida: " + str(a.name) + ",  valor:" + str(best))
+                if debug : print("     @p" + str(_cp.jugador) + " pensando en: " + str(i.name) + ",  valor: " + str(value[0][0])[0:6])
+        if debug: print("     <p" + str(self.jugador) + "> accion elegida: " + str(a.name) + ",  valor: " + str(best))
         return a
 
     # Ejecuta la accion que le llega, actualizando el estado y el agente de forma acorde
@@ -909,7 +909,7 @@ class AgenteDVN:
             self.cartas_restantes.remove(c)  # la quito de las cartas restantes
 
         # finalmente agrego la accion al log de acciones hechas por el estado
-        if DEBUG : printDebug("  p" + str(self.jugador) + " - ejecutando accion: " + str(a))
+        if DEBUG : print("  <<p" + str(self.jugador) + " - ejecutando accion: " + str(a) + ">>")
         s.acciones_hechas.append((self.jugador, a))
 
 
