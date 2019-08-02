@@ -1130,11 +1130,34 @@ def prueba_Play_HUMAN():
     print("===================================================")
     print("")
 
+
+    # RANDOM AGENTS
+    #random_p1 = AgenteRandom(Reglas.JUGADOR1)
+    #random_p2 = AgenteRandom(Reglas.JUGADOR2)
+
+    # VALUE AGENTS
+    #genV = "value_pickles\gen2_"
+    #p1_DVN = keras.models.load_model(genV + "p1_DQN.h5")
+    #p2_DVN = keras.models.load_model(genV + "p2_DQN.h5")
+    #value_p1 = AgenteDVN(Reglas.JUGADOR1, p1_DVN)
+    #value_p2 = AgenteDVN(Reglas.JUGADOR2, p2_DVN)
+
+    # POLICY AGENTS
+    #genP = "policy_pickles\gen2_"
+    #p1_DPN = keras.models.load_model(genP + "p1_DQN.h5")
+    #p2_DPN = keras.models.load_model(genP + "p2_DQN.h5")
+    #policy_p1 = AgenteDPN(Reglas.JUGADOR1, p1_DPN)
+    #policy_p2 = AgenteDPN(Reglas.JUGADOR2, p2_DPN)
+
+    # PARTIDAS
+    #Motor.Play_random_games(random_p1, random_p2, 1, True)
+    #Motor.Play_random_games(value_p1, value_p2, 1, True)
+    #Motor.Play_random_games(policy_p1, policy_p2, 1, True)
+
     # MIXTA
     print("")
-
     Motor.Play_Human_game(Humano(Reglas.JUGADOR1),
-                            AgenteDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen9_p2_DVN.h5")),
+                            AgenteDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen2_p2_DVN.h5")),
                             True)
 
 
@@ -1231,7 +1254,7 @@ if __name__ == '__main__':
 
     ##  parametros de trainer ( start_gen 0?, number_of_generations,  iterations_per_generation, multiprocess=False)
     ## start_gen ultima version donde debe existir el DVN.h5. Primer output sera la startgen+1
-    #ValueNetworkEngine.ValueNetworkTrainer(7, 8, 300000, True)
+    #ValueNetworkEngine.ValueNetworkTrainer(15, 4, 500000, True)
 
     #gen_next = "value_pickles\gen1_"
     #ValueNetworkEngine.Load_and_Test(gen_next)
@@ -1248,15 +1271,14 @@ if __name__ == '__main__':
 
     # versus
 
-    #ValueNetworkEngine.ValueTrainingTest(6, 7, 50000, False)
-    #ValueNetworkEngine.ValueTrainingTest(7, 6, 50000, False)
-    #ValueNetworkEngine.ValueTrainingTest(7, 8, 50000, False)
-    #ValueNetworkEngine.ValueTrainingTest(8, 7, 50000, False)
-    #ValueNetworkEngine.ValueTrainingTest(8, 9, 50000, False)
-    #ValueNetworkEngine.ValueTrainingTest(9, 8, 50000, False)
-    #ValueNetworkEngine.ValueTrainingTest(6, 3, 50000, False)
-    #ValueNetworkEngine.ValueTrainingTest(6, 4, 50000, False)
-    #ValueNetworkEngine.ValueTrainingTest(6, 5, 50000, False)
+
+    ValueNetworkEngine.ValueTrainingTest(15, 8, 50000, False)
+
+    ValueNetworkEngine.ValueTrainingTest(13, 14, 50000, False)
+    ValueNetworkEngine.ValueTrainingTest(14, 13, 50000, False)
+    ValueNetworkEngine.ValueTrainingTest(15, 14, 50000, False)
+    ValueNetworkEngine.ValueTrainingTest(14, 15, 50000, False)
+
 
 
     # pruebas acidas

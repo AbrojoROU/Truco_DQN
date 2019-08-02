@@ -23,17 +23,17 @@ class ValueNetworkEngine:
         player_DVN.add(LeakyReLU(alpha=0.1))
         player_DVN.add(layers.Dense(100, kernel_regularizer=keras.regularizers.l2(0.01)))
         player_DVN.add(LeakyReLU(alpha=0.1))
+        #player_DVN.add(layers.Dropout(0.2))  # DROPOUT
         player_DVN.add(layers.Dense(100, kernel_regularizer=keras.regularizers.l2(0.01)))
         player_DVN.add(LeakyReLU(alpha=0.1))
-        player_DVN.add(layers.Dropout(0.2))  # DROPOUT
         player_DVN.add(layers.Dense(100, kernel_regularizer=keras.regularizers.l2(0.01)))
         player_DVN.add(LeakyReLU(alpha=0.1))
         #player_DVN.add(layers.Dropout(0.2)) # DROPOUT
         player_DVN.add(layers.Dense(100, kernel_regularizer=keras.regularizers.l2(0.01)))
         player_DVN.add(LeakyReLU(alpha=0.1))
-        player_DVN.add(layers.Dropout(0.2)) # DROPOUT
         player_DVN.add(layers.Dense(100, kernel_regularizer=keras.regularizers.l2(0.01)))
         player_DVN.add(LeakyReLU(alpha=0.1))
+        #player_DVN.add(layers.Dropout(0.2))  # DROPOUT
         player_DVN.add(layers.Dense(100, kernel_regularizer=keras.regularizers.l2(0.01)))
         player_DVN.add(LeakyReLU(alpha=0.1))
         player_DVN.add(layers.Dense(100, kernel_regularizer=keras.regularizers.l2(0.01)))
