@@ -913,6 +913,7 @@ class AgenteDVN:
         s.acciones_hechas.append((self.jugador, a))
 
 
+
 class Episodio:
     def __init__(self):
         self.estados = []

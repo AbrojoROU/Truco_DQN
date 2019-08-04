@@ -1254,31 +1254,28 @@ if __name__ == '__main__':
 
     ##  parametros de trainer ( start_gen 0?, number_of_generations,  iterations_per_generation, multiprocess=False)
     ## start_gen ultima version donde debe existir el DVN.h5. Primer output sera la startgen+1
-    #ValueNetworkEngine.ValueNetworkTrainer(15, 4, 500000, True)
+    #ValueNetworkEngine.ValueNetworkTrainer(17, 1, 500000, True)
+
 
     #gen_next = "value_pickles\gen1_"
     #ValueNetworkEngine.Load_and_Test(gen_next)
     #prueba_Generate_Value_Training_Games(0)
 
     # para entrenar la red con los pickles de la generacion ya generados (nextgen, maxepocs, loadprecvious)
-    #ValueNetworkEngine.Train_Save("value_pickles\gen9_", 50, True)
+    #ValueNetworkEngine.Train_Save("value_pickles\gen16_", ValueNetworkEngine.MAX_EPOCHS_PERGEN, True)
 
 
     #gen_next = "value_pickles\gen2_"
     #ValueNetworkEngine.Generate_and_Save(gen_n, gen_next, games_per_gen)
     #ValueNetworkEngine.Train_Save(gen_next, 50, True)
-    #ValueNetworkEngine.Load_and_Test(gen_next)
+    #ValueNetworkEngine.Load_and_Test("value_pickles\gen16_")
 
     # versus
 
 
-    ValueNetworkEngine.ValueTrainingTest(15, 8, 50000, False)
 
-    ValueNetworkEngine.ValueTrainingTest(13, 14, 50000, False)
-    ValueNetworkEngine.ValueTrainingTest(14, 13, 50000, False)
-    ValueNetworkEngine.ValueTrainingTest(15, 14, 50000, False)
-    ValueNetworkEngine.ValueTrainingTest(14, 15, 50000, False)
-
+    ValueNetworkEngine.ValueTrainingTest(15, 17, 50000, False)
+    ValueNetworkEngine.ValueTrainingTest(17, 15, 50000, False)
 
 
     # pruebas acidas

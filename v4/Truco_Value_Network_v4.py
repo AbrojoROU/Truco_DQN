@@ -13,6 +13,7 @@ class ValueNetworkEngine:
     PATIENCE_PERGEN = 6
     BATCH_SIZE = 256
     VALIDATION_RATIO = 0.40 # as % of the total amount of training games
+    TRAINING_EPSILON = 0.2
 
     @staticmethod
     def Generate_Player_DVN():
@@ -115,9 +116,9 @@ class ValueNetworkEngine:
             p1_DQN = keras.models.load_model(input_prefix + "p1_DVN.h5")
             p2_DQN = keras.models.load_model(input_prefix + "p2_DVN.h5")
             p1 = AgenteDVN(Reglas.JUGADOR1, p1_DQN)
-            p1.eps = 0.2
+            p1.eps = ValueNetworkEngine.TRAINING_EPSILON
             p2 = AgenteDVN(Reglas.JUGADOR2, p2_DQN)
-            p2.eps = 0.2
+            p2.eps = ValueNetworkEngine.TRAINING_EPSILON
         else:
             p1 = AgenteRandom(Reglas.JUGADOR1)
             p2 = AgenteRandom(Reglas.JUGADOR2)
