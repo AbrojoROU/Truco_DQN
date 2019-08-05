@@ -3,6 +3,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
 os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '0'
 from Truco_Core_v4 import *
 from Truco_Value_Network_v4 import *
+import numpy as np
 
 
 
@@ -1055,8 +1056,8 @@ def prueba_MultiProcess_Value_Training_Games():
     p1_DQN = keras.models.load_model(genX + "p1_DQN.h5")
     p2_DQN = keras.models.load_model(genX + "p2_DQN.h5")
 
-    p1 = AgenteDVN(Reglas.JUGADOR1, p1_DQN)
-    p2 = AgenteDVN(Reglas.JUGADOR2, p2_DQN)
+    p1 = AgenteGreedyDVN(Reglas.JUGADOR1, p1_DQN)
+    p2 = AgenteGreedyDVN(Reglas.JUGADOR2, p2_DQN)
 
 
     (p1_data, p1_labels), (p2_data, p2_labels) = Motor.MP_Generate_Value_Training_Games(p1, p2, 20000, False)
@@ -1089,8 +1090,8 @@ def prueba_Generate_Value_Training_Games(gen):
         gen_n = "value_pickles\gen" + str(gen) + "_"
         p1_DQN = keras.models.load_model(gen_n + "p1_DVN.h5")
         p2_DQN = keras.models.load_model(gen_n + "p2_DVN.h5")
-        p1 = AgenteDVN(Reglas.JUGADOR1, p1_DQN)
-        p2 = AgenteDVN(Reglas.JUGADOR2, p2_DQN)
+        p1 = AgenteGreedyDVN(Reglas.JUGADOR1, p1_DQN)
+        p2 = AgenteGreedyDVN(Reglas.JUGADOR2, p2_DQN)
 
 
     (p1_data, p1_labels), (p2_data, p2_labels) = Motor.Generate_Value_Training_Games(p1, p2, 2, True)
@@ -1118,8 +1119,8 @@ def prueba_Play_DVN_RandomGames(gen):
     genV = "value_pickles\gen" + str(gen) + "_"
     p1_DVN = keras.models.load_model(genV + "p1_DQN.h5")
     p2_DVN = keras.models.load_model(genV + "p2_DQN.h5")
-    p1 = AgenteDVN(Reglas.JUGADOR1, p1_DVN)
-    p2 = AgenteDVN(Reglas.JUGADOR2, p2_DVN)
+    p1 = AgenteGreedyDVN(Reglas.JUGADOR1, p1_DVN)
+    p2 = AgenteGreedyDVN(Reglas.JUGADOR2, p2_DVN)
 
     Motor.Play_random_games(p1, p2, 10000, True)
 
@@ -1139,8 +1140,8 @@ def prueba_Play_HUMAN():
     #genV = "value_pickles\gen2_"
     #p1_DVN = keras.models.load_model(genV + "p1_DQN.h5")
     #p2_DVN = keras.models.load_model(genV + "p2_DQN.h5")
-    #value_p1 = AgenteDVN(Reglas.JUGADOR1, p1_DVN)
-    #value_p2 = AgenteDVN(Reglas.JUGADOR2, p2_DVN)
+    #value_p1 = AgenteGreedyDVN(Reglas.JUGADOR1, p1_DVN)
+    #value_p2 = AgenteGreedyDVN(Reglas.JUGADOR2, p2_DVN)
 
     # POLICY AGENTS
     #genP = "policy_pickles\gen2_"
@@ -1157,7 +1158,7 @@ def prueba_Play_HUMAN():
     # MIXTA
     print("")
     Motor.Play_Human_game(Humano(Reglas.JUGADOR1),
-                            AgenteDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen2_p2_DVN.h5")),
+                            AgenteGreedyDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen2_p2_DVN.h5")),
                             True)
 
 
@@ -1175,8 +1176,8 @@ def prueba_Play_VERSUS():
     genV = "value_pickles\gen2_"
     p1_DVN = keras.models.load_model(genV + "p1_DQN.h5")
     p2_DVN = keras.models.load_model(genV + "p2_DQN.h5")
-    value_p1 = AgenteDVN(Reglas.JUGADOR1, p1_DVN)
-    value_p2 = AgenteDVN(Reglas.JUGADOR2, p2_DVN)
+    value_p1 = AgenteGreedyDVN(Reglas.JUGADOR1, p1_DVN)
+    value_p2 = AgenteGreedyDVN(Reglas.JUGADOR2, p2_DVN)
 
     # PARTIDAS
     #Motor.Play_random_games(random_p1, random_p2, 1, True)
@@ -1186,21 +1187,21 @@ def prueba_Play_VERSUS():
     # MIXTA
     print("random vs gen2")
     Motor.Play_random_games(AgenteRandom(Reglas.JUGADOR1),
-                            AgenteDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen2_p2_DQN.h5")),
+                            AgenteGreedyDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen2_p2_DQN.h5")),
                             2000, False)
     print("random vs gen12")
     Motor.Play_random_games(AgenteRandom(Reglas.JUGADOR1),
-                            AgenteDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen12_p2_DQN.h5")),
+                            AgenteGreedyDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen12_p2_DQN.h5")),
                             2000, False)
 
     print("gen2 vs gen12")
-    Motor.Play_random_games(AgenteDVN(Reglas.JUGADOR1, keras.models.load_model("value_pickles\gen2_p1_DQN.h5")),
-                            AgenteDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen12_p2_DQN.h5")),
+    Motor.Play_random_games(AgenteGreedyDVN(Reglas.JUGADOR1, keras.models.load_model("value_pickles\gen2_p1_DQN.h5")),
+                            AgenteGreedyDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen12_p2_DQN.h5")),
                             2000, False)
 
     print("gen12 vs gen2")
-    Motor.Play_random_games(AgenteDVN(Reglas.JUGADOR1, keras.models.load_model("value_pickles\gen12_p1_DQN.h5")),
-                            AgenteDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen2_p2_DQN.h5")),
+    Motor.Play_random_games(AgenteGreedyDVN(Reglas.JUGADOR1, keras.models.load_model("value_pickles\gen12_p1_DQN.h5")),
+                            AgenteGreedyDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen2_p2_DQN.h5")),
                             2000, False)
 
 
@@ -1254,7 +1255,13 @@ if __name__ == '__main__':
 
     ##  parametros de trainer ( start_gen 0?, number_of_generations,  iterations_per_generation, multiprocess=False)
     ## start_gen ultima version donde debe existir el DVN.h5. Primer output sera la startgen+1
-    #ValueNetworkEngine.ValueNetworkTrainer(17, 1, 500000, True)
+    ValueNetworkEngine.ValueNetworkTrainer(16, 1, 1000, True)
+
+    #ValueNetworkEngine.HeadToHead_PlayTest(16,66,50000, False)
+    #ValueNetworkEngine.HeadToHead_PlayTest(66, 16, 50000, False)
+
+    #ValueNetworkEngine.HeadToHead_PlayTest(16, 8, 50000, False)
+    #ValueNetworkEngine.HeadToHead_PlayTest(8, 16, 50000, False)
 
 
     #gen_next = "value_pickles\gen1_"
@@ -1272,11 +1279,20 @@ if __name__ == '__main__':
 
     # versus
 
+    """
+    print("stock 16 vs greed 66")
+    Motor.Play_random_games(AgenteSoftmaxDVN(Reglas.JUGADOR1, keras.models.load_model("value_pickles\gen16_p1_DVN.h5")),
+                            AgenteGreedyDVN(Reglas.JUGADOR2, keras.models.load_model("value_pickles\gen66_p2_DVN.h5")),
+                            50000, False)
+    """
 
 
-    ValueNetworkEngine.ValueTrainingTest(15, 17, 50000, False)
-    ValueNetworkEngine.ValueTrainingTest(17, 15, 50000, False)
 
+    #ValueNetworkEngine.HeadToHead_PlayTest(16, 77, 50000, False)
+    #ValueNetworkEngine.HeadToHead_PlayTest(16, 16, 50000, False)
+
+    #ValueNetworkEngine.HeadToHead_PlayTest(16, 15, 50000, False)
+    #ValueNetworkEngine.HeadToHead_PlayTest(15, 16, 50000, False)
 
     # pruebas acidas
     #ValueNetworkEngine.Load_and_Test("value_pickles\gen5_")

@@ -1,21 +1,657 @@
 from Truco_Core_v4 import *
 from matplotlib import pyplot
-from contextlib import contextmanager
-import sys, os
 import keras
 from keras import models, layers
 from keras.callbacks import EarlyStopping, ModelCheckpoint
+from itertools import chain
+from scipy.special import softmax
+import multiprocessing as mp
 
 
-
-class ValueNetworkEngine:
+class HiperParametros:
     MAX_EPOCHS_PERGEN = 70
     PATIENCE_PERGEN = 6
     BATCH_SIZE = 256
-    VALIDATION_RATIO = 0.40 # as % of the total amount of training games
-    TRAINING_EPSILON = 0.2
+    VALIDATION_RATIO = 0.40  # as % of the total amount of training games
+    TRAINING_EPSILON = 0.01
+    PLAYING_EPSILON = 0
+    MULTIPROCESS_WORKER_POOL_COUNT = 4  # Ovearhead warning (y no funciona bien en entornos con GPU habilitadas)
 
-    @staticmethod
+
+# Este agente usa su Red de Valor para decidir acciones
+class AgenteGreedyDVN:
+    def __init__(self, jugador, dvn):
+        self.eps = 0.05
+        self.cartas_totales = []
+        self.cartas_restantes = []
+        self.DVN = dvn
+        self.puntos_envido = 9
+
+        if jugador == Reglas.JUGADOR1:
+            self.jugador = Reglas.JUGADOR1
+        elif jugador == Reglas.JUGADOR2:
+            self.jugador = Reglas.JUGADOR2
+        elif jugador != self.jugador:
+            self.jugador = None
+            assert self.jugador is not None
+
+    def TomarCartas(self, listaCartas, debug=False):
+        self.cartas_totales = []
+        self.cartas_restantes = []
+
+        # Aqui asignamos las cartas al jugador en orden que coincide con el diseño de acciones
+        listaCartas.sort(key=lambda x: x.ValorTruco, reverse=True)
+        for i in listaCartas:
+            self.cartas_restantes.append(i)
+            self.cartas_totales.append(i)
+        if debug: printDebug(str(self.cartas_restantes))
+
+        self.puntos_envido = Reglas.ContarEnvido(self.cartas_totales)
+
+    def get_acciones_posibles(self,s):
+        # Este metodo construye y retorna el vector de acciones posibles (tomados del enum Reglas.Acciones) con base en el estado actual "s"
+        result = []
+
+        # ESTAMOS EN PLENO CICLO DE ENVIDO?  (prioritario, debe resolverse antes de hablar de otra cosa)
+        if s.envido is Reglas.EstadoEnvido.E_DICHO:
+            result.append(Reglas.Accion.ENVIDO)
+            result.append(Reglas.Accion.REALENVIDO)
+            result.append(Reglas.Accion.FALTAENVIDO)
+            result.append(Reglas.Accion.ACEPTAR_TANTO)
+            result.append(Reglas.Accion.RECHAZAR_TANTO)
+        elif s.envido is Reglas.EstadoEnvido.EE_DICHO:
+            result.append(Reglas.Accion.FALTAENVIDO)
+            result.append(Reglas.Accion.ACEPTAR_TANTO)
+            result.append(Reglas.Accion.RECHAZAR_TANTO)
+        elif s.envido in [Reglas.EstadoEnvido.R_DICHO, Reglas.EstadoEnvido.ER_DICHO]:
+            result.append(Reglas.Accion.FALTAENVIDO)
+            result.append(Reglas.Accion.ACEPTAR_TANTO)
+            result.append(Reglas.Accion.RECHAZAR_TANTO)
+        elif s.envido in [Reglas.EstadoEnvido.EF_DICHO, Reglas.EstadoEnvido.EEF_DICHO ,
+                          Reglas.EstadoEnvido.ERF_DICHO , Reglas.EstadoEnvido.RF_DICHO ,
+                          Reglas.EstadoEnvido.F_DICHO]:
+            result.append(Reglas.Accion.ACEPTAR_TANTO)
+            result.append(Reglas.Accion.RECHAZAR_TANTO)
+
+        else: # NO ESTAMOS EN MEDIO DE UN CICLO DE ENVIDO
+
+            # ESTAMOS EN UN CICLO DE TRUCO?  (prioritario luego del envido)
+            if s.truco is Reglas.EstadoTruco.TRUCO_DICHO:
+                if (s.envido is Reglas.EstadoEnvido.NADA_DICHO) and (len(self.cartas_restantes) == 3):
+                    result.append(Reglas.Accion.ENVIDO)
+                    result.append(Reglas.Accion.REALENVIDO)
+                    result.append(Reglas.Accion.FALTAENVIDO)
+                result.append(Reglas.Accion.QUIERO_GRITO)
+                result.append(Reglas.Accion.GRITAR)  # Permitimos Re-Raise (poco lógico, lo podriamos restringir a ultima mano bajo un if len(self.cartas_restantes) == 0)
+                result.append(Reglas.Accion.FOLD)
+            elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO:
+                result.append(Reglas.Accion.QUIERO_GRITO)
+                result.append(Reglas.Accion.GRITAR)  # Permitimos Re-Raise (poco lógico, lo podriamos restringir a ultima mano bajo un if len(self.cartas_restantes) == 0)
+                result.append(Reglas.Accion.FOLD)
+            elif s.truco == Reglas.EstadoTruco.VALE4_DICHO:
+                result.append(Reglas.Accion.QUIERO_GRITO)
+                result.append(Reglas.Accion.FOLD)
+
+            # NO ESTAMOS EN MEDIO DE UN CICLO DE TRUCO
+            else:
+                # ES POSIBLE DECIR ENVIDO: todavia no pasamos por envido y tengo 3 cartas en la mano (si jugue algo ya fui)
+                if (s.envido is Reglas.EstadoEnvido.NADA_DICHO) and (len(self.cartas_restantes) == 3):
+                    # validar que el truco lo permite (todavia no se dijo el Truco)
+                    if s.truco is Reglas.EstadoTruco.NADA_DICHO:
+                        result.append(Reglas.Accion.ENVIDO)
+                        result.append(Reglas.Accion.REALENVIDO)
+                        result.append(Reglas.Accion.FALTAENVIDO)
+
+                # ENVIDO YA GESTIONADO QUEDA TRUCO Y CARTAS
+                if s.QuienJugariaCarta() == self.jugador: # me toca
+                    # Opciones de Truco : si me gritaron, agregar las acciones de aceptar (call) y subir apuesta (raise)
+                    if s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO :
+                        for j, a in reversed(s.acciones_hechas):
+                            if a is Reglas.Accion.GRITAR:
+                                if j is not self.jugador:
+                                    result.append(Reglas.Accion.GRITAR)
+                                break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
+
+                    elif s.truco is Reglas.EstadoTruco.RETRUCO_ACEPTADO :
+                        for j, a in reversed(s.acciones_hechas):
+                            if a is Reglas.Accion.GRITAR:
+                                if j is not self.jugador:
+                                    result.append(Reglas.Accion.GRITAR)
+                                break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
+                    elif s.truco == Reglas.EstadoTruco.NADA_DICHO: result.append(Reglas.Accion.GRITAR)
+                    elif s.truco == Reglas.EstadoTruco.VALE4_ACEPTADO : pass
+                    else:
+                        assert False  # WARNING: Si me toca, el estado del truco deberia estar en alguno case de los elif, a menos que permita Re-Raise
+
+                    # solo resta agregar las acciones de jugar cartas aun en mano
+                    for c in self.cartas_restantes:
+                        result.append(Reglas.Accion(self.cartas_totales.index(c) + 1))
+
+                else:
+                    assert False  # caso no posible (no estamos en ciclo de envido o truco y tampoco me toca jugar)
+
+        # VERSION CON FILTRADO DE DUPLICADOS (lo quito para que salten problemas de flujo si los hay)
+        #from more_itertools import unique_everseen
+        #return list(unique_everseen(result))
+
+        return result
+
+
+    def Elegir_Accion(self, s, debug=False):
+
+        if debug: print("")
+        if debug: print(" p" + str(self.jugador) + " me toca!")
+        # choose an action based on epsilon-greedy strategy
+        r = np.random.rand()
+
+        # podemos usar decaying epsilon (usando variable interna de clase) para el agente que vaya reduciendo eps. Esto me sirve porque cada training agent es nuevo.
+        if r < self.eps:
+            # take a random action
+            if debug: print("  Taking a random action")
+            idx = np.random.choice(len(self.get_acciones_posibles(s)))  # random 0,1 y 2
+            a = self.get_acciones_posibles(s)[idx]
+
+        else:
+            a = None
+            best = -10000
+
+            _cp = AgenteGreedyDVN(self.jugador, self.DVN)
+            _cp.cartas_totales = self.cartas_totales
+
+            for i in self.get_acciones_posibles(s):
+                # 1. copio
+                _cp.cartas_restantes = copy.deepcopy(self.cartas_restantes)
+                _s = copy.deepcopy(s)
+
+                # 2. muevo
+                _cp.EjecutarAccion(_s, i)
+
+                # 3. convierto
+                _s = Motor.ConvertStateToVector(_cp, _s, True)
+                _s = np.squeeze(np.asarray(_s))  # Convierto a array de Red
+                _s = _s.reshape(1, Motor.STATE_VECTOR_LENGTH)
+                _s = _s.astype('float32')
+
+                # 4. Estimo
+                value = _cp.DVN.predict(_s)
+                if value > best :
+                    best = value
+                    a = i
+                if debug : print("     @p" + str(_cp.jugador) + " pensando en: " + str(i.name) + ",  valor: " + str(value[0][0])[0:6])
+        if debug: print("     <p" + str(self.jugador) + "> accion elegida: " + str(a.name) + ",  valor: " + str(best))
+        return a
+
+    # Ejecuta la accion que le llega, actualizando el estado y el agente de forma acorde
+    def EjecutarAccion(self, s, a, DEBUG=False):
+
+        if a is Reglas.Accion.FOLD: s.truco = Reglas.EstadoTruco.FOLD
+
+        if a is Reglas.Accion.ENVIDO :
+            if s.envido is Reglas.EstadoEnvido.NADA_DICHO : s.envido = Reglas.EstadoEnvido.E_DICHO
+            elif s.envido is Reglas.EstadoEnvido.E_DICHO : s.envido = Reglas.EstadoEnvido.EE_DICHO
+        elif a is Reglas.Accion.REALENVIDO :
+            if s.envido is Reglas.EstadoEnvido.NADA_DICHO : s.envido = Reglas.EstadoEnvido.R_DICHO
+            elif s.envido is Reglas.EstadoEnvido.E_DICHO : s.envido = Reglas.EstadoEnvido.ER_DICHO
+        elif a is Reglas.Accion.FALTAENVIDO :
+            if s.envido is Reglas.EstadoEnvido.NADA_DICHO: s.envido = Reglas.EstadoEnvido.F_DICHO
+            elif s.envido is Reglas.EstadoEnvido.E_DICHO : s.envido = Reglas.EstadoEnvido.EF_DICHO
+            elif s.envido is Reglas.EstadoEnvido.ER_DICHO : s.envido = Reglas.EstadoEnvido.ERF_DICHO
+            elif s.envido is Reglas.EstadoEnvido.EE_DICHO : s.envido = Reglas.EstadoEnvido.EEF_DICHO
+            elif s.envido is Reglas.EstadoEnvido.R_DICHO : s.envido = Reglas.EstadoEnvido.RF_DICHO
+        elif a is Reglas.Accion.RECHAZAR_TANTO:
+            if s.envido is Reglas.EstadoEnvido.E_DICHO : s.envido = Reglas.EstadoEnvido.E_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.EF_DICHO : s.envido = Reglas.EstadoEnvido.EF_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.EE_DICHO : s.envido = Reglas.EstadoEnvido.EE_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.EEF_DICHO: s.envido = Reglas.EstadoEnvido.EEF_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.ER_DICHO: s.envido = Reglas.EstadoEnvido.ER_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.ERF_DICHO: s.envido = Reglas.EstadoEnvido.ERF_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.R_DICHO: s.envido = Reglas.EstadoEnvido.R_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.RF_DICHO: s.envido = Reglas.EstadoEnvido.RF_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.F_DICHO: s.envido = Reglas.EstadoEnvido.F_RECHAZADO
+        elif a is Reglas.Accion.ACEPTAR_TANTO:
+            if s.envido is Reglas.EstadoEnvido.E_DICHO: s.envido = Reglas.EstadoEnvido.E_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.EF_DICHO: s.envido = Reglas.EstadoEnvido.EF_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.EE_DICHO: s.envido = Reglas.EstadoEnvido.EE_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.EEF_DICHO: s.envido = Reglas.EstadoEnvido.EEF_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.ER_DICHO: s.envido = Reglas.EstadoEnvido.ER_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.ERF_DICHO: s.envido = Reglas.EstadoEnvido.ERF_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.R_DICHO: s.envido = Reglas.EstadoEnvido.R_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.RF_DICHO: s.envido = Reglas.EstadoEnvido.RF_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.F_DICHO: s.envido = Reglas.EstadoEnvido.F_ACEPTADO
+
+        elif a is Reglas.Accion.GRITAR :
+            if s.truco in [Reglas.EstadoTruco.RETRUCO_ACEPTADO, Reglas.EstadoTruco.RETRUCO_DICHO]:
+                s.truco = Reglas.EstadoTruco.VALE4_DICHO
+            elif s.truco in [Reglas.EstadoTruco.TRUCO_ACEPTADO,Reglas.EstadoTruco.TRUCO_DICHO]:
+                s.truco = Reglas.EstadoTruco.RETRUCO_DICHO
+            elif s.truco is Reglas.EstadoTruco.NADA_DICHO: s.truco = Reglas.EstadoTruco.TRUCO_DICHO
+            elif s.truco is Reglas.EstadoTruco.VALE4_ACEPTADO : assert False # no se puede gritar cuando ya esta dicho el vale4
+
+        elif a is Reglas.Accion.QUIERO_GRITO:
+            if s.truco is Reglas.EstadoTruco.TRUCO_DICHO: s.truco = Reglas.EstadoTruco.TRUCO_ACEPTADO
+            elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO: s.truco = Reglas.EstadoTruco.RETRUCO_ACEPTADO
+            elif s.truco is Reglas.EstadoTruco.VALE4_DICHO: s.truco = Reglas.EstadoTruco.VALE4_ACEPTADO
+            else: assert False # No es posible pasar por aca, si quiso un grito es porque habia un truco, retruco o vale4 dicho
+
+        if a is Reglas.Accion.JUGAR_C1:
+            c = self.cartas_totales[0]
+            assert c in self.cartas_restantes # valido que la carta a jugar aun esta en mi mano
+            s.cartas_jugadas.append(c)  # actualizo el estado
+            self.cartas_restantes.remove(c)  # la quito de las cartas restantes
+
+        if a is Reglas.Accion.JUGAR_C2:
+            c = self.cartas_totales[1]
+            assert c in self.cartas_restantes # valido que la carta a jugar aun esta en mi mano
+            s.cartas_jugadas.append(c)  # actualizo el estado
+            self.cartas_restantes.remove(c)  # la quito de las cartas restantes
+
+        if a is Reglas.Accion.JUGAR_C3:
+            c = self.cartas_totales[2]
+            assert c in self.cartas_restantes # valido que la carta a jugar aun esta en mi mano
+            s.cartas_jugadas.append(c)  # actualizo el estado
+            self.cartas_restantes.remove(c)  # la quito de las cartas restantes
+
+        # finalmente agrego la accion al log de acciones hechas por el estado
+        if DEBUG : print("  <<p" + str(self.jugador) + " - ejecutando accion: " + str(a) + ">>")
+        s.acciones_hechas.append((self.jugador, a))
+
+class AgenteSoftmaxDVN:
+    def __init__(self, jugador, dvn):
+        self.eps = 0
+        self.cartas_totales = []
+        self.cartas_restantes = []
+        self.DVN = dvn
+        self.puntos_envido = 9
+
+        if jugador == Reglas.JUGADOR1:
+            self.jugador = Reglas.JUGADOR1
+        elif jugador == Reglas.JUGADOR2:
+            self.jugador = Reglas.JUGADOR2
+        elif jugador != self.jugador:
+            self.jugador = None
+            assert self.jugador is not None
+
+    def TomarCartas(self, listaCartas, debug=False):
+        self.cartas_totales = []
+        self.cartas_restantes = []
+
+        # Aqui asignamos las cartas al jugador en orden que coincide con el diseño de acciones
+        listaCartas.sort(key=lambda x: x.ValorTruco, reverse=True)
+        for i in listaCartas:
+            self.cartas_restantes.append(i)
+            self.cartas_totales.append(i)
+        if debug: printDebug(str(self.cartas_restantes))
+
+        self.puntos_envido = Reglas.ContarEnvido(self.cartas_totales)
+
+    def get_acciones_posibles(self,s):
+        # Este metodo construye y retorna el vector de acciones posibles (tomados del enum Reglas.Acciones) con base en el estado actual "s"
+        result = []
+
+        # ESTAMOS EN PLENO CICLO DE ENVIDO?  (prioritario, debe resolverse antes de hablar de otra cosa)
+        if s.envido is Reglas.EstadoEnvido.E_DICHO:
+            result.append(Reglas.Accion.ENVIDO)
+            result.append(Reglas.Accion.REALENVIDO)
+            result.append(Reglas.Accion.FALTAENVIDO)
+            result.append(Reglas.Accion.ACEPTAR_TANTO)
+            result.append(Reglas.Accion.RECHAZAR_TANTO)
+        elif s.envido is Reglas.EstadoEnvido.EE_DICHO:
+            result.append(Reglas.Accion.FALTAENVIDO)
+            result.append(Reglas.Accion.ACEPTAR_TANTO)
+            result.append(Reglas.Accion.RECHAZAR_TANTO)
+        elif s.envido in [Reglas.EstadoEnvido.R_DICHO, Reglas.EstadoEnvido.ER_DICHO]:
+            result.append(Reglas.Accion.FALTAENVIDO)
+            result.append(Reglas.Accion.ACEPTAR_TANTO)
+            result.append(Reglas.Accion.RECHAZAR_TANTO)
+        elif s.envido in [Reglas.EstadoEnvido.EF_DICHO, Reglas.EstadoEnvido.EEF_DICHO ,
+                          Reglas.EstadoEnvido.ERF_DICHO , Reglas.EstadoEnvido.RF_DICHO ,
+                          Reglas.EstadoEnvido.F_DICHO]:
+            result.append(Reglas.Accion.ACEPTAR_TANTO)
+            result.append(Reglas.Accion.RECHAZAR_TANTO)
+
+        else: # NO ESTAMOS EN MEDIO DE UN CICLO DE ENVIDO
+
+            # ESTAMOS EN UN CICLO DE TRUCO?  (prioritario luego del envido)
+            if s.truco is Reglas.EstadoTruco.TRUCO_DICHO:
+                if (s.envido is Reglas.EstadoEnvido.NADA_DICHO) and (len(self.cartas_restantes) == 3):
+                    result.append(Reglas.Accion.ENVIDO)
+                    result.append(Reglas.Accion.REALENVIDO)
+                    result.append(Reglas.Accion.FALTAENVIDO)
+                result.append(Reglas.Accion.QUIERO_GRITO)
+                result.append(Reglas.Accion.GRITAR)  # Permitimos Re-Raise (poco lógico, lo podriamos restringir a ultima mano bajo un if len(self.cartas_restantes) == 0)
+                result.append(Reglas.Accion.FOLD)
+            elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO:
+                result.append(Reglas.Accion.QUIERO_GRITO)
+                result.append(Reglas.Accion.GRITAR)  # Permitimos Re-Raise (poco lógico, lo podriamos restringir a ultima mano bajo un if len(self.cartas_restantes) == 0)
+                result.append(Reglas.Accion.FOLD)
+            elif s.truco == Reglas.EstadoTruco.VALE4_DICHO:
+                result.append(Reglas.Accion.QUIERO_GRITO)
+                result.append(Reglas.Accion.FOLD)
+
+            # NO ESTAMOS EN MEDIO DE UN CICLO DE TRUCO
+            else:
+                # ES POSIBLE DECIR ENVIDO: todavia no pasamos por envido y tengo 3 cartas en la mano (si jugue algo ya fui)
+                if (s.envido is Reglas.EstadoEnvido.NADA_DICHO) and (len(self.cartas_restantes) == 3):
+                    # validar que el truco lo permite (todavia no se dijo el Truco)
+                    if s.truco is Reglas.EstadoTruco.NADA_DICHO:
+                        result.append(Reglas.Accion.ENVIDO)
+                        result.append(Reglas.Accion.REALENVIDO)
+                        result.append(Reglas.Accion.FALTAENVIDO)
+
+                # ENVIDO YA GESTIONADO QUEDA TRUCO Y CARTAS
+                if s.QuienJugariaCarta() == self.jugador: # me toca
+                    # Opciones de Truco : si me gritaron, agregar las acciones de aceptar (call) y subir apuesta (raise)
+                    if s.truco is Reglas.EstadoTruco.TRUCO_ACEPTADO :
+                        for j, a in reversed(s.acciones_hechas):
+                            if a is Reglas.Accion.GRITAR:
+                                if j is not self.jugador:
+                                    result.append(Reglas.Accion.GRITAR)
+                                break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
+
+                    elif s.truco is Reglas.EstadoTruco.RETRUCO_ACEPTADO :
+                        for j, a in reversed(s.acciones_hechas):
+                            if a is Reglas.Accion.GRITAR:
+                                if j is not self.jugador:
+                                    result.append(Reglas.Accion.GRITAR)
+                                break  # hago break en el primer GRITAR que encuentre en reversa, si no fui yo agrego Gritar pero siempre break
+                    elif s.truco == Reglas.EstadoTruco.NADA_DICHO: result.append(Reglas.Accion.GRITAR)
+                    elif s.truco == Reglas.EstadoTruco.VALE4_ACEPTADO : pass
+                    else:
+                        assert False  # WARNING: Si me toca, el estado del truco deberia estar en alguno case de los elif, a menos que permita Re-Raise
+
+                    # solo resta agregar las acciones de jugar cartas aun en mano
+                    for c in self.cartas_restantes:
+                        result.append(Reglas.Accion(self.cartas_totales.index(c) + 1))
+
+                else:
+                    assert False  # caso no posible (no estamos en ciclo de envido o truco y tampoco me toca jugar)
+
+        # VERSION CON FILTRADO DE DUPLICADOS (lo quito para que salten problemas de flujo si los hay)
+        #from more_itertools import unique_everseen
+        #return list(unique_everseen(result))
+
+        return result
+
+
+    def Elegir_Accion(self, s, debug=False):
+
+        if debug: print("")
+        if debug: print(" p" + str(self.jugador) + " me toca!")
+        # choose an action based on epsilon-greedy strategy
+        r = np.random.rand()
+
+        # podemos usar decaying epsilon (usando variable interna de clase) para el agente que vaya reduciendo eps. Esto me sirve porque cada training agent es nuevo.
+        if r < self.eps:
+            # take a random action
+            if debug: print("  Taking a random action")
+            idx = np.random.choice(len(self.get_acciones_posibles(s)))  # random 0,1 y 2
+            a = self.get_acciones_posibles(s)[idx]
+
+        else:
+            a = None
+            best = -10000
+
+            _cp = AgenteSoftmaxDVN(self.jugador, self.DVN)
+            _cp.cartas_totales = self.cartas_totales
+
+            acciones_posibles = self.get_acciones_posibles(s)
+            acciones_candidatas = []
+            valores_candidatos = []
+
+            for i in acciones_posibles:
+                # 1. copio
+                _cp.cartas_restantes = copy.deepcopy(self.cartas_restantes)
+                _s = copy.deepcopy(s)
+
+                # 2. muevo
+                _cp.EjecutarAccion(_s, i)
+
+                # 3. convierto
+                _s = Motor.ConvertStateToVector(_cp, _s, True)
+                _s = np.squeeze(np.asarray(_s))  # Convierto a array de Red
+                _s = _s.reshape(1, Motor.STATE_VECTOR_LENGTH)
+                _s = _s.astype('float32')
+
+                # 4. Estimo
+                value = _cp.DVN.predict(_s)
+                valores_candidatos.append(value)
+                acciones_candidatas.append(i)
+                if debug : print("     @p" + str(_cp.jugador) + " pensando en: " + str(i.name) + ",  valor: " + str(value[0][0])[0:6])
+
+            valores_candidatos = softmax(valores_candidatos)
+            a = random.choices(population=acciones_candidatas, weights=valores_candidatos)[0]
+
+        if debug: print("     <p" + str(self.jugador) + "> accion elegida: " + str(a.name) + ",  valor: " + str(best))
+        return a
+
+    # Ejecuta la accion que le llega, actualizando el estado y el agente de forma acorde
+    def EjecutarAccion(self, s, a, DEBUG=False):
+
+        if a is Reglas.Accion.FOLD: s.truco = Reglas.EstadoTruco.FOLD
+
+        if a is Reglas.Accion.ENVIDO :
+            if s.envido is Reglas.EstadoEnvido.NADA_DICHO : s.envido = Reglas.EstadoEnvido.E_DICHO
+            elif s.envido is Reglas.EstadoEnvido.E_DICHO : s.envido = Reglas.EstadoEnvido.EE_DICHO
+        elif a is Reglas.Accion.REALENVIDO :
+            if s.envido is Reglas.EstadoEnvido.NADA_DICHO : s.envido = Reglas.EstadoEnvido.R_DICHO
+            elif s.envido is Reglas.EstadoEnvido.E_DICHO : s.envido = Reglas.EstadoEnvido.ER_DICHO
+        elif a is Reglas.Accion.FALTAENVIDO :
+            if s.envido is Reglas.EstadoEnvido.NADA_DICHO: s.envido = Reglas.EstadoEnvido.F_DICHO
+            elif s.envido is Reglas.EstadoEnvido.E_DICHO : s.envido = Reglas.EstadoEnvido.EF_DICHO
+            elif s.envido is Reglas.EstadoEnvido.ER_DICHO : s.envido = Reglas.EstadoEnvido.ERF_DICHO
+            elif s.envido is Reglas.EstadoEnvido.EE_DICHO : s.envido = Reglas.EstadoEnvido.EEF_DICHO
+            elif s.envido is Reglas.EstadoEnvido.R_DICHO : s.envido = Reglas.EstadoEnvido.RF_DICHO
+        elif a is Reglas.Accion.RECHAZAR_TANTO:
+            if s.envido is Reglas.EstadoEnvido.E_DICHO : s.envido = Reglas.EstadoEnvido.E_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.EF_DICHO : s.envido = Reglas.EstadoEnvido.EF_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.EE_DICHO : s.envido = Reglas.EstadoEnvido.EE_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.EEF_DICHO: s.envido = Reglas.EstadoEnvido.EEF_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.ER_DICHO: s.envido = Reglas.EstadoEnvido.ER_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.ERF_DICHO: s.envido = Reglas.EstadoEnvido.ERF_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.R_DICHO: s.envido = Reglas.EstadoEnvido.R_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.RF_DICHO: s.envido = Reglas.EstadoEnvido.RF_RECHAZADO
+            elif s.envido is Reglas.EstadoEnvido.F_DICHO: s.envido = Reglas.EstadoEnvido.F_RECHAZADO
+        elif a is Reglas.Accion.ACEPTAR_TANTO:
+            if s.envido is Reglas.EstadoEnvido.E_DICHO: s.envido = Reglas.EstadoEnvido.E_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.EF_DICHO: s.envido = Reglas.EstadoEnvido.EF_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.EE_DICHO: s.envido = Reglas.EstadoEnvido.EE_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.EEF_DICHO: s.envido = Reglas.EstadoEnvido.EEF_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.ER_DICHO: s.envido = Reglas.EstadoEnvido.ER_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.ERF_DICHO: s.envido = Reglas.EstadoEnvido.ERF_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.R_DICHO: s.envido = Reglas.EstadoEnvido.R_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.RF_DICHO: s.envido = Reglas.EstadoEnvido.RF_ACEPTADO
+            elif s.envido is Reglas.EstadoEnvido.F_DICHO: s.envido = Reglas.EstadoEnvido.F_ACEPTADO
+
+        elif a is Reglas.Accion.GRITAR :
+            if s.truco in [Reglas.EstadoTruco.RETRUCO_ACEPTADO, Reglas.EstadoTruco.RETRUCO_DICHO]:
+                s.truco = Reglas.EstadoTruco.VALE4_DICHO
+            elif s.truco in [Reglas.EstadoTruco.TRUCO_ACEPTADO,Reglas.EstadoTruco.TRUCO_DICHO]:
+                s.truco = Reglas.EstadoTruco.RETRUCO_DICHO
+            elif s.truco is Reglas.EstadoTruco.NADA_DICHO: s.truco = Reglas.EstadoTruco.TRUCO_DICHO
+            elif s.truco is Reglas.EstadoTruco.VALE4_ACEPTADO : assert False # no se puede gritar cuando ya esta dicho el vale4
+
+        elif a is Reglas.Accion.QUIERO_GRITO:
+            if s.truco is Reglas.EstadoTruco.TRUCO_DICHO: s.truco = Reglas.EstadoTruco.TRUCO_ACEPTADO
+            elif s.truco is Reglas.EstadoTruco.RETRUCO_DICHO: s.truco = Reglas.EstadoTruco.RETRUCO_ACEPTADO
+            elif s.truco is Reglas.EstadoTruco.VALE4_DICHO: s.truco = Reglas.EstadoTruco.VALE4_ACEPTADO
+            else: assert False # No es posible pasar por aca, si quiso un grito es porque habia un truco, retruco o vale4 dicho
+
+        if a is Reglas.Accion.JUGAR_C1:
+            c = self.cartas_totales[0]
+            assert c in self.cartas_restantes # valido que la carta a jugar aun esta en mi mano
+            s.cartas_jugadas.append(c)  # actualizo el estado
+            self.cartas_restantes.remove(c)  # la quito de las cartas restantes
+
+        if a is Reglas.Accion.JUGAR_C2:
+            c = self.cartas_totales[1]
+            assert c in self.cartas_restantes # valido que la carta a jugar aun esta en mi mano
+            s.cartas_jugadas.append(c)  # actualizo el estado
+            self.cartas_restantes.remove(c)  # la quito de las cartas restantes
+
+        if a is Reglas.Accion.JUGAR_C3:
+            c = self.cartas_totales[2]
+            assert c in self.cartas_restantes # valido que la carta a jugar aun esta en mi mano
+            s.cartas_jugadas.append(c)  # actualizo el estado
+            self.cartas_restantes.remove(c)  # la quito de las cartas restantes
+
+        # finalmente agrego la accion al log de acciones hechas por el estado
+        if DEBUG : print("  <<p" + str(self.jugador) + " - ejecutando accion: " + str(a) + ">>")
+        s.acciones_hechas.append((self.jugador, a))
+
+class ValueNetworkEngine:
+
+    @staticmethod  # Version SingleProcess de Generar Juegos de Entrenamiento
+    def Generate_Value_Training_Games(p1, p2, batch_size, normalized=True):
+        print("")
+        print("#########################################")
+        print("  DEPRECATED, USE MULTIPROCESS VERSION")
+        print("(unless you are using GPU, then its fine)")
+        print("#########################################")
+        print("")
+
+        p1_data = []
+        p1_labels = []
+        p2_data = []
+        p2_labels = []
+        print("Generando Partidas.. ( batch_size=" + str(batch_size) + " )")
+        print("")
+
+        # Corremos
+        episodios = Motor.Play_random_games(p1, p2, batch_size, False)
+        for e in episodios:
+            for s in reversed(range(len(e.estados))):
+                # logica: "si en [s-1] me toca a mi, en [s] ya jugue yo. Guardo ese estado con mi movimiento hecho y el puntaje total
+                if s > 0 and e.estados[s - 1].QuienActua() is Reglas.JUGADOR1:
+                    p1_data.append(Motor.ConvertStateToVector(e.p1, e.estados[s], normalized))
+                    p1_labels.append(e.CalcularPuntosFinales()[0] - e.CalcularPuntosFinales()[1])
+
+                if s > 0 and e.estados[s - 1].QuienActua() is Reglas.JUGADOR2:
+                    p2_data.append(Motor.ConvertStateToVector(e.p2, e.estados[s], normalized))
+                    p2_labels.append(e.CalcularPuntosFinales()[1] - e.CalcularPuntosFinales()[0])
+
+        return (p1_data, p1_labels), (p2_data, p2_labels)
+
+    @staticmethod  # Version MultiProcess de Generar Juegos: Worker helper function
+    def MP_value_worker(p1, p2, N, queue):
+        print("")
+        # Los clono para evitar que se ensucie con otros threads de generacion de partidas
+        p1 = copy.deepcopy(p1)
+        p2 = copy.deepcopy(p2)
+        episodios = Motor.Play_random_games(p1, p2, N, False)
+        queue.put(episodios)
+        # import sys
+        # sys.stdout.flush()
+
+    @staticmethod  # Version MultiProcess de Generar Juegos: Main Function
+    def MP_Generate_Value_Training_Games(p1, p2, batch_size, normalized=True):
+        p1_data = []
+        p1_labels = []
+        p2_data = []
+        p2_labels = []
+        process_count = HiperParametros.MULTIPROCESS_WORKER_POOL_COUNT
+
+        assert process_count >= 1
+        assert batch_size >= process_count
+
+        print("Generando Partidas.. ( batch_size=" + str(batch_size) + " )")
+        print("")
+
+        # Me divido la partidas entre la cantidad de workers
+        N = round(batch_size / process_count )
+        # creo las colas de retorno
+        listaQueues = []
+        for q in range(process_count):
+            listaQueues.append(mp.Queue())
+
+        # creo los 4 workers
+        listaProcess = []
+        for q in listaQueues:
+            listaProcess.append(mp.Process(target=ValueNetworkEngine.MP_value_worker, args=(p1, p2, N, q)))
+
+        for p in listaProcess:
+            p.start()
+
+        listaEpisodios = []
+        for q in listaQueues:
+            # obtengo el retorno de los 4 workers
+            listaEpisodios.append(q.get())
+
+        for p in listaProcess:
+            # espero que retornen
+            p.join()
+
+        # sumo los resultados
+        for e in itertools.chain(listaEpisodios):
+            # for e in chain(episodios1, episodios2):
+            # pero quizas esto sea con otra Red de Value (esta es policy)
+            for s in reversed(range(len(e.estados))):
+                # logica: "si en [s-1] me toca a mi, en [s] ya jugue yo. Guardo ese estado con mi movimiento hecho y el puntaje total
+
+                if s > 0 and e.estados[s - 1].QuienActua() is Reglas.JUGADOR1:
+                    p1_data.append(Motor.ConvertStateToVector(e.p1, e.estados[s], normalized))
+                    p1_labels.append(e.CalcularPuntosFinales()[0] - e.CalcularPuntosFinales()[1])
+
+                if s > 0 and e.estados[s - 1].QuienActua() is Reglas.JUGADOR2:
+                    p2_data.append(Motor.ConvertStateToVector(e.p2, e.estados[s], normalized))
+                    p2_labels.append(e.CalcularPuntosFinales()[1] - e.CalcularPuntosFinales()[0])
+
+        return (p1_data, p1_labels), (p2_data, p2_labels)
+
+    @staticmethod  #Version Multiprocess de Testear Agentes: NO ACTUALIZADA (REVISAR!! la deja para no perderla por si la quiero terminar luego)
+    def MP_TestDVNAgents(p1, p2, N, debug):  ## DEPRECRATED
+        # Me divido la partidas entre la cantidad de workers
+
+        N = round(N / 4)
+        # creo las colas de retorno
+        queue1 = mp.Queue()
+        queue2 = mp.Queue()
+        queue3 = mp.Queue()
+        queue4 = mp.Queue()
+        # creo los 4 workers
+        process1 = mp.Process(target=Motor.MP_value_worker, args=(p1, p2, N, queue1))
+        process2 = mp.Process(target=Motor.MP_value_worker, args=(p1, p2, N, queue2))
+        process3 = mp.Process(target=Motor.MP_value_worker, args=(p1, p2, N, queue3))
+        process4 = mp.Process(target=Motor.MP_value_worker, args=(p1, p2, N, queue4))
+        # comienzo la ejecucion de los 4 workers en paralelo
+        process1.start()
+        process2.start()
+        process3.start()
+        process4.start()
+        # obtengo el retorno de los 4 workers
+        episodios1 = queue1.get()
+        episodios2 = queue2.get()
+        episodios3 = queue3.get()
+        episodios4 = queue4.get()
+        # espero que retornen
+        process1.join()
+        process2.join()
+        process3.join()
+        process4.join()
+        # sumo los resultados
+        # print("eps totales:" + str(len(episodios))+ ", ep1:" + str(len(episodios1))+", ep2:" + str(len(episodios2))+", ep3:" + str(len(episodios3))+", ep4:" + str(len(episodios4)))
+
+        cont_p1 = 0
+        cont_p2 = 0
+
+        for e in chain(episodios1, episodios2, episodios3, episodios4):
+            puntos_p1, puntos_p2 = e.CalcularPuntosFinales()
+            if puntos_p1 > puntos_p2: cont_p1 = cont_p1 + 1
+            if puntos_p1 < puntos_p2: cont_p2 = cont_p2 + 1
+
+        winratio = cont_p1 * 100 / (cont_p1 + cont_p2)
+
+        if debug:
+            print("")
+            print("#############")
+            print("#############")
+            print("## RESULTADO ##  N= " + str(N * 4) + " - j1: " + str(cont_p1) + ", j2: " + str(cont_p2) + ", Empates: " + str(
+                (N * 4) - cont_p1 - cont_p2) + ", WINRATIO p1:" + str(winratio)[0:5] + " ##")
+            print("#############")
+            print("#############")
+            print("")
+        return winratio
+
+    @staticmethod  #Generar Red Deep Value Network usada por los agentes (ya sea Greedy o Softmax)
     def Generate_Player_DVN():
         from keras.layers import LeakyReLU
 
@@ -49,8 +685,7 @@ class ValueNetworkEngine:
 
         return player_DVN
 
-
-    @staticmethod
+    @staticmethod  # Genero un vector de prueba acida (lo uso al terminar de entrenar una generacion)
     def Get_VectorEstado_Prueba():
         print("###########################")
         print("##   Partida de Prueba   ##")
@@ -105,7 +740,7 @@ class ValueNetworkEngine:
 
         return p1, p2, s # poner esta linea donde quiera testear predict de la red
 
-    @staticmethod
+    @staticmethod  # Genera partidas de entrenamiento (1. carga los DVN.h5 ; 2. creo los agentes ; 3. los hago jugar ; 4. Save pickle a disco)
     def Generate_and_Save(input_prefix, output_prefix, games_per_gen, multi_process=False):
 
         print("  ##   Generate_and_Save   ##")
@@ -115,26 +750,26 @@ class ValueNetworkEngine:
             # Si input prefix es None, entonces es generacion inicial Random, de lo contrario cargamos generacion anterior
             p1_DQN = keras.models.load_model(input_prefix + "p1_DVN.h5")
             p2_DQN = keras.models.load_model(input_prefix + "p2_DVN.h5")
-            p1 = AgenteDVN(Reglas.JUGADOR1, p1_DQN)
-            p1.eps = ValueNetworkEngine.TRAINING_EPSILON
-            p2 = AgenteDVN(Reglas.JUGADOR2, p2_DQN)
-            p2.eps = ValueNetworkEngine.TRAINING_EPSILON
+            p1 = AgenteSoftmaxDVN(Reglas.JUGADOR1, p1_DQN)
+            p1.eps = HiperParametros.TRAINING_EPSILON
+            p2 = AgenteSoftmaxDVN(Reglas.JUGADOR2, p2_DQN)
+            p2.eps = HiperParametros.TRAINING_EPSILON
         else:
             p1 = AgenteRandom(Reglas.JUGADOR1)
             p2 = AgenteRandom(Reglas.JUGADOR2)
 
         print("1. Generando Partidas de entrenamiento")
-        if multi_process is True : (p1_traindata, p1_trainlabels), (p2_traindata, p2_trainlabels) = Motor.MP_Generate_Value_Training_Games(p1, p2, games_per_gen)
-        else : (p1_traindata, p1_trainlabels), (p2_traindata, p2_trainlabels) = Motor.Generate_Value_Training_Games(p1, p2, games_per_gen)
+        if multi_process is True : (p1_traindata, p1_trainlabels), (p2_traindata, p2_trainlabels) = ValueNetworkEngine.MP_Generate_Value_Training_Games(p1, p2, games_per_gen)
+        else : (p1_traindata, p1_trainlabels), (p2_traindata, p2_trainlabels) = ValueNetworkEngine.Generate_Value_Training_Games(p1, p2, games_per_gen)
 
         print("")
         print("2. Generando Partidas de test")
         if multi_process is True :
-            (p1_testdata, p1_testlabels), (p2_testdata, p2_testlabels) = Motor.MP_Generate_Value_Training_Games(
-                    p1, p2, round(games_per_gen*ValueNetworkEngine.VALIDATION_RATIO)) # Usamos Ratio del Trainign set para determinar tamaño de validation
+            (p1_testdata, p1_testlabels), (p2_testdata, p2_testlabels) = ValueNetworkEngine.MP_Generate_Value_Training_Games(
+                    p1, p2, round(games_per_gen*HiperParametros.VALIDATION_RATIO)) # Usamos Ratio del Trainign set para determinar tamaño de validation
         else:
-            (p1_testdata, p1_testlabels), (p2_testdata, p2_testlabels) = Motor.Generate_Value_Training_Games(
-                    p1, p2, round(games_per_gen*ValueNetworkEngine.VALIDATION_RATIO)) # Usamos Ratio del Trainign set para determinar tamaño de validation
+            (p1_testdata, p1_testlabels), (p2_testdata, p2_testlabels) = ValueNetworkEngine.Generate_Value_Training_Games(
+                    p1, p2, round(games_per_gen*HiperParametros.VALIDATION_RATIO)) # Usamos Ratio del Trainign set para determinar tamaño de validation
 
         print("len p1_traindata: " + str(len(p1_traindata)) + ", len p1_testdata: " + str(len(p1_testdata)))
         print("len p1_trainlabels: " + str(len(p1_trainlabels)) + ", len p1_testlabels: " + str(len(p1_testlabels)))
@@ -156,7 +791,7 @@ class ValueNetworkEngine:
         print("  ...guardado!")
         print("")
 
-    @staticmethod
+    @staticmethod  # Entrena las Redes (1. carga los pickles de disco ; 2. Fit p1 DVN ; 3. Fit p2 DVN ; 4. Save DVN.h5 a disco)
     def Train_Save(gen_prefix, training_epochs, load_previous = False):
 
         print("  ##   Train_Save   ##")
@@ -206,12 +841,12 @@ class ValueNetworkEngine:
         p1_testdata = p1_testdata.astype('float32')
 
         # patient early stopping
-        callbacks = [EarlyStopping(monitor='val_loss', patience=ValueNetworkEngine.PATIENCE_PERGEN),
+        callbacks = [EarlyStopping(monitor='val_loss', patience=HiperParametros.PATIENCE_PERGEN),
                      ModelCheckpoint(filepath=gen_prefix+"p1_DVN.h5", monitor='val_loss', save_best_only=True)]
 
         # Fiteo la red ACA
         history = p1_DVN.fit(p1_traindata, p1_trainlabels, validation_data=(p1_testdata, p1_testlabels),
-                             callbacks=callbacks, epochs=training_epochs, batch_size=ValueNetworkEngine.BATCH_SIZE,
+                             callbacks=callbacks, epochs=training_epochs, batch_size=HiperParametros.BATCH_SIZE,
                              shuffle=True, verbose=2)
 
         # evaluate the model ACA
@@ -233,7 +868,7 @@ class ValueNetworkEngine:
         #p1_DVN.save(gen_prefix+"p1_DVN.h5")
         print("    ..." + gen_prefix + "p1_DVN.h5 guardado!")
 
-        # Free memory
+        # Free memory explicit
         del p1_traindata
         del p1_DVN
 
@@ -282,12 +917,12 @@ class ValueNetworkEngine:
         p2_testdata = p2_testdata.astype('float32')
 
         # patient early stopping
-        callbacks = [EarlyStopping(monitor='val_loss', patience=ValueNetworkEngine.PATIENCE_PERGEN),
+        callbacks = [EarlyStopping(monitor='val_loss', patience=HiperParametros.PATIENCE_PERGEN),
                      ModelCheckpoint(filepath=gen_prefix + "p2_DVN.h5", monitor='val_loss', save_best_only=True)]
 
         # Fiteo la red
         p2_DVN.fit(p2_traindata, p2_trainlabels, validation_data=(p2_testdata, p2_testlabels),
-                   callbacks=callbacks, epochs=training_epochs, batch_size=ValueNetworkEngine.BATCH_SIZE,
+                   callbacks=callbacks, epochs=training_epochs, batch_size=HiperParametros.BATCH_SIZE,
                    shuffle=True, verbose=2)
 
         # evaluate the model ACA
@@ -307,12 +942,11 @@ class ValueNetworkEngine:
         #p2_DVN.save(gen_prefix + "p2_DVN.h5")
         print("    ..." + gen_prefix + "p2_DVN.h5 guardado!")
 
-        # Free memory
+        # Free memory explicit
         del p2_traindata
         del p2_DVN
 
-
-    @staticmethod
+    @staticmethod  # Levanta las Redes de y les hace una prueba acida
     def Load_and_Test(gen_prefix):
         print("  ##   Load_and_Test   ##")
         print("")
@@ -360,39 +994,39 @@ class ValueNetworkEngine:
             if _cp.jugador is Reglas.JUGADOR2 : output = p2_DVN.predict(_s)
             print("p" + str(_cp.jugador) + "> accion posible: " + str(i.name) + ",  valor:" + str(output))
 
-            # Free memory
+            # Free memory explicit
             #del _p1
             #del _p2
             #del _s
 
-        #Free memory
+        #Free memory explicit
         del p1
         del p2
         del s
         del p1_DVN
         del p2_DVN
 
-
-    @staticmethod
-    def ValueTrainingTest(gen_p1,gen_p2, N, debug):
+    @staticmethod  # Pone 2 agentes a competir entre si con N partidas de entrenamiento
+    def HeadToHead_PlayTest(gen_p1, gen_p2, N, debug):
         gen1 = gen_p1
         gen2 = gen_p2
 
         print("")
+        print("(warning, versus test usa greedy agent, not stockastic )")
         print("JUGANDO gen" + str(gen_p1) + " versus gen" + str(gen_p2))
         if gen_p1 > 0:
             gen_p1 = "value_pickles\gen" + str(gen_p1) + "_"
             p1_DVN = keras.models.load_model(gen_p1 + "p1_DVN.h5")
-            value_p1 = AgenteDVN(Reglas.JUGADOR1, p1_DVN)
-            value_p1.eps = 0
+            value_p1 = AgenteGreedyDVN(Reglas.JUGADOR1, p1_DVN)
+            value_p1.eps = HiperParametros.PLAYING_EPSILON
         else:
             value_p1 = AgenteRandom(Reglas.JUGADOR1)
 
         if gen_p2 > 0:
             gen_p2 = "value_pickles\gen" + str(gen_p2) + "_"
             p2_DVN = keras.models.load_model(gen_p2 + "p2_DVN.h5")
-            value_p2 = AgenteDVN(Reglas.JUGADOR2, p2_DVN)
-            value_p2.eps = 0
+            value_p2 = AgenteGreedyDVN(Reglas.JUGADOR2, p2_DVN)
+            value_p2.eps = HiperParametros.PLAYING_EPSILON
         else:
             value_p2 = AgenteRandom(Reglas.JUGADOR2)
 
@@ -403,12 +1037,12 @@ class ValueNetworkEngine:
         print("############################################################")
         print("")
 
-        # Free memory
+        # Free memory explicit
         del value_p1
         del value_p2
         #FINMETODO
 
-    @staticmethod
+    @staticmethod  # Metodo principal para entrenar generaciones de Agentes (el a su vez llama los distintos metodos como Generate y Train)
     def ValueNetworkTrainer(start_gen, generations, games_per_gen, multi_process=False):
         # WARNING: Debe existir start_gen tanto en h5 como pickles
         # Detalle: Los start_gen.h5 los levanta en Generate_and_Save para generar juegos de aprendizaje
@@ -430,9 +1064,9 @@ class ValueNetworkEngine:
             ValueNetworkEngine.Generate_and_Save(gen_n, gen_next, games_per_gen, multi_process)
             # Cargo las partidas de Disco, entreno la red y la guardo en disco en h5 (omitir si ya tengo una buena Red entrenada)
             if i == 0:
-                ValueNetworkEngine.Train_Save(gen_next, ValueNetworkEngine.MAX_EPOCHS_PERGEN, False)
+                ValueNetworkEngine.Train_Save(gen_next, HiperParametros.MAX_EPOCHS_PERGEN, False)
             else:
-                ValueNetworkEngine.Train_Save(gen_next, ValueNetworkEngine.MAX_EPOCHS_PERGEN, True)
+                ValueNetworkEngine.Train_Save(gen_next, HiperParametros.MAX_EPOCHS_PERGEN, True)
             # finalmente, cargo una Red de disco (formato h5) y juego/testeo
             ValueNetworkEngine.Load_and_Test(gen_next)
 
