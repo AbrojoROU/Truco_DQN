@@ -577,7 +577,6 @@ class Humano:
 
         return result
 
-
     def Elegir_Accion(self, s, debug=False):
         print("")
         print("###  TE TOCA HUMANO, p" + str(self.jugador) + "  ###")
@@ -597,7 +596,6 @@ class Humano:
         opcion = int(get_non_negative_int("   Ingrese accion: ", ids_a))
 
         return Reglas.Accion(opcion)
-
 
     # Ejecuta la accion que le llega, actualizando el estado y el agente de forma acorde
     def EjecutarAccion(self, s, a, DEBUG=False):

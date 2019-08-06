@@ -13,15 +13,15 @@ class HiperParametros:
     PATIENCE_PERGEN = 6
     BATCH_SIZE = 256
     VALIDATION_RATIO = 0.40  # as % of the total amount of training games
-    TRAINING_EPSILON = 0.01
+    TRAINING_EPSILON = 0.05
     PLAYING_EPSILON = 0
-    MULTIPROCESS_WORKER_POOL_COUNT = 4  # Ovearhead warning (y no funciona bien en entornos con GPU habilitadas)
+    MULTIPROCESS_WORKER_POOL_COUNT = 2  # Ovearhead warning (y no funciona bien en entornos con GPU habilitadas)
 
 
 # Este agente usa su Red de Valor para decidir acciones
 class AgenteGreedyDVN:
     def __init__(self, jugador, dvn):
-        self.eps = 0.05
+        self.eps = 0
         self.cartas_totales = []
         self.cartas_restantes = []
         self.DVN = dvn
@@ -395,7 +395,6 @@ class AgenteSoftmaxDVN:
             _cp.cartas_totales = self.cartas_totales
 
             acciones_posibles = self.get_acciones_posibles(s)
-            acciones_candidatas = []
             valores_candidatos = []
 
             for i in acciones_posibles:
@@ -415,11 +414,10 @@ class AgenteSoftmaxDVN:
                 # 4. Estimo
                 value = _cp.DVN.predict(_s)
                 valores_candidatos.append(value)
-                acciones_candidatas.append(i)
                 if debug : print("     @p" + str(_cp.jugador) + " pensando en: " + str(i.name) + ",  valor: " + str(value[0][0])[0:6])
-
+            assert len(valores_candidatos) == len(acciones_posibles)
             valores_candidatos = softmax(valores_candidatos)
-            a = random.choices(population=acciones_candidatas, weights=valores_candidatos)[0]
+            a = random.choices(population=acciones_posibles, weights=valores_candidatos)[0]
 
         if debug: print("     <p" + str(self.jugador) + "> accion elegida: " + str(a.name) + ",  valor: " + str(best))
         return a
@@ -581,7 +579,7 @@ class ValueNetworkEngine:
             p.join()
 
         # sumo los resultados
-        for e in itertools.chain(listaEpisodios):
+        for e in list(itertools.chain.from_iterable(listaEpisodios)):
             # for e in chain(episodios1, episodios2):
             # pero quizas esto sea con otra Red de Value (esta es policy)
             for s in reversed(range(len(e.estados))):
