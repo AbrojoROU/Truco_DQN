@@ -419,7 +419,7 @@ class AgenteSoftmaxDVN:
             valores_candidatos = softmax(valores_candidatos)
             a = random.choices(population=acciones_posibles, weights=valores_candidatos)[0]
 
-        if debug: print("     <p" + str(self.jugador) + "> accion elegida: " + str(a.name) + ",  valor: " + str(best))
+        if debug: print("     <p" + str(self.jugador) + "> accion elegida: " + str(a.name))
         return a
 
     # Ejecuta la accion que le llega, actualizando el estado y el agente de forma acorde
