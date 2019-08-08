@@ -1,5 +1,5 @@
 # Truco_DQN
-Implementacion de Truco aplicando distintos tipos de redes neuronales (ej: deep Q networks)
+Implementación de Truco aplicando distintos tipos de redes neuronales (ej: deep Q networks)
 
 v1: Aprendizaje Reforzado Tradicional. Concretamente Temporal Difference (0), aplicando basicamente SARSA + epsilon greedy. Sin envido o truco, mazo reducido, juega las cartas sabiendo cuando matar y con que. 
 Buenos resultados pero muy costoso de entrenar (300 Millones de partidas) y con altisimo costo de memoria.
