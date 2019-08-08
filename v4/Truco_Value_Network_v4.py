@@ -748,9 +748,9 @@ class ValueNetworkEngine:
             # Si input prefix es None, entonces es generacion inicial Random, de lo contrario cargamos generacion anterior
             p1_DQN = keras.models.load_model(input_prefix + "p1_DVN.h5")
             p2_DQN = keras.models.load_model(input_prefix + "p2_DVN.h5")
-            p1 = AgenteSoftmaxDVN(Reglas.JUGADOR1, p1_DQN)
+            p1 = AgenteSoftmaxDVN(Reglas.JUGADOR1, p1_DQN)  ## CAMBIAR ACA EL TIPO DE AGENTE GREEDY VS SOFTMAX
             p1.eps = HiperParametros.TRAINING_EPSILON
-            p2 = AgenteSoftmaxDVN(Reglas.JUGADOR2, p2_DQN)
+            p2 = AgenteSoftmaxDVN(Reglas.JUGADOR2, p2_DQN)  ## CAMBIAR ACA EL TIPO DE AGENTE GREEDY VS SOFTMAX
             p2.eps = HiperParametros.TRAINING_EPSILON
         else:
             p1 = AgenteRandom(Reglas.JUGADOR1)

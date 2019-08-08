@@ -1255,20 +1255,14 @@ if __name__ == '__main__':
 
     ##  parametros de trainer ( start_gen 0?, number_of_generations,  iterations_per_generation, multiprocess=False)
     ## start_gen ultima version donde debe existir el DVN.h5. Primer output sera la startgen+1
-    ValueNetworkEngine.ValueNetworkTrainer(17, 3, 500000, True)
+    #ValueNetworkEngine.ValueNetworkTrainer(21, 3, 500000, True)
 
 
+    #ValueNetworkEngine.HeadToHead_PlayTest(21, 66, 50000, False)
+    #ValueNetworkEngine.HeadToHead_PlayTest(66, 21, 50000, False)
+    #ValueNetworkEngine.HeadToHead_PlayTest(21, 77, 50000, False)
+    #ValueNetworkEngine.HeadToHead_PlayTest(77, 21, 50000, False)
 
-
-
-    #ValueNetworkEngine.HeadToHead_PlayTest(17, 17, 50000, False)
-    #ValueNetworkEngine.HeadToHead_PlayTest(8, 17, 50000, False)
-    #ValueNetworkEngine.HeadToHead_PlayTest(17, 16, 50000, False)
-    #ValueNetworkEngine.HeadToHead_PlayTest(16, 17, 50000, False)
-    #ValueNetworkEngine.HeadToHead_PlayTest(77, 17, 50000, False)
-    #ValueNetworkEngine.HeadToHead_PlayTest(17, 77, 50000, False)
-    #ValueNetworkEngine.HeadToHead_PlayTest(66, 17, 50000, False)
-    #ValueNetworkEngine.HeadToHead_PlayTest(17, 66, 50000, False)
 
 
     #gen_next = "value_pickles\gen1_"
