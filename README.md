@@ -10,4 +10,4 @@ v3: Refactoring the la solucion de Agentes Profundos con multiples optimizacione
 
 v4: Agregamos envido, incontables optimizaciones y correcciones de bug adicionales.
 
-v5: Versional final(?) mejor documentada y con notebooks para uso mas facil
+v5: Versional final(?) mejor documentada y con notebooks para uso mas facil. Ver presentacion de powerpoint "Proyecto Truco" para mas detalles 
