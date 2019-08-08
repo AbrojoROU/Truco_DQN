@@ -8,4 +8,6 @@ v2: Agentes profundos. Inspirado en AlphaGo, se intentan dos tecnicas diferentes
 
 v3: Refactoring the la solucion de Agentes Profundos con multiples optimizaciones. Cada Agente aprende viendo los juegos del padre, y genera juegos para que su hijo entrene. Aqui la version de Agentes que usan una Deep Policy Network ya es descartada por performar peor que la Deep Value Network lo cual hace sentido para este caso donde la cantidad de acciones posibles es relativamente pequeña. Logra jugar al truco (sin envido) bastante bien, mostrando bluffs y otros comportamientos no triviales.
 
-v4: Agregamos envido, multiples optimizaciones y correcciones de bug adicionales.
+v4: Agregamos envido, incontables optimizaciones y correcciones de bug adicionales.
+
+v5: Versional final(?) mejor documentada y con notebooks para uso mas facil
