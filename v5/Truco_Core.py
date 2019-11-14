@@ -1046,7 +1046,7 @@ class Motor:
                     e.ganadorTruco = Reglas.JUGADOR1
                 elif quien_gano == Reglas.JUGADOR2:
                     print(" GANE EL TRUCO! (jugador 2)")
-                    e.ganadorTruco = Reglas.JUGADOR1
+                    e.ganadorTruco = Reglas.JUGADOR2
             else:
                 # Caso no terminal
                 a = next_player.Elegir_Accion(s, con_trampa)
